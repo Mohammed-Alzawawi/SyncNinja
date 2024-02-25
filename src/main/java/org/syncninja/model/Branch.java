@@ -6,6 +6,10 @@ import org.neo4j.ogm.annotation.NodeEntity;
 public class Branch extends NinjaNode{
     private String name;
 
+    public Branch() {
+        super();
+    }
+
     public Branch(String name) {
         super();
         this.name = name;
