@@ -10,7 +10,7 @@ public class DirectoryService {
     ResourceMessagingService resourceMessagingService = new ResourceMessagingService();
 
     public Directory createDirectory(String path) throws Exception {
-        if(directoryRepository.findById(path).isPresent()){
+        if(directoryRepository.findByPath(path).isPresent()){
             throw new Exception(resourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_ALREADY_INITIALIZED, new Object[]{path}));
         }
         System.out.println(resourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_INITIALIZED_SUCCESSFULLY, new Object[]{path}));
@@ -25,7 +25,7 @@ public class DirectoryService {
     }
 
     public Directory getDirectory(String path) throws Exception {
-        return directoryRepository.findById(path).orElseThrow(()->
+        return directoryRepository.findByPath(path).orElseThrow(()->
                 new Exception(resourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_NOT_INITIALIZED, new Object[]{path})));
     }
 }
