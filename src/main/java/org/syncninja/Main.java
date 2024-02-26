@@ -7,8 +7,8 @@ public class Main {
     public static void main(String[] args) {
         long startTime = System.currentTimeMillis();
         int exitCode = new CommandLine(new MainCommand()).execute(args);
-        long endtime = System.currentTimeMillis();
-        System.out.println((endtime - startTime) + " MS") ;
+        long endTime = System.currentTimeMillis();
+        System.out.println((endTime - startTime) + " MS") ;
         System.exit(exitCode);
     }
 }

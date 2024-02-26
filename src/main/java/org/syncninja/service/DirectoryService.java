@@ -11,6 +11,7 @@ public class DirectoryService {
         if(directoryRepository.findById(path).isPresent()){
             throw new Exception("directory exists");
         }
+        System.out.println("Directory " + path + " has been initialized successfully" );
         return directoryRepository.save(new Directory(path));
     }
 
