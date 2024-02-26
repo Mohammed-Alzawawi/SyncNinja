@@ -14,8 +14,9 @@ public class Neo4jSession {
                 .connectionPoolSize(10)
                 .build();
 
-        SessionFactory sessionFactory = new SessionFactory(configuration, "org.example");
+        SessionFactory sessionFactory = new SessionFactory(configuration, "org.syncninja");
         session = sessionFactory.openSession();
+
     }
 
     public static synchronized Session getSession() {
