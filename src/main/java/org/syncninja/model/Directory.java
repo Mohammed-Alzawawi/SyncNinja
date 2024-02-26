@@ -6,7 +6,6 @@ import org.neo4j.ogm.annotation.Relationship;
 
 @NodeEntity
 public class Directory extends SyncNode{
-    @Id
     private String path;
 
     @Relationship(type = "MainBranch")
