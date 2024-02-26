@@ -6,14 +6,16 @@ import org.syncninja.repository.DirectoryRepository;
 import org.syncninja.util.ResourceBundleEnum;
 
 public class DirectoryService {
-    DirectoryRepository directoryRepository = new DirectoryRepository();
-    ResourceMessagingService resourceMessagingService = new ResourceMessagingService();
+    DirectoryRepository directoryRepository;
+
+    public DirectoryService() {
+        this.directoryRepository = new DirectoryRepository();
+    }
 
     public Directory createDirectory(String path) throws Exception {
         if(directoryRepository.findByPath(path).isPresent()){
-            throw new Exception(resourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_ALREADY_INITIALIZED, new Object[]{path}));
+            throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_ALREADY_INITIALIZED, new Object[]{path}));
         }
-        System.out.println(resourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_INITIALIZED_SUCCESSFULLY, new Object[]{path}));
         return directoryRepository.save(new Directory(path));
     }
 
@@ -26,6 +28,6 @@ public class DirectoryService {
 
     public Directory getDirectory(String path) throws Exception {
         return directoryRepository.findByPath(path).orElseThrow(()->
-                new Exception(resourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_NOT_INITIALIZED, new Object[]{path})));
+                new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_NOT_INITIALIZED, new Object[]{path})));
     }
 }

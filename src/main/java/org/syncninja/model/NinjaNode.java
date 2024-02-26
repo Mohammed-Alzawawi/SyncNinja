@@ -9,7 +9,7 @@ import java.util.Set;
 public abstract class NinjaNode extends SyncNode{
 
     @Relationship(type = "ParentOf")
-    Set<NinjaNode> childrenSet;
+    private Set<NinjaNode> childrenSet;
 
     public NinjaNode() {}
 

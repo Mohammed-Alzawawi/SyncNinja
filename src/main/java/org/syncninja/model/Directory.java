@@ -21,10 +21,6 @@ public class Directory extends SyncNode{
         return path;
     }
 
-    public void setPath(String path) {
-        this.path = path;
-    }
-
     public Branch getBranch() {
         return branch;
     }
