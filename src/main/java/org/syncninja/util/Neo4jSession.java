@@ -1,4 +1,4 @@
-package org.syncninja;
+package org.syncninja.util;
 
 import org.neo4j.ogm.config.Configuration;
 import org.neo4j.ogm.session.Session;

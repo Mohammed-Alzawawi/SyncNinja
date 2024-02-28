@@ -1,67 +1,54 @@
 package org.syncninja.repository;
 
 import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.transaction.Transaction;
-import org.syncninja.Neo4jSession;
+import org.syncninja.service.ResourceMessagingService;
+import org.syncninja.util.Neo4jSession;
 import org.syncninja.model.StateDirectory;
 import org.syncninja.model.StateTree;
+import org.syncninja.util.ResourceBundleEnum;
 
 import java.util.*;
 
 public class StateTreeRepository {
-
-    public Optional<StateTree> findById(String path){
+    ResourceMessagingService resourceMessagingService = new ResourceMessagingService();
+    public StateTree findById(String path) throws Exception {
         Session session = Neo4jSession.getSession();
-        StateTree stateTreeNode;
-        try(Transaction transaction = session.beginTransaction()){
-            stateTreeNode = loadByDepth(path);
-            transaction.commit();
-        }
-
-        return Optional.ofNullable(stateTreeNode);
+        StateTree stateTreeNode = loadByDepth(System.getProperty("user.dir") , path);
+        return stateTreeNode;
 
     }
-    public StateTree loadByDepth(String path){
+    public StateTree loadByDepth(String mainPath , String wantedNode) throws Exception {
         Session session = Neo4jSession.getSession();
-        StateTree stateTree = session.load(StateTree.class , path , 3);
-        if(stateTree!=null){
+        StateDirectory stateTree = session.load(StateDirectory.class , mainPath , 5);
+        List<StateTree> stateDirectoryList = new ArrayList<>();
+        if(stateTree==null){
+            return null;
+        }
+        if(stateTree.getPath().equals(wantedNode)){
             return stateTree;
         }
-        else{
-            Iterable<StateDirectory> stateTrees = session.query(StateDirectory.class ,
-                    "MATCH (startNode:StateDirectory)-[:HAS*0..3]-(attachedNodes:StateDirectory) RETURN attachedNodes;" ,
-                    Collections.singletonMap("path" , null));
-
-            List<StateDirectory> nodes = new ArrayList<>();
-            stateTrees.forEach(nodes::add);
-            ListIterator<StateDirectory> listIterator = nodes.listIterator();
-
-            while (listIterator.hasNext()){
-                if(loadByDepth(path , listIterator.next().getPath())!=null){
-                    stateTree = loadByDepth(path , listIterator.next().getPath());
-                    break;
-                }
-                else{
-                    session.query(StateDirectory.class ,
-                            "MATCH (startNode:StateDirectory)-[:HAS*0..3]-(attachedNodes:StateDirectory) WHERE startNode.path = $path RETURN attachedNodes;" ,
-                            Collections.singletonMap("path", listIterator.next().getPath())).forEach(listIterator::add);
-                }
+        for(StateTree node : stateTree.getInternalNodes()){
+            if(node.getPath().equals(wantedNode)){
+                return node;
+            }
+            if(node.isDirectory()){
+                stateDirectoryList.add(node);
             }
         }
-        return stateTree;
+        for(StateTree node: stateDirectoryList){
+            StateTree stateTree1 = loadByDepth(node.getPath() , wantedNode);
+            if(stateTree1!=null){
+                return stateTree1;
+            }
+        }
+        return null;
+
 
     }
-    public StateTree loadByDepth(String path , String startingNode){
+
+
+    public void save(StateTree stateTree) {
         Session session = Neo4jSession.getSession();
-        HashMap<String , String> hashMap = new HashMap<>();
-        hashMap.put("startingNode" , startingNode);
-        hashMap.put("path" , path);
-         return session.queryForObject(StateTree.class ,
-                "MATCH (startingN {path : $startingNode})-[:HAS*0..3]-(wantedNode {path : $path}) RETURN wantedNode;" ,
-                hashMap) ;
-
-
+        session.save(stateTree);
     }
-
-
 }

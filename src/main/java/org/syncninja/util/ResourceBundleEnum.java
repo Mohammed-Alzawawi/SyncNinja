@@ -1,7 +1,5 @@
-package org.syncninja.Utilities;
+package org.syncninja.util;
 
-
-import java.util.Locale;
 
 public enum ResourceBundleEnum {
 

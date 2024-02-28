@@ -1,4 +1,4 @@
-package org.syncninja.Utilities;
+package org.syncninja.util;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Fetcher {
     public static List<String> readFile(String filePath) throws IOException {

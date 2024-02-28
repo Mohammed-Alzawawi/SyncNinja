@@ -1,6 +1,6 @@
 package org.syncninja.service;
 
-import org.syncninja.Utilities.ResourceBundleEnum;
+import org.syncninja.util.ResourceBundleEnum;
 
 import java.util.ResourceBundle;
 

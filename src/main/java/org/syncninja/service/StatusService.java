@@ -1,12 +1,12 @@
 package org.syncninja.service;
 
-import org.syncninja.Utilities.ResourceBundleEnum;
+import org.syncninja.repository.StateTreeRepository;
+import org.syncninja.util.ResourceBundleEnum;
 import org.syncninja.model.StateDirectory;
 import org.syncninja.model.StateFile;
 import org.syncninja.model.StateTree;
 import org.syncninja.repository.StateDirectoryRepository;
 import org.syncninja.repository.StateFileRepository;
-import org.syncninja.repository.StateTreeRepository;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -19,6 +19,7 @@ public class StatusService {
     private final StateDirectoryRepository stateDirectoryRepository = new StateDirectoryRepository();
     private final ResourceMessagingService resourceMessagingService = new ResourceMessagingService();
     private final StateFileRepository stateFileRepository = new StateFileRepository();
+    private final StateTreeRepository stateTreeRepository = new StateTreeRepository();
     public void currentState(File directory, StateDirectory stateDirectory, List<String> untracked) {
         File filesList[] = directory.listFiles();
         Map<String, StateTree> stateTreeMap = stateDirectory.getInternalNodes().stream()
@@ -55,13 +56,15 @@ public class StatusService {
 
     public Object[] getStatus(String path) throws Exception {
 
-        if (!stateDirectoryRepository.existsById(path)) {
-            throw new Exception(resourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_ALREADY_INITIALIZED, new Object[]{path}));
+        if (stateTreeRepository.findById(path)==null) {
+            //System.out.println(path);
+            throw new Exception(resourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_NOT_INITIALIZED, new Object[]{path}));
         }
         List<String> tracked = new ArrayList<>();
         List<String> untracked = new ArrayList<>();
 
-        StateDirectory stateDirectory = stateDirectoryRepository.findById(path).orElse(null);
+        StateDirectory stateDirectory = (StateDirectory) stateTreeRepository.findById(path);
+
         currentState(new File(path), stateDirectory, untracked);
         return new Object[]{tracked, untracked};
     }

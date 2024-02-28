@@ -1,8 +1,8 @@
 package org.syncninja.model;
 
 import org.neo4j.ogm.annotation.NodeEntity;
-import org.syncninja.Utilities.Fetcher;
-import org.syncninja.Utilities.SHA256;
+import org.syncninja.util.Fetcher;
+import org.syncninja.util.SHA256;
 
 
 import java.io.IOException;
