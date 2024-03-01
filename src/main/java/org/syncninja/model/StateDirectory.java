@@ -9,9 +9,7 @@ import java.util.Set;
 @NodeEntity
 public class StateDirectory extends StateTree {
     @Relationship(type = "HAS" , direction = Relationship.Direction.OUTGOING)
-
     private Set<StateTree> internalNodes = new HashSet<>();
-
 
     public StateDirectory() {;
     }

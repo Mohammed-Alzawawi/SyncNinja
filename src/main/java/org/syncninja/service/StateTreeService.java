@@ -15,18 +15,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class StateTreeService {
-    private final ResourceMessagingService resourceMessagingService;
     private final StateTreeRepository stateTreeRepository;
 
     public StateTreeService() {
         stateTreeRepository = new StateTreeRepository();
-        resourceMessagingService = new ResourceMessagingService();
     }
 
     public StateFile generateStateFileNode(String path) throws Exception {
         StateFile file = null;
         if(!stateTreeRepository.findById(path).isEmpty()){
-            throw new Exception(resourceMessagingService.getMessage(ResourceBundleEnum.FILE_ALREADY_EXISTS, new Object[]{path}));
+            throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.FILE_ALREADY_EXISTS, new Object[]{path}));
         }
         else{
             file = new StateFile(path);
@@ -38,7 +36,7 @@ public class StateTreeService {
     public StateDirectory generateStateDirectoryNode(String path) throws Exception {
         StateDirectory stateDirectory = null;
         if(!stateTreeRepository.findById(path).isEmpty()){
-            throw new Exception(resourceMessagingService.getMessage(ResourceBundleEnum.SUB_DIRECTORY_ALREADY_EXISTS, new Object[]{path}));
+            throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.SUB_DIRECTORY_ALREADY_EXISTS, new Object[]{path}));
         }
         else{
             stateDirectory = new StateDirectory(path);

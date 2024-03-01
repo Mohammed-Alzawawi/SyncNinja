@@ -8,7 +8,6 @@ import java.io.File;
 public abstract class StateTree {
     @Id
     protected String path;
-
     protected long lastModified;
 
     public StateTree() {

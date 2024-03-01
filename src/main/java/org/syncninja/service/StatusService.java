@@ -14,14 +14,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class StatusService {
-
-
-    private final ResourceMessagingService resourceMessagingService;
-
     private final StateTreeRepository stateTreeRepository;
 
     public StatusService() {
-        resourceMessagingService = new ResourceMessagingService();
         stateTreeRepository = new StateTreeRepository();
     }
 
@@ -61,15 +56,11 @@ public class StatusService {
 
     public FileState getStatus(String path) throws Exception {
 
-        if (stateTreeRepository.findById(path)==null) {
-            //System.out.println(path);
-            throw new Exception(resourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_NOT_INITIALIZED, new Object[]{path}));
+        if (stateTreeRepository.findById(path).isEmpty()) {
+            throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_NOT_INITIALIZED, new Object[]{path}));
         }
         FileState fileStatus = new FileState();
-
-
         StateDirectory stateDirectory = (StateDirectory) stateTreeRepository.findById(path).orElse(null);
-
         currentState(new File(path), stateDirectory, fileStatus.getUntracked());
         return fileStatus;
     }

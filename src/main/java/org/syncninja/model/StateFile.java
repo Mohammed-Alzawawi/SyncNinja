@@ -9,9 +9,8 @@ import java.io.IOException;
 import java.util.List;
 @NodeEntity
 public class StateFile extends StateTree {
+    private String hashValue;
     private List<String> lines;
-
-    String hashValue;
     public StateFile(String path) throws IOException {
         super(path);
         hashValue = SHA256.hashValue(path);

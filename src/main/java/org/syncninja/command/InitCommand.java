@@ -10,10 +10,11 @@ import picocli.CommandLine;
 @CommandLine.Command(name = "init")
 public class InitCommand implements Runnable {
     private final DirectoryService directoryService;
-    private final StateTreeService stateTreeService = new StateTreeService();
+    private final StateTreeService stateTreeService;
 
     public InitCommand() {
         this.directoryService = new DirectoryService();
+        this.stateTreeService = new StateTreeService();
     }
 
     @Override
