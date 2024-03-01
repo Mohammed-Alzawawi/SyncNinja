@@ -5,6 +5,7 @@ import org.syncninja.model.StateDirectory;
 import org.syncninja.model.StateFile;
 import org.syncninja.repository.StateDirectoryRepository;
 import org.syncninja.repository.StateFileRepository;
+import org.syncninja.util.ResourceBundleEnum;
 
 import java.io.IOException;
 import java.nio.file.Files;

@@ -7,7 +7,7 @@ import java.util.ResourceBundle;
 public class ResourceMessagingService {
     private static ResourceBundle resourceBundle;
 
-    private ResourceMessagingService() {
+    public ResourceMessagingService() {
         resourceBundle = ResourceBundle.getBundle("messages");
     }
 

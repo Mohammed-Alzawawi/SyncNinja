@@ -3,6 +3,8 @@ package org.syncninja.repository;
 import org.neo4j.ogm.session.Session;
 import org.syncninja.model.StateTree;
 import org.syncninja.model.StateDirectory;
+import org.syncninja.service.ResourceMessagingService;
+import org.syncninja.util.Neo4jSession;
 
 import java.util.ArrayList;
 import java.util.List;

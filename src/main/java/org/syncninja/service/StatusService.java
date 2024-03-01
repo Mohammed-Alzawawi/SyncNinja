@@ -6,6 +6,7 @@ import org.syncninja.model.StateFile;
 import org.syncninja.model.StateTree;
 import org.syncninja.repository.StateDirectoryRepository;
 import org.syncninja.repository.StateFileRepository;
+import org.syncninja.util.ResourceBundleEnum;
 
 import java.io.File;
 import java.util.ArrayList;
