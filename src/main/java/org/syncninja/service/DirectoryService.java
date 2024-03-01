@@ -6,7 +6,7 @@ import org.syncninja.repository.DirectoryRepository;
 import org.syncninja.util.ResourceBundleEnum;
 
 public class DirectoryService {
-    private DirectoryRepository directoryRepository;
+    private final DirectoryRepository directoryRepository;
 
     public DirectoryService() {
         this.directoryRepository = new DirectoryRepository();

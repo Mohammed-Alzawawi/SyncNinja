@@ -10,7 +10,6 @@ import org.syncninja.util.ResourceBundleEnum;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class StatusService {
@@ -41,7 +40,6 @@ public class StatusService {
                 }
             }
         }
-
     }
 
     private void addAllFilesInDirectory(File directory, List<String> untracked) {
@@ -55,10 +53,10 @@ public class StatusService {
     }
 
     public FileState getStatus(String path) throws Exception {
-
         if (stateTreeRepository.findById(path).isEmpty()) {
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_NOT_INITIALIZED, new Object[]{path}));
         }
+
         FileState fileStatus = new FileState();
         StateDirectory stateDirectory = (StateDirectory) stateTreeRepository.findById(path).orElse(null);
         currentState(new File(path), stateDirectory, fileStatus.getUntracked());
