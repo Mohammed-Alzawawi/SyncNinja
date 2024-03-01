@@ -10,9 +10,7 @@ public abstract class StateTree {
     protected String path;
     protected long lastModified;
 
-    public StateTree() {
-
-    }
+    public StateTree() {}
 
     public StateTree(String path) {
         this.path = path;
@@ -31,5 +29,6 @@ public abstract class StateTree {
     public String getPath(){
         return path;
     }
+
     public abstract boolean isDirectory();
 }
