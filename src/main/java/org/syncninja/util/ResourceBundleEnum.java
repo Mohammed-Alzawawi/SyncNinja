@@ -10,6 +10,7 @@ public enum ResourceBundleEnum {
     FILE_ALREADY_EXISTS("file_already_exists"),
     SUB_DIRECTORY_ALREADY_EXISTS("sub_directory_already_exists"),
     FILES_READY_TO_BE_COMMITTED("files_to_be_committed"),
+    FILE_NOT_FOUND("File_is_not_found!"),
     UNTRACKED_FILES("Untracked_files");
 
 
