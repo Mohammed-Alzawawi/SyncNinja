@@ -1,7 +1,6 @@
 package org.syncninja.service;
 
 import org.syncninja.repository.StateTreeRepository;
-import org.syncninja.util.ResourceBundleEnum;
 import org.syncninja.model.StateDirectory;
 import org.syncninja.model.StateFile;
 import org.syncninja.model.StateTree;

@@ -1,10 +1,8 @@
 package org.syncninja.command;
 
 import org.syncninja.repository.StateTreeRepository;
-import org.syncninja.service.ResourceMessagingService;
 import org.syncninja.service.StateTreeService;
 import org.syncninja.service.StatusService;
-import org.syncninja.util.ResourceBundleEnum;
 import picocli.CommandLine;
 
 import java.util.*;
