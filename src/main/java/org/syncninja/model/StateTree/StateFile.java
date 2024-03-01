@@ -1,6 +1,7 @@
-package org.syncninja.model;
+package org.syncninja.model.StateTree;
 
 import org.neo4j.ogm.annotation.NodeEntity;
+import org.syncninja.model.StateTree.StateTree;
 import org.syncninja.util.Fetcher;
 import org.syncninja.util.SHA256;
 
@@ -47,4 +48,10 @@ public class StateFile extends StateTree {
     public String getHashValue() {
         return hashValue;
     }
+
+    @Override
+    public boolean isRoot() {
+        return false;
+    }
 }
+

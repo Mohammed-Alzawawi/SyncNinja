@@ -1,7 +1,9 @@
 package org.syncninja.model.commitTree;
 
+import org.neo4j.ogm.annotation.NodeEntity;
 import org.syncninja.model.SyncNode;
 
+@NodeEntity
 public abstract class CommitNode extends SyncNode {
     private String path;
 

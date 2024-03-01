@@ -1,12 +1,17 @@
 package org.syncninja.service;
 
+import org.syncninja.model.NinjaNode;
+import org.syncninja.model.SyncNode;
 import org.syncninja.model.commitTree.CommitDirectory;
 import org.syncninja.model.commitTree.CommitFile;
 import org.syncninja.model.commitTree.CommitNode;
 import org.syncninja.repository.CommitNodeRepository;
 import org.syncninja.util.FileState;
+import org.syncninja.util.ResourceBundleEnum;
+
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 
 public class CommitTreeService {
     private final StatusService statusService;
@@ -58,5 +63,9 @@ public class CommitTreeService {
     }
     private boolean isFile(String path) {
         return new File(path).isFile();
+    }
+
+    public Optional<CommitNode> getCommitRoot(String path){
+        return commitNodeRepository.findById(path);
     }
 }

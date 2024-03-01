@@ -1,10 +1,14 @@
 package org.syncninja.service;
 
-import org.syncninja.model.Directory;
-import org.syncninja.model.StateTree;
+import org.syncninja.model.Branch;
+import org.syncninja.model.StateTree.StateDirectory;
+import org.syncninja.model.StateTree.StateRoot;
+import org.syncninja.model.StateTree.StateTree;
+import org.syncninja.model.commitTree.CommitDirectory;
+import org.syncninja.model.commitTree.CommitNode;
 import org.syncninja.repository.StateTreeRepository;
-import org.syncninja.model.StateDirectory;
-import org.syncninja.model.StateFile;
+
+import org.syncninja.model.StateTree.StateFile;
 import org.syncninja.util.ResourceBundleEnum;
 
 import java.io.IOException;
@@ -16,7 +20,6 @@ import java.util.stream.Collectors;
 
 public class StateTreeService {
     private final StateTreeRepository stateTreeRepository;
-
     public StateTreeService() {
         stateTreeRepository = new StateTreeRepository();
     }
@@ -84,6 +87,18 @@ public class StateTreeService {
     public StateTree getStateNode(String path) throws Exception {
         return stateTreeRepository.findById(path).orElseThrow(()->
                 new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.FILE_NOT_FOUND, new Object[]{path})));
+    }
+
+    public StateRoot generateStateRootNode(String path , Branch currentBranch , CommitNode currentCommit) throws Exception {
+        StateRoot stateRoot = null;
+        if(!stateTreeRepository.findById(path).isEmpty()){
+            throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_ALREADY_INITIALIZED ,new Object[]{path}));
+        }
+        else{
+            stateRoot = new StateRoot(path , currentBranch , currentCommit);
+            stateTreeRepository.save(stateRoot);
+        }
+        return stateRoot;
     }
 
 }

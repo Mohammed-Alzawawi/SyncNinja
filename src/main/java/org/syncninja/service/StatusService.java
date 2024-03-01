@@ -1,16 +1,16 @@
 package org.syncninja.service;
 
+import org.syncninja.model.StateTree.StateRoot;
 import org.syncninja.repository.StateTreeRepository;
-import org.syncninja.model.StateDirectory;
-import org.syncninja.model.StateFile;
-import org.syncninja.model.StateTree;
+import org.syncninja.model.StateTree.StateDirectory;
+import org.syncninja.model.StateTree.StateFile;
+import org.syncninja.model.StateTree.StateTree;
 import org.syncninja.util.FileState;
 import org.syncninja.util.ResourceBundleEnum;
 
 import java.io.File;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class StatusService {
@@ -60,8 +60,8 @@ public class StatusService {
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_NOT_INITIALIZED, new Object[]{path}));
         }
         FileState fileStatus = new FileState();
-        StateDirectory stateDirectory = (StateDirectory) stateTreeRepository.findById(path).orElse(null);
-        currentState(new File(path), stateDirectory, fileStatus.getUntracked());
+        StateRoot stateRoot = (StateRoot) stateTreeRepository.findById(path).orElse(null);
+        currentState(new File(path), stateRoot, fileStatus.getUntracked());
         return fileStatus;
     }
 }

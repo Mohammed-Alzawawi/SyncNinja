@@ -1,4 +1,4 @@
-package org.syncninja.model;
+package org.syncninja.model.StateTree;
 
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
@@ -32,4 +32,5 @@ public abstract class StateTree {
         return path;
     }
     public abstract boolean isDirectory();
+    public abstract boolean isRoot();
 }

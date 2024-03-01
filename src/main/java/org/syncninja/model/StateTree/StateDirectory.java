@@ -1,4 +1,4 @@
-package org.syncninja.model;
+package org.syncninja.model.StateTree;
 
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
@@ -13,7 +13,6 @@ public class StateDirectory extends StateTree {
 
     public StateDirectory() {;
     }
-
 
     public StateDirectory(String path) {
         super(path);
@@ -46,4 +45,8 @@ public class StateDirectory extends StateTree {
         this.internalNodes = internalNodes;
     }
 
+    @Override
+    public boolean isRoot() {
+        return false;
+    }
 }

@@ -22,7 +22,6 @@ public class StatusCommand implements Runnable{
         String path = System.getProperty("user.dir");
         try {
             FileState status = statusService.getStatus(path);
-            
             List<String> tracked = (List<String>) status.getTracked();
             List<String> untracked = (List<String>) status.getUntracked();
             String greenColor = "\u001B[32m";
