@@ -4,6 +4,7 @@ import org.syncninja.repository.StateTreeRepository;
 import org.syncninja.service.ResourceMessagingService;
 import org.syncninja.service.StateTreeService;
 import org.syncninja.service.StatusService;
+import org.syncninja.util.FileState;
 import picocli.CommandLine;
 import org.syncninja.util.ResourceBundleEnum;
 import java.util.*;
@@ -18,9 +19,10 @@ public class StatusCommand implements Runnable{
     public void run() {
         String path = System.getProperty("user.dir");
         try {
-            Object[] status = statusService.getStatus(path);
-            List<String> tracked = (List<String>) status[0];
-            List<String> untracked = (List<String>) status[1];
+            FileState status = statusService.getStatus(path);
+            
+            List<String> tracked = (List<String>) status.getTracked();
+            List<String> untracked = (List<String>) status.getUntracked();
             String greenColor = "\u001B[32m";
             String redColorCode = "\u001B[31m";
             String resetColorCode = "\u001B[0m";

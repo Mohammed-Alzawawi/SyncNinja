@@ -4,22 +4,27 @@ import org.syncninja.repository.StateTreeRepository;
 import org.syncninja.model.StateDirectory;
 import org.syncninja.model.StateFile;
 import org.syncninja.model.StateTree;
-import org.syncninja.repository.StateDirectoryRepository;
-import org.syncninja.repository.StateFileRepository;
+import org.syncninja.util.FileState;
 import org.syncninja.util.ResourceBundleEnum;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class StatusService {
 
-    private final StateDirectoryRepository stateDirectoryRepository = new StateDirectoryRepository();
-    private final ResourceMessagingService resourceMessagingService = new ResourceMessagingService();
-    private final StateFileRepository stateFileRepository = new StateFileRepository();
-    private final StateTreeRepository stateTreeRepository = new StateTreeRepository();
+
+    private final ResourceMessagingService resourceMessagingService;
+
+    private final StateTreeRepository stateTreeRepository;
+
+    public StatusService() {
+        resourceMessagingService = new ResourceMessagingService();
+        stateTreeRepository = new StateTreeRepository();
+    }
+
     public void currentState(File directory, StateDirectory stateDirectory, List<String> untracked) {
         File filesList[] = directory.listFiles();
         Map<String, StateTree> stateTreeMap = stateDirectory.getInternalNodes().stream()
@@ -54,18 +59,18 @@ public class StatusService {
         }
     }
 
-    public Object[] getStatus(String path) throws Exception {
+    public FileState getStatus(String path) throws Exception {
 
         if (stateTreeRepository.findById(path)==null) {
             //System.out.println(path);
             throw new Exception(resourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_NOT_INITIALIZED, new Object[]{path}));
         }
-        List<String> tracked = new ArrayList<>();
-        List<String> untracked = new ArrayList<>();
+        FileState fileStatus = new FileState();
 
-        StateDirectory stateDirectory = (StateDirectory) stateTreeRepository.findById(path);
 
-        currentState(new File(path), stateDirectory, untracked);
-        return new Object[]{tracked, untracked};
+        StateDirectory stateDirectory = (StateDirectory) stateTreeRepository.findById(path).orElse(null);
+
+        currentState(new File(path), stateDirectory, fileStatus.getUntracked());
+        return fileStatus;
     }
 }

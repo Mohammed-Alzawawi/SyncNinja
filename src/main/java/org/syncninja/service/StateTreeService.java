@@ -1,10 +1,10 @@
 package org.syncninja.service;
 
+import org.syncninja.model.Directory;
+import org.syncninja.model.StateTree;
 import org.syncninja.repository.StateTreeRepository;
 import org.syncninja.model.StateDirectory;
 import org.syncninja.model.StateFile;
-import org.syncninja.repository.StateDirectoryRepository;
-import org.syncninja.repository.StateFileRepository;
 import org.syncninja.util.ResourceBundleEnum;
 
 import java.io.IOException;
@@ -15,31 +15,34 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class StateTreeService {
-    private final StateDirectoryRepository stateDirectoryRepository = new StateDirectoryRepository();
-    private final ResourceMessagingService resourceMessagingService = new ResourceMessagingService();
-    private final StateFileRepository stateFileRepository = new StateFileRepository();
-    private final StateTreeRepository stateTreeRepository = new StateTreeRepository();
+    private final ResourceMessagingService resourceMessagingService;
+    private final StateTreeRepository stateTreeRepository;
+
+    public StateTreeService() {
+        stateTreeRepository = new StateTreeRepository();
+        resourceMessagingService = new ResourceMessagingService();
+    }
 
     public StateFile generateStateFileNode(String path) throws Exception {
         StateFile file = null;
-        if(!stateFileRepository.findById(path).isEmpty()){
+        if(!stateTreeRepository.findById(path).isEmpty()){
             throw new Exception(resourceMessagingService.getMessage(ResourceBundleEnum.FILE_ALREADY_EXISTS, new Object[]{path}));
         }
         else{
             file = new StateFile(path);
-            stateFileRepository.save(file);
+            stateTreeRepository.save(file);
         }
         return file;
     }
 
     public StateDirectory generateStateDirectoryNode(String path) throws Exception {
         StateDirectory stateDirectory = null;
-        if(!stateDirectoryRepository.findById(path).isEmpty()){
+        if(!stateTreeRepository.findById(path).isEmpty()){
             throw new Exception(resourceMessagingService.getMessage(ResourceBundleEnum.SUB_DIRECTORY_ALREADY_EXISTS, new Object[]{path}));
         }
         else{
             stateDirectory = new StateDirectory(path);
-            stateDirectoryRepository.save(stateDirectory);
+            stateTreeRepository.save(stateDirectory);
         }
         return stateDirectory;
 
@@ -52,23 +55,23 @@ public class StateTreeService {
             subList = Files.walk(mainDirectory)
                     .collect(Collectors.toList());
             {
-                for(int i = 0 ; i<subList.size() ; i++){
+                for(int i = 1 ; i<subList.size() ; i++){
                     Path file = subList.get(i);
                     if(file.toFile().isDirectory()){
                         StateDirectory child = generateStateDirectoryNode(file.toString());
-                        StateDirectory parent = stateDirectoryRepository.findById(file.getParent().toString()).orElse(null);
+                        StateDirectory parent = (StateDirectory) stateTreeRepository.findById(file.getParent().toString()).orElse(null);
                         if(parent!=null){
                             parent.addfile(child);
-                            stateDirectoryRepository.save(parent);
+                            stateTreeRepository.save(parent);
                         }
                     }
                     else{
                         StateFile child = generateStateFileNode(file.toString());
-                        StateDirectory parent = stateDirectoryRepository.findById(file.getParent().toString()).orElse(null);
+                        StateDirectory parent = (StateDirectory) stateTreeRepository.findById(file.getParent().toString()).orElse(null);
 
                         if(parent!=null){
                             parent.addfile(child);
-                            stateDirectoryRepository.save(parent);
+                            stateTreeRepository.save(parent);
                         }
                     }
                 }
@@ -77,7 +80,12 @@ public class StateTreeService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
 
+
+    }
+    public StateTree getStateNode(String path) throws Exception {
+        return stateTreeRepository.findById(path).orElseThrow(()->
+                new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.FILE_NOT_FOUND, new Object[]{path})));
+    }
 
 }

@@ -9,11 +9,16 @@ import org.syncninja.util.Neo4jSession;
 import java.util.*;
 
 public class StateTreeRepository {
-    ResourceMessagingService resourceMessagingService = new ResourceMessagingService();
-    public StateTree findById(String path) throws Exception {
+    ResourceMessagingService resourceMessagingService;
+
+    public StateTreeRepository() {
+        this.resourceMessagingService = new ResourceMessagingService();
+    }
+
+    public Optional<StateTree> findById(String path) throws Exception {
         Session session = Neo4jSession.getSession();
         StateTree stateTreeNode = session.load(StateTree.class, path);
-        return stateTreeNode;
+        return Optional.ofNullable(stateTreeNode);
 
     }
 //    public StateTree loadByDepth(String mainPath , String wantedNode) throws Exception {
