@@ -1,48 +1,54 @@
 package org.syncninja.util;
 
-import org.syncninja.service.StateFileService;
+import org.syncninja.service.StatusService;
+
 import java.util.*;
 
 public class CompareFileUtil {
-    private static StateFileService stateFileService;
+
+    private final StatusService statusService;
 
     public CompareFileUtil() {
-        stateFileService = new StateFileService();
+        statusService = new StatusService();
     }
 
-    public static List<List<String>> compareFiles(String filePath) throws Exception {
+    public LinesContainer compareFiles(String filePath) throws Exception {
         List<String> newFileList = Fetcher.readFile(filePath);
-        List<String> oldFileList = stateFileService.getStateFile(filePath).getLines();
+        List<String> oldFileList;
+
+        FileState fileState = statusService.getState(filePath.substring(0, filePath.lastIndexOf("\\")));
+        if(fileState != null){
+            oldFileList = fileState.getUntrackedDTO(filePath).getStateFile().getLines();
+        }
+        else{
+            oldFileList = new ArrayList<>();
+        }
+
         return compareNewAndOldLists(newFileList, oldFileList);
     }
 
-    private static List<List<String>> compareNewAndOldLists(List<String> newFileList, List<String> oldFileList){
-        // finding the max length
-        int maximumLength = newFileList.size();
-        if (oldFileList.size() > maximumLength) {maximumLength = oldFileList.size();}
+    private static LinesContainer compareNewAndOldLists(List<String> newFileList, List<String> oldFileList){
+        LinesContainer linesContainer = new LinesContainer(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        int maximumLength = Math.max(newFileList.size(), oldFileList.size());
 
-        List<List<String>> differenceList= new ArrayList<>();
         int lineNumber = 1;
         String newLine, oldLine;
 
         while(lineNumber <= maximumLength){
-            List<String> tempList = new ArrayList<>();
+            if(lineNumber > newFileList.size()){ newLine = ""; }
+            else {newLine = newFileList.get( lineNumber-1); }
 
-            try{newLine = newFileList.get(lineNumber-1);}
-            catch (IndexOutOfBoundsException e) {newLine = "";}
-
-            try{oldLine = oldFileList.get(lineNumber-1);}
-            catch (IndexOutOfBoundsException e) {oldLine = "";}
+            if(lineNumber > oldFileList.size()){ oldLine = ""; }
+            else {oldLine = oldFileList.get( lineNumber-1); }
 
             if(!newLine.equals(oldLine)){
-                tempList.add(String.valueOf(lineNumber));
-                tempList.add(newLine);
-                tempList.add(oldLine);
-                differenceList.add(tempList);
+                linesContainer.getLineNumbers().add(lineNumber);
+                linesContainer.getNewLines().add(newLine);
+                linesContainer.getOldLines().add(oldLine);
             }
 
             lineNumber++;
         }
-        return differenceList;
+        return linesContainer;
     }
 }
