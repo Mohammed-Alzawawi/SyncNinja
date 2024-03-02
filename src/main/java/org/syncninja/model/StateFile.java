@@ -18,8 +18,7 @@ public class StateFile extends StateTree {
         lines = Fetcher.readFile(path);
     }
 
-    public StateFile() {
-    }
+    public StateFile() {}
 
     public void setPath(String path) {
         this.path = path;

@@ -27,6 +27,7 @@ public class StateDirectory extends StateTree {
     public boolean isDirectory() {
         return true;
     }
+
     public void addFile(StateTree internalFile) {
         this.internalNodes.add(internalFile);
     }
