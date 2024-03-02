@@ -16,12 +16,11 @@ import picocli.CommandLine;
 public class InitCommand implements Runnable {
     private final DirectoryService directoryService;
     private final StateTreeService stateTreeService;
-    private final CommitTreeService commitTreeService;
+
 
     public InitCommand() {
         this.directoryService = new DirectoryService();
         this.stateTreeService = new StateTreeService();
-        this.commitTreeService = new CommitTreeService();
     }
 
     @Override
@@ -30,8 +29,7 @@ public class InitCommand implements Runnable {
         try {
             Directory directory = directoryService.createDirectory(path);
             directoryService.createDirectoryMainBranch(directory, "main");
-            stateTreeService.generateStateRootNode(path , directory.getBranch() , commitTreeService.getCommitRoot(path).orElse(null));
-            StateRoot stateRoot = (StateRoot) stateTreeService.getStateNode(path);
+            stateTreeService.generateStateRootNode(path , directory.getBranch());
             System.out.println(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_INITIALIZED_SUCCESSFULLY, new Object[]{path}));
         } catch (Exception exception) {
             System.out.println(exception.getMessage());

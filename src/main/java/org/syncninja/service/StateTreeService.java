@@ -89,13 +89,13 @@ public class StateTreeService {
                 new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.FILE_NOT_FOUND, new Object[]{path})));
     }
 
-    public StateRoot generateStateRootNode(String path , Branch currentBranch , CommitNode currentCommit) throws Exception {
+    public StateRoot generateStateRootNode(String path , Branch currentBranch ) throws Exception {
         StateRoot stateRoot = null;
         if(!stateTreeRepository.findById(path).isEmpty()){
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_ALREADY_INITIALIZED ,new Object[]{path}));
         }
         else{
-            stateRoot = new StateRoot(path , currentBranch , currentCommit);
+            stateRoot = new StateRoot(path , currentBranch);
             stateTreeRepository.save(stateRoot);
         }
         return stateRoot;

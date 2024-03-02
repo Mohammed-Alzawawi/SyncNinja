@@ -11,7 +11,9 @@ import java.util.Set;
 
 @NodeEntity
 public class StateRoot extends StateDirectory{
+    @Relationship(type="CURRENT_BRANCH", direction = Relationship.Direction.OUTGOING)
     private Branch currentBranch;
+    @Relationship(type="CURRENT_COMMIT", direction = Relationship.Direction.OUTGOING)
     private CommitNode currentCommit;
 
     @Relationship(type = "HAS" , direction = Relationship.Direction.OUTGOING)
@@ -23,11 +25,9 @@ public class StateRoot extends StateDirectory{
         super(path);
     }
 
-    public StateRoot(String path, Branch currentBranch , CommitNode currentCommit) {
+    public StateRoot(String path, Branch currentBranch) {
         super(path);
         this.currentBranch = currentBranch;
-        this.currentCommit = currentCommit;
-
     }
 
     public Branch getCurrentBranch() {

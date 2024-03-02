@@ -21,12 +21,13 @@ public class CommitTreeService {
         this.statusService = new StatusService();
         this.commitNodeRepository = new CommitNodeRepository();
     }
-    public void addFilesFromDirectoryToCommitTree(String directoryPath) throws Exception {
+    public CommitNode addFilesFromDirectoryToCommitTree(String directoryPath) throws Exception {
         FileState fileState = statusService.getStatus(directoryPath);
         List<String> untracedFiles =fileState.getUntracked();
-        addFilesToCommitTree(untracedFiles,directoryPath);
+        CommitNode commitNode = addFilesToCommitTree(untracedFiles,directoryPath);
+        return commitNode;
     }
-    private void addFilesToCommitTree(List<String> filePaths, String mainDirectoryPath) {
+    private CommitNode addFilesToCommitTree(List<String> filePaths, String mainDirectoryPath) {
         CommitNode root = new CommitDirectory(mainDirectoryPath);
 
         for (String path : filePaths) {
@@ -60,12 +61,11 @@ public class CommitTreeService {
             }
         }
         commitNodeRepository.save(root);
+        return root;
     }
     private boolean isFile(String path) {
         return new File(path).isFile();
     }
 
-    public Optional<CommitNode> getCommitRoot(String path){
-        return commitNodeRepository.findById(path);
-    }
+
 }

@@ -13,9 +13,5 @@ public class CommitNodeRepository {
         session.save(commitNode);
     }
 
-    public Optional<CommitNode> findById(String path){
-        Session session = Neo4jSession.getSession();
-        CommitNode commitNode = session.load(CommitNode.class , path);
-        return Optional.ofNullable(commitNode);
-    }
+
 }
