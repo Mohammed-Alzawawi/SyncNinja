@@ -14,28 +14,22 @@ public class StateDirectory extends StateTree {
     public StateDirectory() {;
     }
 
-
     public StateDirectory(String path) {
         super(path);
         this.internalNodes = new HashSet<>();
-    }
-
-    public String getPath() {
-        return path;
     }
 
     public Set<StateTree> getInternalNodes() {
         return internalNodes;
     }
 
-
     @Override
     public boolean isDirectory() {
         return true;
     }
-    public void addfile(StateTree internalfile) {
 
-        this.internalNodes.add(internalfile);
+    public void addFile(StateTree internalFile) {
+        this.internalNodes.add(internalFile);
     }
 
     public void setPath(String path) {
@@ -45,5 +39,4 @@ public class StateDirectory extends StateTree {
     public void setInternalNodes(Set<StateTree> internalNodes) {
         this.internalNodes = internalNodes;
     }
-
 }

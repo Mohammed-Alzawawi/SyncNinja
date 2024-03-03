@@ -1,10 +1,14 @@
 package org.syncninja.service;
 
+import org.syncninja.dto.StatusFileDTO;
 import org.syncninja.model.commitTree.CommitDirectory;
 import org.syncninja.model.commitTree.CommitFile;
 import org.syncninja.model.commitTree.CommitNode;
 import org.syncninja.repository.CommitNodeRepository;
-import org.syncninja.util.FileState;
+import org.syncninja.util.CompareFileUtil;
+import org.syncninja.util.FileTrackingState;
+import org.syncninja.util.LinesContainer;
+
 import java.io.File;
 import java.util.List;
 
@@ -16,16 +20,18 @@ public class CommitTreeService {
         this.statusService = new StatusService();
         this.commitNodeRepository = new CommitNodeRepository();
     }
+
     public void addFilesFromDirectoryToCommitTree(String directoryPath) throws Exception {
-        FileState fileState = statusService.getStatus(directoryPath);
-        List<String> untracedFiles =fileState.getUntracked();
-        addFilesToCommitTree(untracedFiles,directoryPath);
+        FileTrackingState fileTrackingState = statusService.getState(directoryPath);
+        List<StatusFileDTO> untrackedFiles = fileTrackingState.getUntracked();
+        addFilesToCommitTree(untrackedFiles, directoryPath);
     }
-    private void addFilesToCommitTree(List<String> filePaths, String mainDirectoryPath) {
+
+    private void addFilesToCommitTree(List<StatusFileDTO> untrackedFiles, String mainDirectoryPath) throws Exception {
         CommitNode root = new CommitDirectory(mainDirectoryPath);
 
-        for (String path : filePaths) {
-            String relativePath = path.substring(mainDirectoryPath.length() + 1);
+        for (StatusFileDTO statusFileDTO : untrackedFiles) {
+            String relativePath = statusFileDTO.getPath().substring(mainDirectoryPath.length() + 1);
             String[] pathComponents = relativePath.split("\\\\");
             CommitNode currentNode = root;
             String previousPath = mainDirectoryPath;
@@ -45,7 +51,8 @@ public class CommitTreeService {
                 if (!found) {
                     CommitNode newNode;
                     if (isFile(previousPath)) {
-                        newNode = new CommitFile(previousPath);
+                        LinesContainer linesContainer = CompareFileUtil.compareFiles(previousPath, statusFileDTO);
+                        newNode = new CommitFile(previousPath, linesContainer.getLineNumbers(), linesContainer.getNewLines(), linesContainer.getOldLines());
                     } else {
                         newNode = new CommitDirectory(previousPath);
                     }
@@ -56,6 +63,7 @@ public class CommitTreeService {
         }
         commitNodeRepository.save(root);
     }
+
     private boolean isFile(String path) {
         return new File(path).isFile();
     }

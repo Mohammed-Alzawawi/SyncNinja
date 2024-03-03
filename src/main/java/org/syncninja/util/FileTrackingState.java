@@ -5,11 +5,11 @@ import org.syncninja.dto.StatusFileDTO;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FileState {
+public class FileTrackingState {
     private final List<StatusFileDTO> untracked;
     private final List<StatusFileDTO> tracked;
 
-    public FileState() {
+    public FileTrackingState() {
         this.untracked = new ArrayList<>();
         this.tracked = new ArrayList<>();
     }
@@ -20,14 +20,5 @@ public class FileState {
 
     public List<StatusFileDTO> getTracked() {
         return tracked;
-    }
-
-    public StatusFileDTO getUntrackedDTO(String path){
-        for(StatusFileDTO statusFileDTO : untracked){
-            if (statusFileDTO.getPath().equals(path)){
-                return statusFileDTO;
-            }
-        }
-        return null;
     }
 }
