@@ -3,7 +3,7 @@ package org.syncninja.command;
 import org.syncninja.dto.StatusFileDTO;
 import org.syncninja.service.ResourceMessagingService;
 import org.syncninja.service.StatusService;
-import org.syncninja.util.FileState;
+import org.syncninja.util.FileTrackingState;
 import picocli.CommandLine;
 import org.syncninja.util.ResourceBundleEnum;
 import java.util.*;
@@ -20,7 +20,7 @@ public class StatusCommand implements Runnable{
     public void run() {
         String path = System.getProperty("user.dir");
         try {
-            FileState state = statusService.getState(path);
+            FileTrackingState state = statusService.getState(path);
 
             if(state == null){
                 throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_NOT_INITIALIZED, new Object[]{path}));

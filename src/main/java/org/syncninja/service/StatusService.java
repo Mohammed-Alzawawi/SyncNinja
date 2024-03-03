@@ -5,8 +5,7 @@ import org.syncninja.repository.StateTreeRepository;
 import org.syncninja.model.StateDirectory;
 import org.syncninja.model.StateFile;
 import org.syncninja.model.StateTree;
-import org.syncninja.util.FileState;
-import org.syncninja.util.ResourceBundleEnum;
+import org.syncninja.util.FileTrackingState;
 
 import java.io.File;
 import java.util.List;
@@ -53,13 +52,13 @@ public class StatusService {
         }
     }
 
-    public FileState getState(String path) throws Exception {
+    public FileTrackingState getState(String path) throws Exception {
         if (stateTreeRepository.findById(path).isEmpty()) {
             return null;
         }
-        FileState fileState = new FileState();
+        FileTrackingState fileTrackingState = new FileTrackingState();
         StateDirectory stateDirectory = (StateDirectory) stateTreeRepository.findById(path).orElse(null);
-        currentState(new File(path), stateDirectory, fileState.getUntracked());
-        return fileState;
+        currentState(new File(path), stateDirectory, fileTrackingState.getUntracked());
+        return fileTrackingState;
     }
 }

@@ -1,29 +1,20 @@
 package org.syncninja.util;
 
-import org.syncninja.service.StatusService;
+import org.syncninja.dto.StatusFileDTO;
 
 import java.util.*;
 
 public class CompareFileUtil {
 
-    private final StatusService statusService;
-
-    public CompareFileUtil() {
-        statusService = new StatusService();
-    }
-
-    public LinesContainer compareFiles(String filePath) throws Exception {
+    public static LinesContainer compareFiles(String filePath, StatusFileDTO statusFileDTO) throws Exception {
         List<String> newFileList = Fetcher.readFile(filePath);
         List<String> oldFileList;
 
-        FileState fileState = statusService.getState(filePath.substring(0, filePath.lastIndexOf("\\")));
-        if(fileState != null){
-            oldFileList = fileState.getUntrackedDTO(filePath).getStateFile().getLines();
-        }
-        else{
+        if(statusFileDTO.getStateFile() != null){
+            oldFileList = statusFileDTO.getStateFile().getLines();
+        } else {
             oldFileList = new ArrayList<>();
         }
-
         return compareNewAndOldLists(newFileList, oldFileList);
     }
 
