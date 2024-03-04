@@ -14,14 +14,15 @@ public class CommitNodeRepository {
         Session session = Neo4jSession.getSession();
         session.save(commitNode);
     }
-
-
     public Optional<CommitNode> findByPath(String path) {
         Session session = Neo4jSession.getSession();
         Filter filter = new Filter("path", ComparisonOperator.EQUALS, path);
         Collection<CommitNode> commitNodes = session.loadAll(CommitNode.class, filter, -1);
         return Optional.ofNullable((commitNodes.isEmpty()) ? null : commitNodes.iterator().next());
     }
-
-
+    public CommitNode getCommitNode(String path){
+        Session session = Neo4jSession.getSession();
+        CommitNode commitNode = session.load(CommitNode.class,path);
+        return commitNode;
+    }
 }
