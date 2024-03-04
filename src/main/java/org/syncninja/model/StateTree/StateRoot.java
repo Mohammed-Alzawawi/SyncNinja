@@ -16,8 +16,6 @@ public class StateRoot extends StateDirectory{
     @Relationship(type="CURRENT_COMMIT", direction = Relationship.Direction.OUTGOING)
     private CommitNode currentCommit;
 
-    @Relationship(type = "HAS" , direction = Relationship.Direction.OUTGOING)
-    private Set<StateTree> internalNodes = new HashSet<>();
     public StateRoot() {
     }
 
@@ -44,15 +42,6 @@ public class StateRoot extends StateDirectory{
     public void setCurrentCommit(CommitNode currentCommit) {
         this.currentCommit = currentCommit;
     }
-
-    public Set<StateTree> getInternalNodes() {
-        return internalNodes;
-    }
-
-    public void setInternalNodes(Set<StateTree> internalNodes) {
-        this.internalNodes = internalNodes;
-    }
-
     @Override
     public boolean isRoot() {
         return true;
