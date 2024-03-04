@@ -8,4 +8,9 @@ public class CommitNodeRepository {
         Session session = Neo4jSession.getSession();
         session.save(commitNode);
     }
+    public CommitNode getCommitNode(String path){
+        Session session = Neo4jSession.getSession();
+        CommitNode commitNode = session.load(CommitNode.class,path);
+        return commitNode;
+    }
 }

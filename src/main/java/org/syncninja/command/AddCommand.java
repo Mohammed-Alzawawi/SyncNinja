@@ -23,7 +23,8 @@ private CommitTreeService commitTreeService;
             if (directory != null) {
                 commitTreeService.addFilesFromDirectoryToCommitTree(directory);
             } else if (filePath != null) {
-                commitTreeService.addFileToCommitTree(filePath);
+                String mainDirectoryPath = System.getProperty("user.dir");
+                commitTreeService.addFileToCommitTree(mainDirectoryPath,filePath);
             } else {
                 String path = System.getProperty("user.dir");
                 commitTreeService.addFilesFromDirectoryToCommitTree(path);
