@@ -4,7 +4,6 @@ import org.syncninja.service.ResourceMessagingService;
 import org.syncninja.util.ResourceBundleEnum;
 import picocli.CommandLine;
 
-
 @CommandLine.Command (name="add", description = "Add files to the commit tree")
 public class AddCommand implements Runnable{
 
@@ -22,7 +21,8 @@ private CommitTreeService commitTreeService;
     public void run() {
         try {
             if (directory != null) {
-                commitTreeService.addDirectoryToCommitTree(directory);
+
+                commitTreeService.addFilesFromDirectoryToCommitTree(directory);
             } else if (filePath != null) {
                 commitTreeService.addFileToCommitTree(filePath);
             } else {
