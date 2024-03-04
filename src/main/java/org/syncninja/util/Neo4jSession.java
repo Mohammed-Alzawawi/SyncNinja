@@ -18,7 +18,7 @@ public class Neo4jSession {
     }
 
     public static synchronized Session getSession() {
-        if (session == null){
+        if (session == null) {
             new Neo4jSession();
         }
         return session;

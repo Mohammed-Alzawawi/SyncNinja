@@ -8,10 +8,11 @@ import java.util.Set;
 
 @NodeEntity
 public class StateDirectory extends StateTree {
-    @Relationship(type = "HAS" , direction = Relationship.Direction.OUTGOING)
+    @Relationship(type = "HAS", direction = Relationship.Direction.OUTGOING)
     protected Set<StateTree> internalNodes = new HashSet<>();
 
-    public StateDirectory() {;
+    public StateDirectory() {
+        ;
     }
 
     public StateDirectory(String path) {
@@ -19,26 +20,8 @@ public class StateDirectory extends StateTree {
         this.internalNodes = new HashSet<>();
     }
 
-    public String getPath() {
-        return path;
-    }
-
     public Set<StateTree> getInternalNodes() {
         return internalNodes;
-    }
-
-
-    @Override
-    public boolean isDirectory() {
-        return true;
-    }
-    public void addfile(StateTree internalfile) {
-
-        this.internalNodes.add(internalfile);
-    }
-
-    public void setPath(String path) {
-        this.path = path;
     }
 
     public void setInternalNodes(Set<StateTree> internalNodes) {
@@ -46,7 +29,21 @@ public class StateDirectory extends StateTree {
     }
 
     @Override
+    public boolean isDirectory() {
+        return true;
+    }
+
+    public void addFile(StateTree internalFile) {
+        this.internalNodes.add(internalFile);
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    @Override
     public boolean isRoot() {
         return false;
     }
+
 }

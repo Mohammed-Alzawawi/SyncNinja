@@ -15,7 +15,6 @@ public enum ResourceBundleEnum {
     SUCCESSFULLY_ADDED("successfully_added");
 
 
-
     private final String key;
 
     ResourceBundleEnum(String key) {

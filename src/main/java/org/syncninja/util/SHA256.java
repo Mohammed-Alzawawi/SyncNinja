@@ -8,7 +8,7 @@ import java.security.NoSuchAlgorithmException;
 public class SHA256 {
     private static MessageDigest messageDigest = getMessageDigestInstance();
 
-    private static MessageDigest getMessageDigestInstance(){
+    private static MessageDigest getMessageDigestInstance() {
         try {
             return MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException e) {
@@ -16,15 +16,15 @@ public class SHA256 {
         }
     }
 
-    public static String hashValue(String file ) throws IOException {
+    public static String hashValue(String file) throws IOException {
         FileInputStream fis = new FileInputStream(file);
         byte[] byteArray = new byte[1024];
         int bytesCount = 0;
 
-        while ((bytesCount = fis.read(byteArray)) != -1)
-        {
+        while ((bytesCount = fis.read(byteArray)) != -1) {
             messageDigest.update(byteArray, 0, bytesCount);
-        };
+        }
+        ;
         fis.close();
         byte[] bytes = messageDigest.digest();
         StringBuilder sb = new StringBuilder();

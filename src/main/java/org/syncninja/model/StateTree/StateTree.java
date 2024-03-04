@@ -4,6 +4,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
 import java.io.File;
+
 @NodeEntity
 public abstract class StateTree {
     @Id
@@ -11,7 +12,6 @@ public abstract class StateTree {
     protected long lastModified;
 
     public StateTree() {
-
     }
 
     public StateTree(String path) {
@@ -28,9 +28,11 @@ public abstract class StateTree {
         this.lastModified = lastModified;
     }
 
-    public String getPath(){
+    public String getPath() {
         return path;
     }
+
     public abstract boolean isDirectory();
+
     public abstract boolean isRoot();
 }
