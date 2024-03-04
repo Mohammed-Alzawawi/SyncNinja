@@ -80,7 +80,7 @@ public class StateTreeService {
         return stateTreeRepository.findById(path).orElseThrow(() ->
                 new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.FILE_NOT_FOUND, new Object[]{path})));
     }
-<<<<<<<HEAD
+
 
     public StateRoot generateStateRootNode(String path, Branch currentBranch) throws Exception {
         StateRoot stateRoot = null;
@@ -93,6 +93,4 @@ public class StateTreeService {
         return stateRoot;
     }
 
-=======
-        >>>>>>>fff78decc915b2df9743a12eeb0268468196c509
 }
