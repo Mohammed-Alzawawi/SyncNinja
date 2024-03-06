@@ -12,9 +12,7 @@ public class StateDirectory extends StateTree {
     protected Set<StateTree> internalNodes = new HashSet<>();
 
     public StateDirectory() {
-        ;
     }
-
     public StateDirectory(String path) {
         super(path);
         this.internalNodes = new HashSet<>();

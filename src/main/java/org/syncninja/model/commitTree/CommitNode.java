@@ -21,4 +21,6 @@ public abstract class CommitNode extends SyncNode {
     public void setPath(String path) {
         this.path = path;
     }
+
+    public abstract boolean isDirectory();
 }

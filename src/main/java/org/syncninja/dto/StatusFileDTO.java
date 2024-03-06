@@ -2,11 +2,14 @@ package org.syncninja.dto;
 
 
 import org.syncninja.model.StateTree.StateFile;
+import org.syncninja.model.commitTree.CommitFile;
 
 public class StatusFileDTO {
     private boolean isNew;
     private StateFile stateFile;
     private String path;
+
+    private CommitFile commitFile;
 
     public StatusFileDTO(boolean isNew, StateFile stateFile, String path) {
         this.isNew = isNew;

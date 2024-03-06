@@ -22,7 +22,6 @@ public class StatusCommand implements Runnable {
         String path = System.getProperty("user.dir");
         try {
             FileTrackingState state = statusService.getState(path);
-
             if (state == null) {
                 throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_NOT_INITIALIZED, new Object[]{path}));
             }
