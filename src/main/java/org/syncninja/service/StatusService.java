@@ -28,6 +28,7 @@ public class StatusService {
     public void getTracked(List<StatusFileDTO> tracked , CommitDirectory commitDirectory){
         if(commitDirectory!=null){
             List<CommitNode> trackedList = commitDirectory.getCommitNodeList();
+            System.out.println(trackedList.isEmpty());
             for(CommitNode commitNode:trackedList){
                 if(commitNode.isDirectory()){
                     getTracked(tracked,(CommitDirectory) commitNode);
@@ -82,7 +83,7 @@ public class StatusService {
         }
         FileTrackingState fileTrackingState = new FileTrackingState();
         List<StatusFileDTO> trackedFiles =fileTrackingState.getTracked();
-        CommitDirectory stagingArea =(CommitDirectory) commitNodeRepository.findByPath(path).orElse(null);
+        CommitDirectory stagingArea = (CommitDirectory) commitNodeRepository.findByPath(path).orElse(null);
         getTracked(trackedFiles,stagingArea);
         StateDirectory stateDirectory = (StateDirectory) stateTreeRepository.findById(path).orElse(null);
         Map<String, StatusFileDTO> stagingAreaMap = trackedFiles.stream()
