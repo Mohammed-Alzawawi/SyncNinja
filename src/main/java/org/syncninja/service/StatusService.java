@@ -1,10 +1,11 @@
 package org.syncninja.service;
 
+
 import org.syncninja.dto.StatusFileDTO;
+import org.syncninja.model.StateTree.StateDirectory;
+import org.syncninja.model.StateTree.StateFile;
+import org.syncninja.model.StateTree.StateTree;
 import org.syncninja.repository.StateTreeRepository;
-import org.syncninja.model.StateDirectory;
-import org.syncninja.model.StateFile;
-import org.syncninja.model.StateTree;
 import org.syncninja.util.FileTrackingState;
 
 import java.io.File;
@@ -23,17 +24,17 @@ public class StatusService {
         File[] filesList = directory.listFiles();
         Map<String, StateTree> stateTreeMap = stateDirectory.getInternalNodes().stream()
                 .collect(Collectors.toMap((stateTree) -> stateTree.getPath(), (stateTree -> stateTree)));
-        for (File file: filesList) {
+        for (File file : filesList) {
             if (file.isDirectory()) {
                 StateDirectory stateDirectoryChild = (StateDirectory) stateTreeMap.get(file.getPath());
-                if(stateDirectoryChild == null) {
+                if (stateDirectoryChild == null) {
                     addAllFilesInDirectory(file, untracked);
                 } else if (stateDirectoryChild.getLastModified() != file.lastModified()) {
                     currentState(file, stateDirectoryChild, untracked);
                 }
             } else {
                 StateFile stateFile = (StateFile) stateTreeMap.get(file.getPath());
-                if (stateFile == null){
+                if (stateFile == null) {
                     untracked.add(new StatusFileDTO(true, null, file.getPath()));
                 } else {
                     untracked.add(new StatusFileDTO(false, stateFile, file.getPath()));
@@ -47,7 +48,7 @@ public class StatusService {
             if (file.isDirectory()) {
                 addAllFilesInDirectory(file, untracked);
             } else if (file.isFile()) {
-                untracked.add(new StatusFileDTO(true, null,file.getPath()));
+                untracked.add(new StatusFileDTO(true, null, file.getPath()));
             }
         }
     }
@@ -60,5 +61,6 @@ public class StatusService {
         StateDirectory stateDirectory = (StateDirectory) stateTreeRepository.findById(path).orElse(null);
         currentState(new File(path), stateDirectory, fileTrackingState.getUntracked());
         return fileTrackingState;
+
     }
 }

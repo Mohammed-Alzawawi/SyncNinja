@@ -1,4 +1,5 @@
 package org.syncninja.model.commitTree;
+
 import org.neo4j.ogm.annotation.NodeEntity;
 
 import java.util.List;
@@ -10,7 +11,7 @@ public class CommitFile extends CommitNode {
     private List<String> newValuesList;
     private List<String> oldValuesList;
 
-    public CommitFile(){
+    public CommitFile() {
 
     }
 
@@ -24,6 +25,7 @@ public class CommitFile extends CommitNode {
     public CommitFile(String path) {
         super(path);
     }
+
     public List<Integer> getLineNumberList() {
         return lineNumberList;
     }

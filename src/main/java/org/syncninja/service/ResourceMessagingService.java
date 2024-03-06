@@ -12,14 +12,14 @@ public class ResourceMessagingService {
     }
 
     public static synchronized String getMessage(ResourceBundleEnum resourceBundleEnum) {
-        if (resourceBundle == null){
+        if (resourceBundle == null) {
             new ResourceMessagingService();
         }
         return resourceBundle.getString(resourceBundleEnum.getKey());
     }
 
     public static synchronized String getMessage(ResourceBundleEnum resourceBundleEnum, Object[] args) {
-        if (resourceBundle == null){
+        if (resourceBundle == null) {
             new ResourceMessagingService();
         }
         String pattern = resourceBundle.getString(resourceBundleEnum.getKey());

@@ -1,6 +1,7 @@
 package org.syncninja.dto;
 
-import org.syncninja.model.StateFile;
+
+import org.syncninja.model.StateTree.StateFile;
 
 public class StatusFileDTO {
     private boolean isNew;

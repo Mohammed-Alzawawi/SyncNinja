@@ -3,7 +3,7 @@ package org.syncninja.model;
 import org.neo4j.ogm.annotation.NodeEntity;
 
 @NodeEntity
-public class Branch extends NinjaNode{
+public class Branch extends NinjaNode {
     private String name;
 
     public Branch() {

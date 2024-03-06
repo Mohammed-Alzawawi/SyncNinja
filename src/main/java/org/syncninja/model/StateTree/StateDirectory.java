@@ -1,4 +1,4 @@
-package org.syncninja.model;
+package org.syncninja.model.StateTree;
 
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
@@ -8,10 +8,11 @@ import java.util.Set;
 
 @NodeEntity
 public class StateDirectory extends StateTree {
-    @Relationship(type = "HAS" , direction = Relationship.Direction.OUTGOING)
-    private Set<StateTree> internalNodes = new HashSet<>();
+    @Relationship(type = "HAS", direction = Relationship.Direction.OUTGOING)
+    protected Set<StateTree> internalNodes = new HashSet<>();
 
-    public StateDirectory() {;
+    public StateDirectory() {
+        ;
     }
 
     public StateDirectory(String path) {
@@ -21,6 +22,10 @@ public class StateDirectory extends StateTree {
 
     public Set<StateTree> getInternalNodes() {
         return internalNodes;
+    }
+
+    public void setInternalNodes(Set<StateTree> internalNodes) {
+        this.internalNodes = internalNodes;
     }
 
     @Override
@@ -36,7 +41,9 @@ public class StateDirectory extends StateTree {
         this.path = path;
     }
 
-    public void setInternalNodes(Set<StateTree> internalNodes) {
-        this.internalNodes = internalNodes;
+    @Override
+    public boolean isRoot() {
+        return false;
     }
+
 }

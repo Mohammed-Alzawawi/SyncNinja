@@ -1,16 +1,18 @@
-package org.syncninja.model;
+package org.syncninja.model.StateTree;
 
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
 import java.io.File;
+
 @NodeEntity
 public abstract class StateTree {
     @Id
     protected String path;
     protected long lastModified;
 
-    public StateTree() {}
+    public StateTree() {
+    }
 
     public StateTree(String path) {
         this.path = path;
@@ -26,9 +28,11 @@ public abstract class StateTree {
         this.lastModified = lastModified;
     }
 
-    public String getPath(){
+    public String getPath() {
         return path;
     }
 
     public abstract boolean isDirectory();
+
+    public abstract boolean isRoot();
 }

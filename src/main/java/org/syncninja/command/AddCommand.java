@@ -5,9 +5,10 @@ import org.syncninja.service.ResourceMessagingService;
 import org.syncninja.util.ResourceBundleEnum;
 import picocli.CommandLine;
 
-@CommandLine.Command (name="add")
-public class AddCommand implements Runnable{
-private CommitTreeService commitTreeService;
+@CommandLine.Command(name = "add")
+public class AddCommand implements Runnable {
+    private CommitTreeService commitTreeService;
+
 
     public AddCommand() {
         this.commitTreeService = new CommitTreeService();

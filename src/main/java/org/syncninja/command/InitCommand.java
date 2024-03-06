@@ -12,6 +12,7 @@ public class InitCommand implements Runnable {
     private final DirectoryService directoryService;
     private final StateTreeService stateTreeService;
 
+
     public InitCommand() {
         this.directoryService = new DirectoryService();
         this.stateTreeService = new StateTreeService();
@@ -23,7 +24,7 @@ public class InitCommand implements Runnable {
         try {
             Directory directory = directoryService.createDirectory(path);
             directoryService.createDirectoryMainBranch(directory, "main");
-            stateTreeService.generateStateDirectoryNode(path);
+            stateTreeService.generateStateRootNode(path, directory.getBranch());
             System.out.println(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_INITIALIZED_SUCCESSFULLY, new Object[]{path}));
         } catch (Exception exception) {
             System.out.println(exception.getMessage());
