@@ -29,6 +29,7 @@ public class CommitTreeService {
 
     private void addFilesToCommitTree(List<StatusFileDTO> untrackedFiles, String mainDirectoryPath) throws Exception {
         CommitNode root = new CommitDirectory(mainDirectoryPath);
+        root.setCommitted(false);
 
         for (StatusFileDTO statusFileDTO : untrackedFiles) {
             String relativePath = statusFileDTO.getPath().substring(mainDirectoryPath.length() + 1);

@@ -17,6 +17,11 @@ public class CommitCommand implements Runnable {
 
     @Override
     public void run() {
-        commitService.createCommit(message);
+        String path = System.getProperty("user.dir");
+        try {
+            commitService.createCommit(message, path);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

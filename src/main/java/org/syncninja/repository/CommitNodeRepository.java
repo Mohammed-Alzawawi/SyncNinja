@@ -9,6 +9,4 @@ public class CommitNodeRepository {
         Session session = Neo4jSession.getSession();
         session.save(commitNode);
     }
-
-
 }
