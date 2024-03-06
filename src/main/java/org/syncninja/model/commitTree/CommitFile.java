@@ -24,6 +24,7 @@ public class CommitFile extends CommitNode {
     public CommitFile(String path) {
         super(path);
     }
+
     public List<Integer> getLineNumberList() {
         return lineNumberList;
     }

@@ -10,7 +10,6 @@ public class Branch extends NinjaNode{
     }
 
     public Branch(String name) {
-        super();
         this.name = name;
     }
 
