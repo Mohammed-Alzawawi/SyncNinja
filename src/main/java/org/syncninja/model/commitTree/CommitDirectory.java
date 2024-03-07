@@ -17,10 +17,11 @@ public class CommitDirectory extends CommitNode {
 
     public CommitDirectory(String path) {
         super(path);
+        this.commitNodeList = new ArrayList<>();
     }
 
     public List<CommitNode> getCommitNodeList() {
-        return commitNodeList;
+        return this.commitNodeList;
     }
 
     public void setCommitNodeList(List<CommitNode> commitNodeList) {
@@ -28,7 +29,8 @@ public class CommitDirectory extends CommitNode {
     }
 
     public void addNode(CommitNode commitNode) {
-        commitNodeList.add(commitNode);
+        this.commitNodeList.add(commitNode);
     }
+
 
 }

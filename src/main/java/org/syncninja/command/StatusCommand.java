@@ -1,5 +1,6 @@
 package org.syncninja.command;
 
+import org.syncninja.dto.CommitFileDTO;
 import org.syncninja.dto.StatusFileDTO;
 import org.syncninja.service.ResourceMessagingService;
 import org.syncninja.service.StatusService;
@@ -22,12 +23,11 @@ public class StatusCommand implements Runnable {
         String path = System.getProperty("user.dir");
         try {
             FileTrackingState state = statusService.getState(path);
-
             if (state == null) {
                 throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_NOT_INITIALIZED, new Object[]{path}));
             }
 
-            List<StatusFileDTO> tracked = state.getTracked();
+            List<CommitFileDTO> tracked = state.getTracked();
             List<StatusFileDTO> untracked = state.getUntracked();
             String greenColor = "\u001B[32m";
             String redColorCode = "\u001B[31m";

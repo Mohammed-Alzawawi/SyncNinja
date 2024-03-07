@@ -29,13 +29,11 @@ public class CommitTreeService {
 
     private void addFilesToCommitTree(List<StatusFileDTO> untrackedFiles, String mainDirectoryPath) throws Exception {
         CommitNode root = new CommitDirectory(mainDirectoryPath);
-
         for (StatusFileDTO statusFileDTO : untrackedFiles) {
             String relativePath = statusFileDTO.getPath().substring(mainDirectoryPath.length() + 1);
             String[] pathComponents = relativePath.split("\\\\");
             CommitNode currentNode = root;
             String previousPath = mainDirectoryPath;
-
             for (String component : pathComponents) {
                 previousPath = previousPath + "\\" + component;
                 boolean found = false;
@@ -56,7 +54,7 @@ public class CommitTreeService {
                     } else {
                         newNode = new CommitDirectory(previousPath);
                     }
-                    ((CommitDirectory) currentNode).addNode(newNode);
+                    ((CommitDirectory) currentNode).getCommitNodeList().add(newNode);
                     currentNode = newNode;
                 }
             }
