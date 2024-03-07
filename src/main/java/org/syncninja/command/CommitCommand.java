@@ -4,6 +4,7 @@ import org.syncninja.model.Commit;
 import org.syncninja.model.StateTree.StateRoot;
 import org.syncninja.service.CommitService;
 import org.syncninja.service.StateTreeService;
+
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "commit")
