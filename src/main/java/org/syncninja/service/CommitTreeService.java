@@ -56,7 +56,7 @@ public class CommitTreeService {
                     } else {
                         newNode = new CommitDirectory(previousPath);
                     }
-                    ((CommitDirectory) currentNode).addNode(newNode);
+                    ((CommitDirectory)currentNode).getCommitNodeList().add(newNode);
                     currentNode = newNode;
                 }
             }

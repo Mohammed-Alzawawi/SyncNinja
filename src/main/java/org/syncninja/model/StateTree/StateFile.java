@@ -41,7 +41,6 @@ public class StateFile extends StateTree {
     public String getHashValue() {
         return hashValue;
     }
-<<<<<<< HEAD:src/main/java/org/syncninja/model/StateTree/StateFile.java
 
     public void setHashValue(String hashValue) {
         this.hashValue = hashValue;
@@ -52,7 +51,3 @@ public class StateFile extends StateTree {
         return false;
     }
 }
-
-=======
-}
->>>>>>> 11049af (add commit repo and service):src/main/java/org/syncninja/model/StateFile.java

@@ -1,6 +1,7 @@
 package org.syncninja.service;
 
 import org.syncninja.model.Branch;
+import org.syncninja.model.Commit;
 import org.syncninja.model.StateTree.StateDirectory;
 import org.syncninja.model.StateTree.StateFile;
 import org.syncninja.model.StateTree.StateRoot;
@@ -82,15 +83,20 @@ public class StateTreeService {
     }
 
 
-    public StateRoot generateStateRootNode(String path, Branch currentBranch) throws Exception {
+    public StateRoot generateStateRootNode(String path, Branch currentBranch, Commit currentCommit) throws Exception {
         StateRoot stateRoot = null;
         if (!stateTreeRepository.findById(path).isEmpty()) {
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_ALREADY_INITIALIZED, new Object[]{path}));
         } else {
-            stateRoot = new StateRoot(path, currentBranch);
+            currentBranch.setNextCommit(currentCommit);
+            stateRoot = new StateRoot(path, currentBranch, currentCommit);
             stateTreeRepository.save(stateRoot);
         }
         return stateRoot;
     }
 
+    public StateRoot getStateRoot(String path) throws Exception {
+        return (StateRoot) stateTreeRepository.findById(path).orElseThrow(
+                () -> new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_NOT_INITIALIZED, new Object[]{path})));
+    }
 }

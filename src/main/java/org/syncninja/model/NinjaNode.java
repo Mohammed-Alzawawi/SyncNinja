@@ -2,24 +2,30 @@ package org.syncninja.model;
 
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
-import org.syncninja.model.commitTree.CommitDirectory;
 
 import java.util.List;
-import java.util.Set;
 
 @NodeEntity
 public abstract class NinjaNode extends SyncNode {
 
     @Relationship(type = "ParentOf")
-    private List<Branch> childrenSet;
+    private List<Branch> branchList;
 
     @Relationship(type = "nextCommit")
-    private Commit commit;
+    private Commit nextCommit;
 
     public NinjaNode() {
     }
 
-    public List<Branch> getChildrenSet() {
-        return childrenSet;
+    public List<Branch> getBranchList() {
+        return branchList;
+    }
+
+    public Commit getNextCommit() {
+        return nextCommit;
+    }
+
+    public void setNextCommit(Commit nextCommit) {
+        this.nextCommit = nextCommit;
     }
 }

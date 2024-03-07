@@ -5,8 +5,14 @@ import org.syncninja.model.Commit;
 import org.syncninja.util.Neo4jSession;
 
 public class CommitRepository {
-    public void save(Commit commit){
+    public Commit save(Commit commit){
         Session session = Neo4jSession.getSession();
         session.save(commit);
+        return commit;
+    }
+
+    public Commit getCommit(String id){
+        Session session = Neo4jSession.getSession();
+        return session.load(Commit.class, id);
     }
 }
