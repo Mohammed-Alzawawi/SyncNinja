@@ -8,6 +8,7 @@ import org.syncninja.model.StateTree.StateTree;
 import org.syncninja.repository.StateTreeRepository;
 import org.syncninja.util.ResourceBundleEnum;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,6 +31,12 @@ public class StateTreeService {
             file = new StateFile(path);
             stateTreeRepository.save(file);
         }
+        StateDirectory parent = (StateDirectory) stateTreeRepository.findById(new File(path).getParent().toString()).orElse(null);
+        if (parent == null) {
+            parent = new StateDirectory(new File(path).getParent().toString());
+        }
+        parent.getInternalNodes().add(file);
+        stateTreeRepository.save(parent);
         return file;
     }
 
@@ -84,7 +91,7 @@ public class StateTreeService {
 
     public StateRoot generateStateRootNode(String path, Branch currentBranch) throws Exception {
         StateRoot stateRoot = null;
-        if (!stateTreeRepository.findById(path).isEmpty()) {
+        if (stateTreeRepository.findById(path).isPresent()) {
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_ALREADY_INITIALIZED, new Object[]{path}));
         } else {
             stateRoot = new StateRoot(path, currentBranch);

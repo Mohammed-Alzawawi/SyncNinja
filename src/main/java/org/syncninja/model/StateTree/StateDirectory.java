@@ -13,6 +13,7 @@ public class StateDirectory extends StateTree {
 
     public StateDirectory() {
     }
+
     public StateDirectory(String path) {
         super(path);
         this.internalNodes = new HashSet<>();

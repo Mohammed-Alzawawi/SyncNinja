@@ -9,8 +9,6 @@ public class StatusFileDTO {
     private StateFile stateFile;
     private String path;
 
-    private CommitFile commitFile;
-
     public StatusFileDTO(boolean isNew, StateFile stateFile, String path) {
         this.isNew = isNew;
         this.stateFile = stateFile;

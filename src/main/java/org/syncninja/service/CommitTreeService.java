@@ -24,10 +24,10 @@ public class CommitTreeService {
     public void addFilesFromDirectoryToCommitTree(String directoryPath) throws Exception {
         FileTrackingState fileTrackingState = statusService.getState(directoryPath);
         List<StatusFileDTO> untrackedFiles = fileTrackingState.getUntracked();
-        addFilesToCommitTree(untrackedFiles, directoryPath );
+        addFilesToCommitTree(untrackedFiles, directoryPath);
     }
 
-    private void addFilesToCommitTree(List<StatusFileDTO> untrackedFiles, String mainDirectoryPath ) throws Exception {
+    private void addFilesToCommitTree(List<StatusFileDTO> untrackedFiles, String mainDirectoryPath) throws Exception {
         CommitNode root = new CommitDirectory(mainDirectoryPath);
         for (StatusFileDTO statusFileDTO : untrackedFiles) {
             String relativePath = statusFileDTO.getPath().substring(mainDirectoryPath.length() + 1);

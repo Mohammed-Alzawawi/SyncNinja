@@ -1,19 +1,15 @@
 package org.syncninja.util;
 
+import org.syncninja.dto.CommitFileDTO;
 import org.syncninja.dto.StatusFileDTO;
-import org.syncninja.model.commitTree.CommitDirectory;
-import org.syncninja.model.commitTree.CommitFile;
-import org.syncninja.model.commitTree.CommitNode;
 import org.syncninja.repository.CommitNodeRepository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class FileTrackingState {
     private final List<StatusFileDTO> untracked;
-    private final List<StatusFileDTO> tracked;
+    private final List<CommitFileDTO> tracked;
     private final CommitNodeRepository commitNodeRepository;
 
 
@@ -27,11 +23,9 @@ public class FileTrackingState {
         return untracked;
     }
 
-    public List<StatusFileDTO> getTracked() {
+    public List<CommitFileDTO> getTracked() {
         return tracked;
     }
-
-
 
 
 }
