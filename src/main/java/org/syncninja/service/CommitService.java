@@ -16,7 +16,6 @@ public class CommitService {
     public void createCommit(String message, String path) throws Exception {
         Commit commit = new Commit(message);
         CommitDirectory commitTreeRoot = commitTreeService.getCommitTreeRoot(path);
-        commitTreeRoot.setCommitted(true);
         commit.getCommitTree().add(commitTreeRoot);
         commitRepository.save(commit);
     }
