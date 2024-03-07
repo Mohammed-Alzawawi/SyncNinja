@@ -50,9 +50,5 @@ public class CommitFile extends CommitNode {
         this.oldValuesList = oldValuesList;
     }
 
-    @Override
-    public boolean isDirectory() {
-        return false;
-    }
 
 }

@@ -31,7 +31,7 @@ public class StatusService {
         if (commitDirectory != null) {
             List<CommitNode> trackedList = commitDirectory.getCommitNodeList();
             for (CommitNode commitNode : trackedList) {
-                if (commitNode.isDirectory()) {
+                if (commitNode instanceof CommitDirectory) {
                     getTracked(tracked, (CommitDirectory) commitNode);
                 } else {
                     tracked.add(new CommitFileDTO((CommitFile) commitNode, commitNode.getPath()));
@@ -59,7 +59,7 @@ public class StatusService {
                 StateFile stateFile = (StateFile) stateTreeMap.get(file.getPath());
                 if (stateFile == null) {
                     untracked.add(new StatusFileDTO(true, null, file.getPath()));
-                } else if(stateFile.getLastModified()!=file.lastModified()) {
+                } else if(stateFile.getLastModified() != file.lastModified()) {
                     untracked.add(new StatusFileDTO(false, stateFile, file.getPath()));
                 }
             }

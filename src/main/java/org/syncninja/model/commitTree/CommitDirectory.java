@@ -32,8 +32,5 @@ public class CommitDirectory extends CommitNode {
         this.commitNodeList.add(commitNode);
     }
 
-    @Override
-    public boolean isDirectory() {
-        return true;
-    }
+
 }

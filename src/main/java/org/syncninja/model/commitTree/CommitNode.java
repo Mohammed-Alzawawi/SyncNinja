@@ -22,5 +22,5 @@ public abstract class CommitNode extends SyncNode {
         this.path = path;
     }
 
-    public abstract boolean isDirectory();
+
 }
