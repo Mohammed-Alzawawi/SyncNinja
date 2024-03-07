@@ -10,7 +10,7 @@ import java.util.List;
 @NodeEntity
 public class Commit extends NinjaNode {
     private String message;
-
+    private boolean isCommitted;
     @Relationship(type = "CommitTree")
     private List<CommitDirectory> commitTree;
 
@@ -21,6 +21,7 @@ public class Commit extends NinjaNode {
     public Commit(String message) {
         commitTree = new ArrayList<>();
         this.message = message;
+        isCommitted = false;
     }
 
     public String getMessage() {
@@ -37,5 +38,13 @@ public class Commit extends NinjaNode {
 
     public void setCommitTree(List<CommitDirectory> commitTree) {
         this.commitTree = commitTree;
+    }
+
+    public boolean isCommitted() {
+        return isCommitted;
+    }
+
+    public void setCommitted(boolean isCommitted) {
+        this.isCommitted = isCommitted;
     }
 }
