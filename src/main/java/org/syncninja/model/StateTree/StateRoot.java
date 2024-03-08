@@ -19,10 +19,9 @@ public class StateRoot extends StateDirectory {
         super(path);
     }
 
-    public StateRoot(String path, Branch currentBranch, Commit currentCommit) {
+    public StateRoot(String path, Branch currentBranch) {
         super(path);
         this.currentBranch = currentBranch;
-        this.currentCommit = currentCommit;
     }
 
     public Branch getCurrentBranch() {

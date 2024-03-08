@@ -1,5 +1,6 @@
 package org.syncninja.command;
 
+import org.syncninja.model.Branch;
 import org.syncninja.model.Directory;
 import org.syncninja.service.CommitService;
 import org.syncninja.service.DirectoryService;
@@ -21,14 +22,15 @@ public class InitCommand implements Runnable {
         this.commitService = new CommitService();
     }
 
-
     @Override
     public void run() {
         String path = System.getProperty("user.dir");
         try {
             Directory directory = directoryService.createDirectory(path);
             directoryService.createDirectoryMainBranch(directory, "main");
-            stateTreeService.generateStateRootNode(path, directory.getBranch(), commitService.createStagedCommit());
+            Branch mainBranch = directory.getBranch();
+            mainBranch.setNextCommit(commitService.createStagedCommit());
+            stateTreeService.generateStateRootNode(path, mainBranch);
             System.out.println(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_INITIALIZED_SUCCESSFULLY, new Object[]{path}));
         } catch (Exception exception) {
             System.out.println(exception.getMessage());

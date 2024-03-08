@@ -1,6 +1,7 @@
 package org.syncninja.command;
 
 import org.syncninja.model.Commit;
+import org.syncninja.model.NinjaNode;
 import org.syncninja.model.StateTree.StateRoot;
 import org.syncninja.service.CommitService;
 import org.syncninja.service.StateTreeService;
@@ -26,8 +27,11 @@ public class CommitCommand implements Runnable {
         String path = System.getProperty("user.dir");
         try {
             StateRoot stateRoot = stateTreeService.getStateRoot(path);
-            Commit newCommit = commitService.save(message, stateRoot.getCurrentCommit()).getNextCommit();
-            stateTreeService.updateStateRoot(stateRoot, newCommit);
+            NinjaNode currentNinjaNode = stateRoot.getCurrentCommit();
+            if (currentNinjaNode == null){
+                currentNinjaNode = stateRoot.getCurrentBranch();
+            }
+            commitService.save(message, currentNinjaNode.getNextCommit());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

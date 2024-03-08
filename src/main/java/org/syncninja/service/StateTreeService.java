@@ -90,13 +90,12 @@ public class StateTreeService {
     }
 
 
-    public StateRoot generateStateRootNode(String path, Branch currentBranch, Commit currentCommit) throws Exception {
+    public StateRoot generateStateRootNode(String path, Branch currentBranch) throws Exception {
         StateRoot stateRoot = null;
         if (stateTreeRepository.findById(path).isPresent()) {
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_ALREADY_INITIALIZED, new Object[]{path}));
         } else {
-            currentBranch.setNextCommit(currentCommit);
-            stateRoot = new StateRoot(path, currentBranch, currentCommit);
+            stateRoot = new StateRoot(path, currentBranch);
             stateTreeRepository.save(stateRoot);
         }
         return stateRoot;
@@ -107,7 +106,7 @@ public class StateTreeService {
                 () -> new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_NOT_INITIALIZED, new Object[]{path})));
     }
 
-    public void updateStateRoot(StateRoot stateRoot, Commit newCommit) throws Exception {
+    public void updateStateRoot(StateRoot stateRoot, Commit newCommit) {
         stateTreeRepository.updateStateRoot(stateRoot, newCommit);
     }
 }

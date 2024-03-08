@@ -1,7 +1,6 @@
 package org.syncninja.repository;
 
 import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.transaction.Transaction;
 import org.syncninja.model.Commit;
 import org.syncninja.model.StateTree.StateRoot;
 import org.syncninja.model.StateTree.StateTree;
@@ -13,7 +12,7 @@ public class StateTreeRepository {
 
     public Optional<StateTree> findById(String path) throws Exception {
         Session session = Neo4jSession.getSession();
-        StateTree stateTreeNode = session.load(StateTree.class, path);
+        StateTree stateTreeNode = session.load(StateTree.class, path, -1);
         return Optional.ofNullable(stateTreeNode);
     }
 
