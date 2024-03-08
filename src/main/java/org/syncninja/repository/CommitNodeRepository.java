@@ -6,11 +6,12 @@ import org.syncninja.model.Directory;
 import org.syncninja.model.commitTree.CommitNode;
 import org.syncninja.util.Neo4jSession;
 
-import java.util.Collections;
+
+import java.util.Collection;
 import java.util.Optional;
 
 public class CommitNodeRepository {
-    public void save(CommitNode commitNode){
+    public void save(CommitNode commitNode) {
         Session session = Neo4jSession.getSession();
         session.save(commitNode);
     }

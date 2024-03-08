@@ -4,7 +4,7 @@ import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 
 @NodeEntity
-public class Directory extends SyncNode{
+public class Directory extends SyncNode {
     private String path;
 
     @Relationship(type = "MainBranch")

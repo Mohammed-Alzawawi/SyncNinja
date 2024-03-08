@@ -1,4 +1,4 @@
-package org.syncninja.model;
+package org.syncninja.model.StateTree;
 
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.syncninja.util.Fetcher;
@@ -18,22 +18,19 @@ public class StateFile extends StateTree {
         lines = Fetcher.readFile(path);
     }
 
-    public StateFile() {}
+    public StateFile() {
+    }
 
     public void setPath(String path) {
         this.path = path;
     }
 
-    public void setLines(List<String> lines) {
-        this.lines = lines;
-    }
-
-    public void setHashValue(String hashValue) {
-        this.hashValue = hashValue;
-    }
-
     public List<String> getLines() {
         return lines;
+    }
+
+    public void setLines(List<String> lines) {
+        this.lines = lines;
     }
 
     @Override
@@ -44,4 +41,14 @@ public class StateFile extends StateTree {
     public String getHashValue() {
         return hashValue;
     }
+
+    public void setHashValue(String hashValue) {
+        this.hashValue = hashValue;
+    }
+
+    @Override
+    public boolean isRoot() {
+        return false;
+    }
 }
+

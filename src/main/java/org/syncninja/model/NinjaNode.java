@@ -3,29 +3,29 @@ package org.syncninja.model;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 
-import java.util.Set;
+import java.util.List;
 
 @NodeEntity
-public abstract class NinjaNode extends SyncNode{
+public abstract class NinjaNode extends SyncNode {
 
     @Relationship(type = "ParentOf")
-    private Set<NinjaNode> childrenSet;
+    private List<Branch> branchList;
 
-    public NinjaNode() {}
+    @Relationship(type = "nextCommit")
+    private Commit nextCommit;
 
-    public Set<NinjaNode> getChildrenSet() {
-        return childrenSet;
+    public NinjaNode() {
     }
 
-    public void setChildrenSet(Set<NinjaNode> childrenSet) {
-        this.childrenSet = childrenSet;
+    public List<Branch> getBranchList() {
+        return branchList;
     }
 
-    public void addToChildrenSet(NinjaNode ninjaNode){
-        childrenSet.add(ninjaNode);
+    public Commit getNextCommit() {
+        return nextCommit;
     }
 
-    public void DeleteFromChildrenSet(NinjaNode ninjaNode){
-        childrenSet.remove(ninjaNode);
+    public void setNextCommit(Commit nextCommit) {
+        this.nextCommit = nextCommit;
     }
 }

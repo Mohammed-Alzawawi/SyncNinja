@@ -12,8 +12,9 @@ public enum ResourceBundleEnum {
     FILES_READY_TO_BE_COMMITTED("files_to_be_committed"),
     FILE_NOT_FOUND("File_is_not_found!"),
     UNTRACKED_FILES("Untracked_files"),
-    SUCCESSFULLY_ADDED("successfully_added"),
     PATH_NOT_FILE("path_not_file");
+    STAGE_AREA_IS_EMPTY("stage_area_is_empty"),
+    SUCCESSFULLY_ADDED("successfully_added");
 
     private final String key;
 

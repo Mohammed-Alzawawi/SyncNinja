@@ -8,27 +8,26 @@ import java.util.List;
 
 @NodeEntity
 public class CommitDirectory extends CommitNode {
-    @Relationship(type = "HAS" , direction = Relationship.Direction.OUTGOING)
+    @Relationship(type = "HAS", direction = Relationship.Direction.OUTGOING)
     private List<CommitNode> commitNodeList = new ArrayList<>();
 
-   public CommitDirectory(){
+    public CommitDirectory() {
 
-   }
+    }
+
     public CommitDirectory(String path) {
         super(path);
+        this.commitNodeList = new ArrayList<>();
     }
 
     public List<CommitNode> getCommitNodeList() {
-        return commitNodeList;
+        return this.commitNodeList;
     }
 
     public void setCommitNodeList(List<CommitNode> commitNodeList) {
         this.commitNodeList = commitNodeList;
     }
-    public void addNode (CommitNode commitNode){
-       commitNodeList.add(commitNode);
-    }
-    public void removeNode(CommitNode nodeToRemove) {
-        commitNodeList.remove(nodeToRemove);
-    }
+
+    public void addNode(CommitNode commitNode) {
+        this.commitNodeList.add(commitNode);
 }

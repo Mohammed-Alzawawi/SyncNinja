@@ -20,10 +20,12 @@ import java.util.Optional;
 public class CommitTreeService {
     private final StatusService statusService;
     private final CommitNodeRepository commitNodeRepository;
+    private final CommitService commitService;
 
     public CommitTreeService() {
         this.statusService = new StatusService();
         this.commitNodeRepository = new CommitNodeRepository();
+        this.commitService = new CommitService();
     }
 
     public void addFileToCommitTree(String mainDirectoryPath, List<String> listOfFilesToBeAdded) throws Exception {
@@ -55,11 +57,11 @@ public class CommitTreeService {
         for (StatusFileDTO statusFileDTO : statusFileDTOs) {
             if (!statusFileDTO.getPath().matches(regex) && !listOfFilesToBeAdded.isEmpty()) {continue;}
 
+  
             String relativePath = statusFileDTO.getPath().substring(mainDirectoryPath.length() + 1);
             String[] pathComponents = relativePath.split("\\\\");
             CommitNode currentNode = root;
             String previousPath = mainDirectoryPath;
-
             for (String component : pathComponents) {
                 previousPath = previousPath + "\\" + component;
                 boolean found = false;
@@ -80,7 +82,7 @@ public class CommitTreeService {
                     } else {
                         newNode = new CommitDirectory(previousPath);
                     }
-                    ((CommitDirectory) currentNode).addNode(newNode);
+                    ((CommitDirectory) currentNode).getCommitNodeList().add(newNode);
                     currentNode = newNode;
                 }
             }
@@ -111,6 +113,4 @@ public class CommitTreeService {
     private boolean isFile(String path) {
         return new File(path).isFile();
     }
-
 }
-

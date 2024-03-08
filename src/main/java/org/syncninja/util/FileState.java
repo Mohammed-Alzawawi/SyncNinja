@@ -22,9 +22,9 @@ public class FileState {
         return tracked;
     }
 
-    public StatusFileDTO getUntrackedDTO(String path){
-        for(StatusFileDTO statusFileDTO : untracked){
-            if (statusFileDTO.getPath().equals(path)){
+    public StatusFileDTO getUntrackedDTO(String path) {
+        for (StatusFileDTO statusFileDTO : untracked) {
+            if (statusFileDTO.getPath().equals(path)) {
                 return statusFileDTO;
             }
         }

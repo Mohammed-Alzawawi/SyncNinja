@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 public class DirectoryRepository {
-    public Directory save(Directory directory){
+    public Directory save(Directory directory) {
         Session session = Neo4jSession.getSession();
         session.save(directory);
         return directory;
