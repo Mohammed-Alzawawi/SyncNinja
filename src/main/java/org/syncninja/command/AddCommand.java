@@ -7,7 +7,7 @@ import picocli.CommandLine;
 
 @CommandLine.Command(name = "add")
 public class AddCommand implements Runnable {
-    private CommitTreeService commitTreeService;
+    private final CommitTreeService commitTreeService;
 
 
     public AddCommand() {

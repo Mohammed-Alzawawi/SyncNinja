@@ -15,10 +15,12 @@ import java.util.List;
 public class CommitTreeService {
     private final StatusService statusService;
     private final CommitNodeRepository commitNodeRepository;
+    private final CommitService commitService;
 
     public CommitTreeService() {
         this.statusService = new StatusService();
         this.commitNodeRepository = new CommitNodeRepository();
+        this.commitService = new CommitService();
     }
 
     public void addFilesFromDirectoryToCommitTree(String directoryPath) throws Exception {
@@ -28,7 +30,8 @@ public class CommitTreeService {
     }
 
     private void addFilesToCommitTree(List<StatusFileDTO> untrackedFiles, String mainDirectoryPath) throws Exception {
-        CommitNode root = new CommitDirectory(mainDirectoryPath);
+        CommitDirectory root = new CommitDirectory(mainDirectoryPath);
+        commitService.addCommitTree(root);
         for (StatusFileDTO statusFileDTO : untrackedFiles) {
             String relativePath = statusFileDTO.getPath().substring(mainDirectoryPath.length() + 1);
             String[] pathComponents = relativePath.split("\\\\");
