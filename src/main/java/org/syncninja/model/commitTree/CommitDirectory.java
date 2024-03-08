@@ -28,5 +28,7 @@ public class CommitDirectory extends CommitNode {
     public void addNode (CommitNode commitNode){
        commitNodeList.add(commitNode);
     }
-
+    public void removeNode(CommitNode nodeToRemove) {
+        commitNodeList.remove(nodeToRemove);
+    }
 }
