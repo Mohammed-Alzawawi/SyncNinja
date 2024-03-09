@@ -8,6 +8,7 @@ import org.syncninja.repository.CommitNodeRepository;
 import org.syncninja.util.CompareFileUtil;
 import org.syncninja.util.FileTrackingState;
 import org.syncninja.util.LinesContainer;
+import org.syncninja.util.Regex;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,7 +16,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 public class CommitTreeService {
     private final StatusService statusService;
@@ -40,19 +40,13 @@ public class CommitTreeService {
     private void addFilesToCommitTree(List<StatusFileDTO> statusFileDTOs, String mainDirectoryPath, List<String> listOfFilesToBeAdded) throws Exception {
         CommitNode root = new CommitDirectory(mainDirectoryPath);
 
-        String regex = "";
-        for (String path : listOfFilesToBeAdded) {
-            if (path.endsWith(".") ){
-                path = path +"*";
-            }
-            regex += "|" + path;
-        }
+        Regex regexBuilder = new Regex();
 
-        for (StatusFileDTO statusFileDTO : statusFileDTOs) {
-            if (!statusFileDTO.getPath().matches(regex) && !listOfFilesToBeAdded.isEmpty()){
-                continue;
-            }
+        for (String path : listOfFilesToBeAdded) {
+            regexBuilder.addFilePath(path);
         }
+        String regex = regexBuilder.buildRegex();
+
 
         for (StatusFileDTO statusFileDTO : statusFileDTOs) {
             if (!statusFileDTO.getPath().matches(regex) && !listOfFilesToBeAdded.isEmpty()) {continue;}
@@ -90,26 +84,6 @@ public class CommitTreeService {
         commitNodeRepository.save(root);
     }
 
-    private void removeFileFromCommitTree(CommitNode currentNode, String filePath) {
-        if (currentNode instanceof CommitFile && currentNode.getPath().equals(filePath)) {
-            ((CommitDirectory) currentNode.getParent()).removeNode(currentNode);
-            return;
-        }
-        if (currentNode instanceof CommitDirectory) {
-            for (CommitNode child : ((CommitDirectory) currentNode).getCommitNodeList()) {
-                removeFileFromCommitTree(child, filePath);
-            }
-        }
-    }
-    private CommitNode getOrCreateStagingArea(String mainDirectoryPath) {
-        Optional<CommitNode> optionalRoot = commitNodeRepository.findByPath(mainDirectoryPath);
-        CommitNode root = optionalRoot.orElseGet(() -> {
-            CommitDirectory newRoot = new CommitDirectory(mainDirectoryPath);
-            commitNodeRepository.save(newRoot);
-            return newRoot;
-        });
-        return root;
-    }
     private boolean isFile(String path) {
         return new File(path).isFile();
     }
