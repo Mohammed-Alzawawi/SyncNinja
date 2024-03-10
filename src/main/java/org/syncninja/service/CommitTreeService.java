@@ -11,10 +11,6 @@ import org.syncninja.util.LinesContainer;
 import org.syncninja.util.Regex;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 
 public class CommitTreeService {
@@ -38,15 +34,14 @@ public class CommitTreeService {
     }
 
     private void addFilesToCommitTree(List<StatusFileDTO> statusFileDTOs, String mainDirectoryPath, List<String> listOfFilesToBeAdded) throws Exception {
-        CommitNode root = new CommitDirectory(mainDirectoryPath);
+        CommitDirectory root = new CommitDirectory(mainDirectoryPath);
+        commitService.addCommitTree(root);
 
         Regex regexBuilder = new Regex();
-
         for (String path : listOfFilesToBeAdded) {
             regexBuilder.addFilePath(path);
         }
         String regex = regexBuilder.buildRegex();
-
 
         for (StatusFileDTO statusFileDTO : statusFileDTOs) {
             if (!statusFileDTO.getPath().matches(regex) && !listOfFilesToBeAdded.isEmpty()) {continue;}
@@ -83,7 +78,6 @@ public class CommitTreeService {
         }
         commitNodeRepository.save(root);
     }
-
     private boolean isFile(String path) {
         return new File(path).isFile();
     }
