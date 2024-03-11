@@ -1,10 +1,14 @@
 package org.syncninja.service;
 
 import org.syncninja.dto.StatusFileDTO;
+import org.syncninja.model.Commit;
+import org.syncninja.model.NinjaNode;
+import org.syncninja.model.StateTree.StateRoot;
 import org.syncninja.model.commitTree.CommitDirectory;
 import org.syncninja.model.commitTree.CommitFile;
 import org.syncninja.model.commitTree.CommitNode;
 import org.syncninja.repository.CommitNodeRepository;
+import org.syncninja.repository.StateTreeRepository;
 import org.syncninja.util.CompareFileUtil;
 import org.syncninja.util.FileTrackingState;
 import org.syncninja.util.LinesContainer;

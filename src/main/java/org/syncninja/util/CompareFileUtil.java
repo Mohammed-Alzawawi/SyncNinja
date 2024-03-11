@@ -1,5 +1,6 @@
 package org.syncninja.util;
 
+import org.syncninja.dto.CommitFileDTO;
 import org.syncninja.dto.StatusFileDTO;
 
 import java.util.ArrayList;
@@ -16,6 +17,12 @@ public class CompareFileUtil {
         } else {
             oldFileList = new ArrayList<>();
         }
+        return compareNewAndOldLists(newFileList, oldFileList);
+    }
+
+    public static LinesContainer compareFiles(String filePath, CommitFileDTO commitFileDTO) throws Exception {
+        List<String> newFileList = Fetcher.readFile(filePath);
+        List<String> oldFileList = commitFileDTO.getCommitFile().getNewValuesList();
         return compareNewAndOldLists(newFileList, oldFileList);
     }
 
@@ -48,5 +55,13 @@ public class CompareFileUtil {
             lineNumber++;
         }
         return linesContainer;
+    }
+
+    public static boolean isModified(String path, CommitFileDTO commitFileDTO) throws Exception {
+        return !compareFiles(path, commitFileDTO).lineNumbers.isEmpty();
+    }
+
+    public static boolean isModified(String path, StatusFileDTO statusFileDTO) throws Exception {
+        return !compareFiles(path, statusFileDTO).lineNumbers.isEmpty();
     }
 }
