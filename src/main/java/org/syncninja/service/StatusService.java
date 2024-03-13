@@ -85,8 +85,12 @@ public class StatusService {
         }
         FileTrackingState fileTrackingState = new FileTrackingState();
         List<CommitFileDTO> trackedFiles = fileTrackingState.getTracked();
+        
+        //loading the staging area and getting the tracked files
         CommitDirectory stagingArea = getStagingArea(path);
         getTracked(trackedFiles, stagingArea);
+
+        //determining the state of each file (tracked/untracked)
         StateDirectory stateDirectory = (StateDirectory) stateTreeRepository.findById(path).orElse(null);
         Map<String, CommitFileDTO> stagingAreaMap = trackedFiles.stream()
                 .collect(Collectors.toMap((commitFileDTO) -> commitFileDTO.getPath(), (commitFileDTO -> commitFileDTO)));
@@ -107,13 +111,18 @@ public class StatusService {
         }
         return currentCommit.getNextCommit().getCommitTree();
     }
-
+    //checking the state of the file
     public boolean isModified(StateFile stateFile, CommitFileDTO commitFileDTO, File file) throws Exception {
+        if(stateFile != null && stateFile.getLastModified() == stateFile.getLastModified()){
+            return false;
+        }
         LinesContainer linesContainer = CompareFileUtil.compareFiles(file.getPath(), new StatusFileDTO(stateFile==null, stateFile, file.getPath()));
-        if (commitFileDTO == null || !commitFileDTO.getCommitFile().getNewValuesList().equals(linesContainer.getNewLines())) {
+        if (commitFileDTO == null ) {
+            return !linesContainer.getLineNumbers().isEmpty();
+        }
+        if(!commitFileDTO.getCommitFile().getNewValuesList().equals(linesContainer.getNewLines())){
             return true;
         }
         return false;
     }
-
 }
