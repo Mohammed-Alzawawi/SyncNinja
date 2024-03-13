@@ -15,14 +15,14 @@ public class CommitService {
         this.stateTreeService = new StateTreeService();
     }
 
-    public Commit createStagedCommit(){
+    public Commit createStagedCommit() {
         Commit commit = new Commit();
         commit.setCommitted(false);
         return commitRepository.save(commit);
     }
 
     public Commit save(String message, Commit commit) throws Exception {
-        if(commit.getCommitTree() == null){
+        if (commit.getCommitTree() == null) {
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.STAGE_AREA_IS_EMPTY));
         }
         commit.setCommitted(true);
@@ -34,7 +34,7 @@ public class CommitService {
 
     public void addCommitTree(CommitDirectory commitDirectory) throws Exception {
         NinjaNode currentNinjaNode = stateTreeService.getStateRoot(commitDirectory.getPath()).getCurrentCommit();
-        if (currentNinjaNode == null){
+        if (currentNinjaNode == null) {
             currentNinjaNode = stateTreeService.getStateRoot(commitDirectory.getPath()).getCurrentBranch();
         }
         Commit commit = currentNinjaNode.getNextCommit();

@@ -10,12 +10,6 @@ import org.syncninja.repository.StateTreeRepository;
 import org.syncninja.util.ResourceBundleEnum;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class StateTreeService {
     private final StateTreeRepository stateTreeRepository;
@@ -50,38 +44,6 @@ public class StateTreeService {
             stateTreeRepository.save(stateDirectory);
         }
         return stateDirectory;
-    }
-
-    public void generateStateTree(String path) throws Exception {
-        Path mainDirectory = Paths.get(path);
-        List<Path> subList = null;
-        try {
-            subList = Files.walk(mainDirectory)
-                    .collect(Collectors.toList());
-            {
-                for (int i = 1; i < subList.size(); i++) {
-                    Path file = subList.get(i);
-                    if (file.toFile().isDirectory()) {
-                        StateDirectory child = generateStateDirectoryNode(file.toString());
-                        StateDirectory parent = (StateDirectory) stateTreeRepository.findById(file.getParent().toString()).orElse(null);
-                        if (parent != null) {
-                            parent.addFile(child);
-                            stateTreeRepository.save(parent);
-                        }
-                    } else {
-                        StateFile child = generateStateFileNode(file.toString());
-                        StateDirectory parent = (StateDirectory) stateTreeRepository.findById(file.getParent().toString()).orElse(null);
-
-                        if (parent != null) {
-                            parent.addFile(child);
-                            stateTreeRepository.save(parent);
-                        }
-                    }
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public StateTree getStateNode(String path) throws Exception {

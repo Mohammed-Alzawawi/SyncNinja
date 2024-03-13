@@ -14,11 +14,11 @@ import org.syncninja.model.commitTree.CommitNode;
 import org.syncninja.repository.CommitNodeRepository;
 import org.syncninja.repository.StateTreeRepository;
 import org.syncninja.util.CompareFileUtil;
-import org.syncninja.util.Fetcher;
 import org.syncninja.util.FileTrackingState;
+import org.syncninja.util.LinesContainer;
+import org.syncninja.util.ResourceBundleEnum;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 public class StatusService {
     private final StateTreeRepository stateTreeRepository;
     private final CommitNodeRepository commitNodeRepository;
+
     public StatusService() {
         this.stateTreeRepository = new StateTreeRepository();
         this.commitNodeRepository = new CommitNodeRepository();
@@ -57,17 +58,10 @@ public class StatusService {
                     currentState(file, stateDirectoryChild, untracked, tracked);
                 }
             } else {
-                if (tracked.get(file.getPath()) != null) {
-                    if(CompareFileUtil.isModified(file.getPath() , tracked.get(file.getPath()))){
-                        untracked.add(new StatusFileDTO(true , null , file.getPath()));
-                    }
-                    continue;
-                }
                 StateFile stateFile = (StateFile) stateTreeMap.get(file.getPath());
-                if (stateFile == null) {
-                    untracked.add(new StatusFileDTO(true, null, file.getPath()));
-                } else if(stateFile.getLastModified() != file.lastModified() && CompareFileUtil.isModified(file.getPath(), new StatusFileDTO(false , stateFile , stateFile.getPath()))) {
-                    untracked.add(new StatusFileDTO(false, stateFile, file.getPath()));
+                CommitFileDTO commitFileDTO = tracked.get(file.getPath());
+                if (isModified(stateFile, commitFileDTO, file)) {
+                    untracked.add(new StatusFileDTO(stateFile == null, stateFile, file.getPath()));
                 }
             }
         }
@@ -79,9 +73,8 @@ public class StatusService {
                 addAllFilesInDirectory(file, untracked, tracked);
             } else if (tracked.get(file.getPath()) == null) {
                 untracked.add(new StatusFileDTO(true, null, file.getPath()));
-            }
-            else if(CompareFileUtil.isModified(file.getPath() , tracked.get(file.getPath()))){
-                untracked.add(new StatusFileDTO(true, null , file.getPath()));
+            } else if (isModified(null, tracked.get(file.getPath()), file)) {
+                untracked.add(new StatusFileDTO(true, null, file.getPath()));
             }
         }
     }
@@ -106,9 +99,21 @@ public class StatusService {
     public CommitDirectory getStagingArea(String path) throws Exception {
         StateRoot stateRoot = (StateRoot) stateTreeRepository.findById(path).orElse(null);
         NinjaNode currentCommit = stateRoot.getCurrentCommit();
-        if(currentCommit==null){
+        if (currentCommit == null) {
             currentCommit = stateRoot.getCurrentBranch();
+        }
+        if (currentCommit.getNextCommit() == null) {
+            throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.STAGE_AREA_IS_EMPTY));
         }
         return currentCommit.getNextCommit().getCommitTree();
     }
+
+    public boolean isModified(StateFile stateFile, CommitFileDTO commitFileDTO, File file) throws Exception {
+        LinesContainer linesContainer = CompareFileUtil.compareFiles(file.getPath(), new StatusFileDTO(stateFile==null, stateFile, file.getPath()));
+        if (commitFileDTO == null || !commitFileDTO.getCommitFile().getNewValuesList().equals(linesContainer.getNewLines())) {
+            return true;
+        }
+        return false;
+    }
+
 }
