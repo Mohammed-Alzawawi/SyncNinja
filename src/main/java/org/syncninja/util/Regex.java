@@ -16,15 +16,17 @@ public class Regex {
 
     public String buildRegex() {
         StringBuilder regexBuilder = new StringBuilder();
-        for (String path : listOfFilesToBeAdded) {
+        for (int index = 0; index < listOfFilesToBeAdded.size(); index++) {
+            String path = listOfFilesToBeAdded.get(index);
+            regexBuilder.append(path);
             if (path.endsWith(".")) {
-                path = path + "*";
+                regexBuilder.append("*");
             }
-            regexBuilder.append("|").append(path);
+            if (index != listOfFilesToBeAdded.size() - 1) {
+                regexBuilder.append("|");
+            }
         }
-        if (!regexBuilder.isEmpty()) {
-            regexBuilder.deleteCharAt(0);
-        }
+
         return regexBuilder.toString();
     }
 }

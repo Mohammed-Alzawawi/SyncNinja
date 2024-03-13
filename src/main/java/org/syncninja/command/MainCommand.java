@@ -6,11 +6,11 @@ import picocli.CommandLine;
         InitCommand.class,
         StatusCommand.class,
         AddCommand.class,
-        CommitCommand.class
+        CommitCommand.class,
+        UnstageCommand.class
 })
+
 public class MainCommand implements Runnable {
     @Override
-    public void run() {
-
-    }
+    public void run() {}
 }

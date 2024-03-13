@@ -34,7 +34,7 @@ public class CommitService {
 
     public void addCommitTree(CommitDirectory commitDirectory) throws Exception {
         NinjaNode currentNinjaNode = stateTreeService.getStateRoot(commitDirectory.getPath()).getCurrentCommit();
-        if (currentNinjaNode == null){
+        if (currentNinjaNode == null) {
             currentNinjaNode = stateTreeService.getStateRoot(commitDirectory.getPath()).getCurrentBranch();
         }
         Commit commit = currentNinjaNode.getNextCommit();

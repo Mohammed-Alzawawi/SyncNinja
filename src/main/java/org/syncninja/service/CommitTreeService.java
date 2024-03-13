@@ -44,39 +44,39 @@ public class CommitTreeService {
         String regex = regexBuilder.buildRegex();
 
         for (StatusFileDTO statusFileDTO : statusFileDTOs) {
-            if (!statusFileDTO.getPath().matches(regex) && !listOfFilesToBeAdded.isEmpty()) {continue;}
+            if (statusFileDTO.getPath().matches(regex)) {
+                String relativePath = statusFileDTO.getPath().substring(mainDirectoryPath.length() + 1);
+                String[] pathComponents = relativePath.split("\\\\");
+                CommitNode currentNode = root;
+                String previousPath = mainDirectoryPath;
 
-            String relativePath = statusFileDTO.getPath().substring(mainDirectoryPath.length() + 1);
-            String[] pathComponents = relativePath.split("\\\\");
-            CommitNode currentNode = root;
-            String previousPath = mainDirectoryPath;
-
-            for (String component : pathComponents) {
-                previousPath = previousPath + "\\" + component;
-                boolean found = false;
-                if (currentNode instanceof CommitDirectory && ((CommitDirectory) currentNode).getCommitNodeList() != null) {
-                    for (CommitNode child : ((CommitDirectory) currentNode).getCommitNodeList()) {
-                        if (child.getPath().equals(previousPath)) {
-                            currentNode = child;
-                            found = true;
-                            break;
+                for (String component : pathComponents) {
+                    previousPath = previousPath + "\\" + component;
+                    boolean found = false;
+                    if (currentNode instanceof CommitDirectory && ((CommitDirectory) currentNode).getCommitNodeList() != null) {
+                        for (CommitNode child : ((CommitDirectory) currentNode).getCommitNodeList()) {
+                            if (child.getPath().equals(previousPath)) {
+                                currentNode = child;
+                                found = true;
+                                break;
+                            }
                         }
                     }
-                }
-                if (!found) {
-                    CommitNode newNode;
-                    if (isFile(previousPath)) {
-                        LinesContainer linesContainer = CompareFileUtil.compareFiles(previousPath, statusFileDTO);
-                        newNode = new CommitFile(previousPath, linesContainer.getLineNumbers(), linesContainer.getNewLines(), linesContainer.getOldLines());
-                    } else {
-                        newNode = new CommitDirectory(previousPath);
+                    if (!found) {
+                        CommitNode newNode;
+                        if (isFile(previousPath)) {
+                            LinesContainer linesContainer = CompareFileUtil.compareFiles(previousPath, statusFileDTO);
+                            newNode = new CommitFile(previousPath, linesContainer.getLineNumbers(), linesContainer.getNewLines(), linesContainer.getOldLines());
+                        } else {
+                            newNode = new CommitDirectory(previousPath);
+                        }
+                        ((CommitDirectory) currentNode).addNode(newNode);
+                        currentNode = newNode;
                     }
-                    ((CommitDirectory) currentNode).addNode(newNode);
-                    currentNode = newNode;
                 }
             }
-        }
-        commitNodeRepository.save(root);
+            commitNodeRepository.save(root);
+            }
     }
     private boolean isFile(String path) {
         return new File(path).isFile();
