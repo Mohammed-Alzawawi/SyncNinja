@@ -1,6 +1,5 @@
 package org.syncninja.command;
 
-import org.syncninja.model.Commit;
 import org.syncninja.model.NinjaNode;
 import org.syncninja.model.StateTree.StateRoot;
 import org.syncninja.service.CommitService;
@@ -32,6 +31,7 @@ public class CommitCommand implements Runnable {
                 currentNinjaNode = stateRoot.getCurrentBranch();
             }
             commitService.save(message, currentNinjaNode.getNextCommit());
+            stateTreeService.updateStateTree(path);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -11,11 +11,6 @@ import org.syncninja.util.ResourceBundleEnum;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class StateTreeService {
     private final StateTreeRepository stateTreeRepository;
@@ -25,16 +20,20 @@ public class StateTreeService {
     }
 
     public StateFile generateStateFileNode(String path) throws Exception {
-        StateFile file = null;
-        if (stateTreeRepository.findById(path).isPresent()) {
-            throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.FILE_ALREADY_EXISTS, new Object[]{path}));
-        } else {
-            file = new StateFile(path);
-            stateTreeRepository.save(file);
-        }
-        StateDirectory parent = (StateDirectory) stateTreeRepository.findById(new File(path).getParent().toString()).orElse(null);
+        StateFile file = (StateFile) stateTreeRepository.findById(path)
+                .orElseGet(() -> {
+                    StateFile newFile = null;
+                    try {
+                        newFile = new StateFile(path);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    stateTreeRepository.save(newFile);
+                    return newFile;
+                });
+        StateDirectory parent = (StateDirectory) stateTreeRepository.findById(new File(path).getParent()).orElse(null);
         if (parent == null) {
-            parent = new StateDirectory(new File(path).getParent().toString());
+            parent = new StateDirectory(new File(path).getParent());
         }
         parent.getInternalNodes().add(file);
         stateTreeRepository.save(parent);
@@ -42,46 +41,12 @@ public class StateTreeService {
     }
 
     public StateDirectory generateStateDirectoryNode(String path) throws Exception {
-        StateDirectory stateDirectory = null;
-        if (stateTreeRepository.findById(path).isPresent()) {
-            throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.SUB_DIRECTORY_ALREADY_EXISTS, new Object[]{path}));
-        } else {
-            stateDirectory = new StateDirectory(path);
-            stateTreeRepository.save(stateDirectory);
-        }
-        return stateDirectory;
-    }
-
-    public void generateStateTree(String path) throws Exception {
-        Path mainDirectory = Paths.get(path);
-        List<Path> subList = null;
-        try {
-            subList = Files.walk(mainDirectory)
-                    .collect(Collectors.toList());
-            {
-                for (int i = 1; i < subList.size(); i++) {
-                    Path file = subList.get(i);
-                    if (file.toFile().isDirectory()) {
-                        StateDirectory child = generateStateDirectoryNode(file.toString());
-                        StateDirectory parent = (StateDirectory) stateTreeRepository.findById(file.getParent().toString()).orElse(null);
-                        if (parent != null) {
-                            parent.addFile(child);
-                            stateTreeRepository.save(parent);
-                        }
-                    } else {
-                        StateFile child = generateStateFileNode(file.toString());
-                        StateDirectory parent = (StateDirectory) stateTreeRepository.findById(file.getParent().toString()).orElse(null);
-
-                        if (parent != null) {
-                            parent.addFile(child);
-                            stateTreeRepository.save(parent);
-                        }
-                    }
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        return (StateDirectory) stateTreeRepository.findById(path).orElseGet(() -> {
+            StateDirectory newDirectory = null;
+            newDirectory = new StateDirectory(path);
+            stateTreeRepository.save(newDirectory);
+            return newDirectory;
+        });
     }
 
     public StateTree getStateNode(String path) throws Exception {
@@ -90,7 +55,7 @@ public class StateTreeService {
     }
 
 
-    public StateRoot generateStateRootNode(String path, Branch currentBranch) throws Exception {
+    public void generateStateRootNode(String path, Branch currentBranch) throws Exception {
         StateRoot stateRoot = null;
         if (stateTreeRepository.findById(path).isPresent()) {
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_ALREADY_INITIALIZED, new Object[]{path}));
@@ -98,7 +63,6 @@ public class StateTreeService {
             stateRoot = new StateRoot(path, currentBranch);
             stateTreeRepository.save(stateRoot);
         }
-        return stateRoot;
     }
 
     public StateRoot getStateRoot(String path) throws Exception {
@@ -108,5 +72,42 @@ public class StateTreeService {
 
     public void updateStateRoot(StateRoot stateRoot, Commit newCommit) {
         stateTreeRepository.updateStateRoot(stateRoot, newCommit);
+    }
+
+    public void updateStateTree(String path) throws Exception {
+        StateRoot stateRoot = getStateRoot(path);
+
+        if (stateRoot != null) {
+            File mainDirectory = new File(path);
+            generateNodes(mainDirectory, null, stateRoot);
+        }
+    }
+
+    private void generateNodes(File directory, StateDirectory parent, StateRoot stateRoot) throws Exception {
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    StateDirectory stateDirectory = generateStateDirectoryNode(file.getAbsolutePath());
+                    if (parent != null) {
+                        parent.addFile(stateDirectory);
+                        stateTreeRepository.save(parent);
+                    } else {
+                        stateRoot.addFile(stateDirectory);
+                        stateTreeRepository.save(stateRoot);
+                    }
+                    generateNodes(file, stateDirectory, stateRoot);
+                } else {
+                    StateFile stateFile = generateStateFileNode(file.getAbsolutePath());
+                    if (parent != null) {
+                        parent.addFile(stateFile);
+                        stateTreeRepository.save(parent);
+                    } else {
+                        stateRoot.addFile(stateFile);
+                        stateTreeRepository.save(stateRoot);
+                    }
+                }
+            }
+        }
     }
 }
