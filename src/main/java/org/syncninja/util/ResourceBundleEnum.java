@@ -13,7 +13,8 @@ public enum ResourceBundleEnum {
     FILE_NOT_FOUND("File_is_not_found!"),
     UNTRACKED_FILES("Untracked_files"),
     STAGE_AREA_IS_EMPTY("stage_area_is_empty"),
-    SUCCESSFULLY_ADDED("successfully_added");
+    SUCCESSFULLY_ADDED("successfully_added"),
+    PATH_NOT_FILE("path_not_file");
 
     private final String key;
 
