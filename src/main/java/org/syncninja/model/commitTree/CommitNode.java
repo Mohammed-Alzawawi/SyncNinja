@@ -6,9 +6,11 @@ import org.syncninja.model.SyncNode;
 @NodeEntity
 public abstract class CommitNode extends SyncNode {
     private String path;
+    private boolean isDirectory;
 
-    public CommitNode(String path) {
+    public CommitNode(String path, boolean isDirectory) {
         this.path = path;
+        this.isDirectory = isDirectory;
     }
 
     public CommitNode() {
@@ -22,5 +24,7 @@ public abstract class CommitNode extends SyncNode {
         this.path = path;
     }
 
-
+    public boolean isDirectory() {
+        return isDirectory;
+    }
 }

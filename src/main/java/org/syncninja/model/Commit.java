@@ -4,15 +4,12 @@ import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 import org.syncninja.model.commitTree.CommitDirectory;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @NodeEntity
 public class Commit extends NinjaNode {
     private String message;
     private boolean isCommitted;
     @Relationship(type = "CommitTree")
-    private CommitDirectory commitTree;
+    private CommitDirectory commitTreeRoot;
 
     public Commit() {
 
@@ -31,12 +28,12 @@ public class Commit extends NinjaNode {
         this.message = message;
     }
 
-    public CommitDirectory getCommitTree() {
-        return commitTree;
+    public CommitDirectory getCommitTreeRoot() {
+        return commitTreeRoot;
     }
 
-    public void setCommitTree(CommitDirectory commitTree) {
-        this.commitTree = commitTree;
+    public void setCommitTreeRoot(CommitDirectory commitTreeRoot) {
+        this.commitTreeRoot = commitTreeRoot;
     }
 
     public boolean isCommitted() {

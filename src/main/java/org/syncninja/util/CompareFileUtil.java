@@ -34,7 +34,7 @@ public class CompareFileUtil {
             }
 
             if (lineNumber > oldFileList.size()) {
-                oldLine = "";
+                oldLine = null;
             } else {
                 oldLine = oldFileList.get(lineNumber - 1);
             }
@@ -42,6 +42,9 @@ public class CompareFileUtil {
             if (!newLine.equals(oldLine)) {
                 linesContainer.getLineNumbers().add(lineNumber);
                 linesContainer.getNewLines().add(newLine);
+                if (oldLine == null){
+                    oldLine = "";
+                }
                 linesContainer.getOldLines().add(oldLine);
             }
 

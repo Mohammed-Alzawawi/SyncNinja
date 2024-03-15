@@ -1,6 +1,8 @@
 package org.syncninja.service;
 
+import org.neo4j.cypher.internal.expressions.functions.E;
 import org.syncninja.dto.StatusFileDTO;
+import org.syncninja.model.StateTree.StateTree;
 import org.syncninja.model.commitTree.CommitDirectory;
 import org.syncninja.model.commitTree.CommitFile;
 import org.syncninja.model.commitTree.CommitNode;
@@ -8,6 +10,7 @@ import org.syncninja.repository.CommitNodeRepository;
 import org.syncninja.util.CompareFileUtil;
 import org.syncninja.util.FileTrackingState;
 import org.syncninja.util.LinesContainer;
+import org.syncninja.util.ResourceBundleEnum;
 
 import java.io.File;
 import java.util.List;
@@ -67,5 +70,10 @@ public class CommitTreeService {
 
     private boolean isFile(String path) {
         return new File(path).isFile();
+    }
+
+    public CommitNode getCommitTreeRoot(String path) throws Exception {
+        return commitNodeRepository.findByPath(path).orElseThrow(
+                () -> new RuntimeException(ResourceMessagingService.getMessage(ResourceBundleEnum.STAGE_AREA_IS_EMPTY)));
     }
 }

@@ -22,23 +22,20 @@ public class CommitService {
     }
 
     public Commit save(String message, Commit commit) throws Exception {
-        if(commit.getCommitTree() == null){
+        if(commit.getCommitTreeRoot() == null){
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.STAGE_AREA_IS_EMPTY));
         }
         commit.setCommitted(true);
         commit.setMessage(message);
         commit.setNextCommit(createStagedCommit());
-        stateTreeService.updateStateRoot(stateTreeService.getStateRoot(commit.getCommitTree().getPath()), commit);
+        stateTreeService.updateStateRoot(stateTreeService.getStateRoot(commit.getCommitTreeRoot().getPath()), commit);
         return commitRepository.save(commit);
     }
 
     public void addCommitTree(CommitDirectory commitDirectory) throws Exception {
-        NinjaNode currentNinjaNode = stateTreeService.getStateRoot(commitDirectory.getPath()).getCurrentCommit();
-        if (currentNinjaNode == null){
-            currentNinjaNode = stateTreeService.getStateRoot(commitDirectory.getPath()).getCurrentBranch();
-        }
+        NinjaNode currentNinjaNode = stateTreeService.getStateRoot(commitDirectory.getPath()).getCurrentNinjaNode();
         Commit commit = currentNinjaNode.getNextCommit();
-        commit.setCommitTree(commitDirectory);
+        commit.setCommitTreeRoot(commitDirectory);
         commitRepository.save(commit);
     }
 }

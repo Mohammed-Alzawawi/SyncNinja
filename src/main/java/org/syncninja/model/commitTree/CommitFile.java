@@ -16,14 +16,14 @@ public class CommitFile extends CommitNode {
     }
 
     public CommitFile(String path, List<Integer> lineNumberList, List<String> newValuesList, List<String> oldValuesList) {
-        super(path);
+        super(path, false);
         this.lineNumberList = lineNumberList;
         this.newValuesList = newValuesList;
         this.oldValuesList = oldValuesList;
     }
 
     public CommitFile(String path) {
-        super(path);
+        super(path, false);
     }
 
     public List<Integer> getLineNumberList() {
@@ -49,6 +49,4 @@ public class CommitFile extends CommitNode {
     public void setOldValuesList(List<String> oldValuesList) {
         this.oldValuesList = oldValuesList;
     }
-
-
 }
