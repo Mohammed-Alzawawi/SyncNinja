@@ -9,6 +9,7 @@ import org.syncninja.util.CompareFileUtil;
 import org.syncninja.util.FileTrackingState;
 import org.syncninja.util.LinesContainer;
 import org.syncninja.util.Regex;
+import org.syncninja.util.ResourceBundleEnum;
 
 import java.io.File;
 import java.util.List;
@@ -80,5 +81,10 @@ public class CommitTreeService {
     }
     private boolean isFile(String path) {
         return new File(path).isFile();
+    }
+
+    public CommitNode getCommitTreeRoot(String path) throws Exception {
+        return commitNodeRepository.findByPath(path).orElseThrow(
+                () -> new RuntimeException(ResourceMessagingService.getMessage(ResourceBundleEnum.STAGE_AREA_IS_EMPTY)));
     }
 }

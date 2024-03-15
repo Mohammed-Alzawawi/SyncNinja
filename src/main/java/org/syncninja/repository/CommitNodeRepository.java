@@ -22,4 +22,3 @@ public class CommitNodeRepository {
         return Optional.ofNullable((commitNodes.isEmpty()) ? null : commitNodes.iterator().next());
     }
 }
-

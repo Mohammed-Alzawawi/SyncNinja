@@ -49,6 +49,4 @@ public class CommitFile extends CommitNode {
     public void setOldValuesList(List<String> oldValuesList) {
         this.oldValuesList = oldValuesList;
     }
-
-
 }
