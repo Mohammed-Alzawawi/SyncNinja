@@ -4,9 +4,7 @@ import org.neo4j.ogm.cypher.ComparisonOperator;
 import org.neo4j.ogm.cypher.Filter;
 import org.neo4j.ogm.session.Session;
 import org.syncninja.model.commitTree.CommitNode;
-import org.syncninja.service.ResourceMessagingService;
 import org.syncninja.util.Neo4jSession;
-import org.syncninja.util.ResourceBundleEnum;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -24,13 +22,9 @@ public class CommitNodeRepository {
         return Optional.ofNullable((commitNodes.isEmpty()) ? null : commitNodes.iterator().next());
     }
 
-    public void deleteByPath(String path) throws Exception {
-        CommitNode commitNode = findByPath(path).orElseThrow(()->{return new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.FILE_NOT_FOUND));});
-        //CommitFile commitFile = findByPath(path).orElseThrow(()-> {return new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.FILE_NOT_FOUND));});
+    public void delete(CommitNode commitNode) {
         Session session= Neo4jSession.getSession();
         session.delete(commitNode);
-        //session.delete(commitFile);
-
     }
 }
 

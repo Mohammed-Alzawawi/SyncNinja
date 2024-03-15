@@ -26,7 +26,6 @@ public class Regex {
                 regexBuilder.append("|");
             }
         }
-
         return regexBuilder.toString();
     }
 }
