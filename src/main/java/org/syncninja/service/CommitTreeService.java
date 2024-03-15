@@ -1,6 +1,7 @@
 package org.syncninja.service;
 
 import org.syncninja.dto.StatusFileDTO;
+import org.syncninja.model.StateTree.StateRoot;
 import org.syncninja.model.commitTree.CommitDirectory;
 import org.syncninja.model.commitTree.CommitFile;
 import org.syncninja.model.commitTree.CommitNode;
@@ -18,10 +19,13 @@ public class CommitTreeService {
     private final CommitNodeRepository commitNodeRepository;
     private final CommitService commitService;
 
+    private final StateTreeService stateTreeService;
+
     public CommitTreeService() {
         this.statusService = new StatusService();
         this.commitNodeRepository = new CommitNodeRepository();
         this.commitService = new CommitService();
+        this.stateTreeService = new StateTreeService();
     }
 
     public void addFileToCommitTree(String mainDirectoryPath, List<String> listOfFilesToBeAdded) throws Exception {
@@ -34,8 +38,7 @@ public class CommitTreeService {
     }
 
     private void addFilesToCommitTree(List<StatusFileDTO> statusFileDTOs, String mainDirectoryPath, List<String> listOfFilesToBeAdded) throws Exception {
-        CommitDirectory root = new CommitDirectory(mainDirectoryPath);
-        commitService.addCommitTree(root);
+        CommitDirectory root = createAndGetCommitTreeRoot(mainDirectoryPath);
 
         Regex regexBuilder = new Regex();
         for (String path : listOfFilesToBeAdded) {
@@ -45,7 +48,7 @@ public class CommitTreeService {
 
         for (StatusFileDTO statusFileDTO : statusFileDTOs) {
             if (statusFileDTO.getPath().matches(regex)) {
-                String relativePath = statusFileDTO.getPath().substring(mainDirectoryPath.length() + 1);
+                    String relativePath = statusFileDTO.getPath().substring(mainDirectoryPath.length() + 1);
                 String[] pathComponents = relativePath.split("\\\\");
                 CommitNode currentNode = root;
                 String previousPath = mainDirectoryPath;
@@ -77,6 +80,14 @@ public class CommitTreeService {
             }
         }
         commitNodeRepository.save(root);
+    }
+    private CommitDirectory createAndGetCommitTreeRoot(String path) throws Exception {
+        CommitDirectory root = (CommitDirectory) stateTreeService.getStagingArea(path);
+        if(root == null) {
+            root = new CommitDirectory(path);
+        }
+        commitService.addCommitTree(root);
+        return root;
     }
     private boolean isFile(String path) {
         return new File(path).isFile();

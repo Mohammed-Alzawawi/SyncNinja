@@ -113,7 +113,7 @@ public class StatusService {
     }
     //checking the state of the file
     public boolean isModified(StateFile stateFile, CommitFileDTO commitFileDTO, File file) throws Exception {
-        if(stateFile != null && stateFile.getLastModified() == stateFile.getLastModified()){
+        if(stateFile != null && stateFile.getLastModified() == file.lastModified()){
             return false;
         }
         LinesContainer linesContainer = CompareFileUtil.compareFiles(file.getPath(), new StatusFileDTO(stateFile==null, stateFile, file.getPath()));
