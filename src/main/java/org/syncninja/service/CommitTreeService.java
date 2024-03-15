@@ -115,7 +115,7 @@ public class CommitTreeService {
         if (currentNinjaNode == null) {
             currentNinjaNode = stateRoot.getCurrentBranch();
         }
-        CommitDirectory commitTreeRoot = currentNinjaNode.getNextCommit().getCommitTree();
+        CommitDirectory commitTreeRoot = currentNinjaNode.getNextCommit().getCommitTreeRoot();
 
         Regex regexBuilder = new Regex();
         for (String path : filesToUnstage) {

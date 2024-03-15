@@ -27,11 +27,9 @@ public class CommitCommand implements Runnable {
         String path = System.getProperty("user.dir");
         try {
             StateRoot stateRoot = stateTreeService.getStateRoot(path);
-            NinjaNode currentNinjaNode = stateRoot.getCurrentCommit();
-            if (currentNinjaNode == null){
-                currentNinjaNode = stateRoot.getCurrentBranch();
-            }
-            commitService.save(message, currentNinjaNode.getNextCommit());
+            Commit newCommit =  stateRoot.getCurrentNinjaNode().getNextCommit();
+            commitService.save(message, newCommit);
+            stateTreeService.addChangesToStateTree(newCommit.getCommitTreeRoot(), stateRoot, null);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

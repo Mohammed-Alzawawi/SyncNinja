@@ -29,4 +29,3 @@ public class CommitNodeRepository {
                 Collections.singletonMap("nodeId", commitNode.getId()));
     }
 }
-

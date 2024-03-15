@@ -1,10 +1,10 @@
 package org.syncninja.model.StateTree;
 
 import org.neo4j.ogm.annotation.NodeEntity;
-import org.syncninja.util.Fetcher;
 import org.syncninja.util.SHA256;
 
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 
 @NodeEntity
@@ -15,7 +15,7 @@ public class StateFile extends StateTree {
     public StateFile(String path) throws IOException {
         super(path);
         hashValue = SHA256.hashValue(path);
-        lines = Fetcher.readFile(path);
+        lines = new LinkedList<>();
     }
 
     public StateFile() {

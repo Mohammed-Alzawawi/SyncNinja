@@ -13,6 +13,6 @@ public class CommitRepository {
 
     public Commit getCommit(String id){
         Session session = Neo4jSession.getSession();
-        return session.load(Commit.class, id);
+        return session.load(Commit.class, id, -1);
     }
 }
