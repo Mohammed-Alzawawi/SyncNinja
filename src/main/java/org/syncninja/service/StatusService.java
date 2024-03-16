@@ -25,11 +25,9 @@ import java.util.stream.Collectors;
 
 public class StatusService {
     private final StateTreeRepository stateTreeRepository;
-    private final CommitNodeRepository commitNodeRepository;
 
     public StatusService() {
         this.stateTreeRepository = new StateTreeRepository();
-        this.commitNodeRepository = new CommitNodeRepository();
     }
 
     public void getTracked(List<CommitFileDTO> tracked, CommitDirectory commitDirectory) {
@@ -102,18 +100,15 @@ public class StatusService {
 
     public CommitDirectory getStagingArea(String path) throws Exception {
         StateRoot stateRoot = (StateRoot) stateTreeRepository.findById(path).orElse(null);
-        NinjaNode currentCommit = stateRoot.getCurrentCommit();
-        if (currentCommit == null) {
-            currentCommit = stateRoot.getCurrentBranch();
-        }
-        if (currentCommit.getNextCommit() == null) {
+        NinjaNode currentNinjaNode = stateRoot.getCurrentNinjaNode();
+        if (currentNinjaNode.getNextCommit() == null) {
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.STAGE_AREA_IS_EMPTY));
         }
-        return currentCommit.getNextCommit().getCommitTree();
+        return currentNinjaNode.getNextCommit().getCommitTreeRoot();
     }
     //checking the state of the file
     public boolean isModified(StateFile stateFile, CommitFileDTO commitFileDTO, File file) throws Exception {
-        if(stateFile != null && stateFile.getLastModified() == stateFile.getLastModified()){
+        if(stateFile != null && stateFile.getLastModified() == file.lastModified()){
             return false;
         }
         LinesContainer linesContainer = CompareFileUtil.compareFiles(file.getPath(), new StatusFileDTO(stateFile==null, stateFile, file.getPath()));
