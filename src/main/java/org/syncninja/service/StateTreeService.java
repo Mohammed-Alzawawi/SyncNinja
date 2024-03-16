@@ -60,16 +60,16 @@ public class StateTreeService {
         stateTreeRepository.updateStateRoot(stateRoot, newCommit);
     }
 
-    public void addChangesToStateTree(CommitNode commitNode, StateRoot stateRoot, StateTree oldStateNode) throws IOException {
+    public void addChangesToStateTree(CommitNode commitNode, StateTree oldStateNode) throws Exception {
         List<CommitNode> commitNodeList = new ArrayList<>();
         StateTree currentStateTree;
 
         if(commitNode instanceof CommitDirectory){
-            currentStateTree = new StateDirectory(commitNode.getPath());
+            currentStateTree = getStateDirectory(commitNode.getPath());
             stateTreeRepository.save(currentStateTree);
             commitNodeList = ((CommitDirectory) commitNode).getCommitNodeList();
         } else {
-            currentStateTree = new StateFile(commitNode.getPath());
+            currentStateTree = getStateFile(commitNode.getPath());
             CommitFile commitFile = ((CommitFile)commitNode);
             List<String> stateFileLines = ((StateFile)currentStateTree).getLines();
 
@@ -91,7 +91,19 @@ public class StateTreeService {
         }
 
         for (CommitNode childCommitNode : commitNodeList) {
-            addChangesToStateTree(childCommitNode, stateRoot, currentStateTree);
+            addChangesToStateTree(childCommitNode, currentStateTree);
         }
+    }
+
+    private StateFile getStateFile(String path) throws Exception {
+        return (StateFile) stateTreeRepository.findById(path).orElse(
+                new StateFile(path)
+        );
+    }
+
+    private StateDirectory getStateDirectory(String path) throws Exception {
+        return (StateDirectory) stateTreeRepository.findById(path).orElse(
+                new StateDirectory(path)
+        );
     }
 }
