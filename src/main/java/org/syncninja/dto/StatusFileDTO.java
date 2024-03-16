@@ -10,8 +10,8 @@ public class StatusFileDTO {
     private String path;
     private String relativePath;
 
-    public StatusFileDTO(boolean isNew, StateFile stateFile, String path , String relativePath) {
-        this.relativePath =relativePath;
+    public StatusFileDTO(boolean isNew, StateFile stateFile, String path, String relativePath) {
+        this.relativePath = relativePath;
         this.isNew = isNew;
         this.stateFile = stateFile;
         this.path = path;

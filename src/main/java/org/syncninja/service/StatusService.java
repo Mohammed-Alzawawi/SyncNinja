@@ -36,7 +36,7 @@ public class StatusService {
                 if (commitNode instanceof CommitDirectory) {
                     getTracked(tracked, (CommitDirectory) commitNode);
                 } else {
-                    tracked.add(new CommitFileDTO((CommitFile) commitNode, commitNode.getPath() , Fetcher.getRelativePath(commitNode.getPath())));
+                    tracked.add(new CommitFileDTO((CommitFile) commitNode, commitNode.getPath(), Fetcher.getRelativePath(commitNode.getPath())));
                 }
             }
         }
@@ -58,7 +58,7 @@ public class StatusService {
                 StateFile stateFile = (StateFile) stateTreeMap.get(file.getPath());
                 CommitFileDTO commitFileDTO = tracked.get(file.getPath());
                 if (isModified(stateFile, commitFileDTO, file)) {
-                    untracked.add(new StatusFileDTO(stateFile == null, stateFile, file.getPath() ,  Fetcher.getRelativePath(file.getPath())));
+                    untracked.add(new StatusFileDTO(stateFile == null, stateFile, file.getPath(), Fetcher.getRelativePath(file.getPath())));
                 }
             }
         }
@@ -70,7 +70,7 @@ public class StatusService {
                 addAllFilesInDirectory(file, untracked, tracked);
             }
             else if (isModified(null, tracked.get(file.getPath()), file)) {
-                untracked.add(new StatusFileDTO(true, null, file.getPath() , Fetcher.getRelativePath(file.getPath())));
+                untracked.add(new StatusFileDTO(true, null, file.getPath(), Fetcher.getRelativePath(file.getPath())));
             }
         }
     }
@@ -112,7 +112,7 @@ public class StatusService {
         if(stateFile != null && stateFile.getLastModified() == file.lastModified()){
             return false;
         }
-        LinesContainer linesContainer = CompareFileUtil.compareFiles(file.getPath(), new StatusFileDTO(stateFile==null, stateFile, file.getPath() , Fetcher.getRelativePath(file.getPath())));
+        LinesContainer linesContainer = CompareFileUtil.compareFiles(file.getPath(), new StatusFileDTO(stateFile==null, stateFile, file.getPath(), Fetcher.getRelativePath(file.getPath())));
         if (commitFileDTO == null ) {
             return !linesContainer.getLineNumbers().isEmpty();
         }
