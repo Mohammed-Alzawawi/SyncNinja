@@ -27,6 +27,6 @@ public class Fetcher {
 
     public static String getRelativePath(String path){
         String mainDirectoryPath = System.getProperty("user.dir");
-        return path.substring(mainDirectoryPath.length()+1);
+        return path.substring(mainDirectoryPath.length() + 1);
     }
 }

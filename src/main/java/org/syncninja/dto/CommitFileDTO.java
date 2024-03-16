@@ -5,13 +5,12 @@ import org.syncninja.model.commitTree.CommitFile;
 public class CommitFileDTO {
     private CommitFile commitFile;
     private String path;
-
     private String relativePath;
 
     public CommitFileDTO() {
     }
 
-    public CommitFileDTO(CommitFile commitFile, String path , String relativePath) {
+    public CommitFileDTO(CommitFile commitFile, String path, String relativePath) {
         this.commitFile = commitFile;
         this.path = path;
         this.relativePath = relativePath;
