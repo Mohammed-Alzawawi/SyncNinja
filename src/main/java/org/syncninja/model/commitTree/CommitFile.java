@@ -56,6 +56,4 @@ public class CommitFile extends CommitNode {
         this.newValuesList = linesContainer.getNewLines();
         this.oldValuesList = linesContainer.getOldLines();
     }
-
-
 }
