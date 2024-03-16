@@ -35,14 +35,14 @@ public class StatusCommand implements Runnable {
             System.out.println(ResourceMessagingService.getMessage(ResourceBundleEnum.FILES_READY_TO_BE_COMMITTED));
 
             for (int i = 0; i < tracked.size(); i++) {
-                System.out.println(greenColor + "\t" + tracked.get(i).getPath() + resetColorCode);
+                System.out.println(greenColor + "\t" + tracked.get(i).getRelativePath() + resetColorCode);
             }
 
             System.out.println("\n" + "\n");
             System.out.println(ResourceMessagingService.getMessage(ResourceBundleEnum.UNTRACKED_FILES) + "\n");
 
             for (int i = 0; i < untracked.size(); i++) {
-                System.out.println(redColorCode + "\t" + untracked.get(i).getPath() + resetColorCode);
+                System.out.println(redColorCode + "\t" + untracked.get(i).getRelativePath() + resetColorCode);
             }
 
             System.out.println();

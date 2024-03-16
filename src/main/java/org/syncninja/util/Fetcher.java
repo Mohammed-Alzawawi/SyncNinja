@@ -24,4 +24,9 @@ public class Fetcher {
 
         return lines;
     }
+
+    public static String getRelativePath(String path){
+        String mainDirectoryPath = System.getProperty("user.dir");
+        return path.substring(mainDirectoryPath.length()+1);
+    }
 }
