@@ -53,6 +53,7 @@ public class StatusService {
             if (file.isDirectory()) {
                 StateDirectory stateDirectoryChild = (StateDirectory) stateTreeMap.get(file.getPath());
                 if (stateDirectoryChild == null) {
+                    // the directory is new add everything inside it
                     addAllFilesInDirectory(file, untracked, tracked);
                 } else if (stateDirectoryChild.getLastModified() != file.lastModified()) {
                     currentState(file, stateDirectoryChild, untracked, tracked);

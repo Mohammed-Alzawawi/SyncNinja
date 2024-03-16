@@ -27,9 +27,12 @@ public class InitCommand implements Runnable {
         String path = System.getProperty("user.dir");
         try {
             Directory directory = directoryService.createDirectory(path);
+            // creating main branch
             directoryService.createDirectoryMainBranch(directory, "main");
             Branch mainBranch = directory.getBranch();
+            // creating staging area
             mainBranch.setNextCommit(commitService.createStagedCommit());
+            // creating state tree
             stateTreeService.generateStateRootNode(path, mainBranch);
             System.out.println(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_INITIALIZED_SUCCESSFULLY, new Object[]{path}));
         } catch (Exception exception) {
