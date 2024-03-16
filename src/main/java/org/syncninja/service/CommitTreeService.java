@@ -22,14 +22,12 @@ public class CommitTreeService {
     private final CommitService commitService;
     private final StateTreeService stateTreeService;
 
-    private final StateTreeService stateTreeService;
 
     public CommitTreeService() {
         this.stateTreeService = new StateTreeService();
         this.statusService = new StatusService();
         this.commitNodeRepository = new CommitNodeRepository();
         this.commitService = new CommitService();
-        this.stateTreeService = new StateTreeService();
     }
 
     public void addFileToCommitTree(String mainDirectoryPath, List<String> listOfFilesToBeAdded) throws Exception {

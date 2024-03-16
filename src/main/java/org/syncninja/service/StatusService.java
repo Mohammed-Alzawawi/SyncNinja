@@ -96,7 +96,6 @@ public class StatusService {
         return fileTrackingState;
     }
 
-
     public CommitDirectory getStagingArea(String path) throws Exception {
         StateRoot stateRoot = (StateRoot) stateTreeRepository.findById(path).orElse(null);
         NinjaNode currentCommit = stateRoot.getCurrentCommit();
