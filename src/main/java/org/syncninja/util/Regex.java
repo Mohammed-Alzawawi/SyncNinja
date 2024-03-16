@@ -23,10 +23,11 @@ public class Regex {
                 regexBuilder.append("*");
             }
             if (index != listOfFilesToBeAdded.size() - 1) {
+
                 regexBuilder.append("|");
             }
         }
+
         return regexBuilder.toString();
     }
 }
-

@@ -15,14 +15,14 @@ public class CommitService {
         this.stateTreeService = new StateTreeService();
     }
 
-    public Commit createStagedCommit(){
+    public Commit createStagedCommit() {
         Commit commit = new Commit();
         commit.setCommitted(false);
         return commitRepository.save(commit);
     }
 
     public Commit save(String message, Commit commit) throws Exception {
-        if(commit.getCommitTree() == null){
+        if (commit.getCommitTree() == null) {
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.STAGE_AREA_IS_EMPTY));
         }
         commit.setCommitted(true);
