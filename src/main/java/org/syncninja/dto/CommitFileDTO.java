@@ -6,12 +6,15 @@ public class CommitFileDTO {
     private CommitFile commitFile;
     private String path;
 
+    private String relativePath;
+
     public CommitFileDTO() {
     }
 
-    public CommitFileDTO(CommitFile commitFile, String path) {
+    public CommitFileDTO(CommitFile commitFile, String path , String relativePath) {
         this.commitFile = commitFile;
         this.path = path;
+        this.relativePath = relativePath;
     }
 
     public CommitFile getCommitFile() {
@@ -28,5 +31,13 @@ public class CommitFileDTO {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public String getRelativePath() {
+        return relativePath;
+    }
+
+    public void setRelativePath(String relativePath) {
+        this.relativePath = relativePath;
     }
 }

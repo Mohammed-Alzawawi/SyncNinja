@@ -8,8 +8,10 @@ public class StatusFileDTO {
     private boolean isNew;
     private StateFile stateFile;
     private String path;
+    private String relativePath;
 
-    public StatusFileDTO(boolean isNew, StateFile stateFile, String path) {
+    public StatusFileDTO(boolean isNew, StateFile stateFile, String path , String relativePath) {
+        this.relativePath =relativePath;
         this.isNew = isNew;
         this.stateFile = stateFile;
         this.path = path;
@@ -37,5 +39,13 @@ public class StatusFileDTO {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public String getRelativePath() {
+        return relativePath;
+    }
+
+    public void setRelativePath(String relativePath) {
+        this.relativePath = relativePath;
     }
 }
