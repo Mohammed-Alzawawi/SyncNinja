@@ -1,6 +1,7 @@
 package org.syncninja.model.commitTree;
 
 import org.neo4j.ogm.annotation.NodeEntity;
+import org.syncninja.util.LinesContainer;
 
 import java.util.List;
 
@@ -50,5 +51,9 @@ public class CommitFile extends CommitNode {
         this.oldValuesList = oldValuesList;
     }
 
-
+    public void updateCommitList(LinesContainer linesContainer) {
+        this.lineNumberList = linesContainer.getLineNumbers();
+        this.newValuesList = linesContainer.getNewLines();
+        this.oldValuesList = linesContainer.getOldLines();
+    }
 }
