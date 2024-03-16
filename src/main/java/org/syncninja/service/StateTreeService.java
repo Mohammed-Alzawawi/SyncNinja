@@ -2,10 +2,13 @@ package org.syncninja.service;
 
 import org.syncninja.model.Branch;
 import org.syncninja.model.Commit;
+import org.syncninja.model.NinjaNode;
 import org.syncninja.model.StateTree.StateDirectory;
 import org.syncninja.model.StateTree.StateFile;
 import org.syncninja.model.StateTree.StateRoot;
 import org.syncninja.model.StateTree.StateTree;
+import org.syncninja.model.commitTree.CommitDirectory;
+import org.syncninja.model.commitTree.CommitNode;
 import org.syncninja.repository.StateTreeRepository;
 import org.syncninja.util.ResourceBundleEnum;
 
@@ -67,6 +70,18 @@ public class StateTreeService {
                 () -> new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_NOT_INITIALIZED, new Object[]{path})));
     }
 
+    public CommitNode getStagingArea(String path) throws Exception {
+        StateRoot stateRoot = getStateRoot(path);
+        NinjaNode currentNode = stateRoot.getCurrentCommit();
+        if(currentNode == null){
+            currentNode = stateRoot.getCurrentBranch();
+        }
+        Commit commit = currentNode.getNextCommit();
+        if(commit == null) {
+            throw new Exception("Commit tree is no staging area init");
+        }
+        return commit.getCommitTree();
+    }
     public void updateStateRoot(StateRoot stateRoot, Commit newCommit) {
         stateTreeRepository.updateStateRoot(stateRoot, newCommit);
     }

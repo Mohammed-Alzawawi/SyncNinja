@@ -13,10 +13,7 @@ import org.syncninja.model.commitTree.CommitFile;
 import org.syncninja.model.commitTree.CommitNode;
 import org.syncninja.repository.CommitNodeRepository;
 import org.syncninja.repository.StateTreeRepository;
-import org.syncninja.util.CompareFileUtil;
-import org.syncninja.util.FileTrackingState;
-import org.syncninja.util.LinesContainer;
-import org.syncninja.util.ResourceBundleEnum;
+import org.syncninja.util.*;
 
 import java.io.File;
 import java.util.List;
@@ -39,7 +36,7 @@ public class StatusService {
                 if (commitNode instanceof CommitDirectory) {
                     getTracked(tracked, (CommitDirectory) commitNode);
                 } else {
-                    tracked.add(new CommitFileDTO((CommitFile) commitNode, commitNode.getPath()));
+                    tracked.add(new CommitFileDTO((CommitFile) commitNode, commitNode.getPath(), Fetcher.getRelativePath(commitNode.getPath())));
                 }
             }
         }
@@ -53,6 +50,7 @@ public class StatusService {
             if (file.isDirectory()) {
                 StateDirectory stateDirectoryChild = (StateDirectory) stateTreeMap.get(file.getPath());
                 if (stateDirectoryChild == null) {
+                    // the directory is new add everything inside it
                     addAllFilesInDirectory(file, untracked, tracked);
                 } else if (stateDirectoryChild.getLastModified() != file.lastModified()) {
                     currentState(file, stateDirectoryChild, untracked, tracked);
@@ -61,7 +59,7 @@ public class StatusService {
                 StateFile stateFile = (StateFile) stateTreeMap.get(file.getPath());
                 CommitFileDTO commitFileDTO = tracked.get(file.getPath());
                 if (isModified(stateFile, commitFileDTO, file)) {
-                    untracked.add(new StatusFileDTO(stateFile == null, stateFile, file.getPath()));
+                    untracked.add(new StatusFileDTO(stateFile == null, stateFile, file.getPath(), Fetcher.getRelativePath(file.getPath())));
                 }
             }
         }
@@ -71,10 +69,9 @@ public class StatusService {
         for (File file : directory.listFiles()) {
             if (file.isDirectory()) {
                 addAllFilesInDirectory(file, untracked, tracked);
-            } else if (tracked.get(file.getPath()) == null) {
-                untracked.add(new StatusFileDTO(true, null, file.getPath()));
-            } else if (isModified(null, tracked.get(file.getPath()), file)) {
-                untracked.add(new StatusFileDTO(true, null, file.getPath()));
+            }
+            else if (isModified(null, tracked.get(file.getPath()), file)) {
+                untracked.add(new StatusFileDTO(true, null, file.getPath(), Fetcher.getRelativePath(file.getPath())));
             }
         }
     }
@@ -113,10 +110,10 @@ public class StatusService {
     }
     //checking the state of the file
     public boolean isModified(StateFile stateFile, CommitFileDTO commitFileDTO, File file) throws Exception {
-        if(stateFile != null && stateFile.getLastModified() == stateFile.getLastModified()){
+        if(stateFile != null && stateFile.getLastModified() == file.lastModified()){
             return false;
         }
-        LinesContainer linesContainer = CompareFileUtil.compareFiles(file.getPath(), new StatusFileDTO(stateFile==null, stateFile, file.getPath()));
+        LinesContainer linesContainer = CompareFileUtil.compareFiles(file.getPath(), new StatusFileDTO(stateFile==null, stateFile, file.getPath(), Fetcher.getRelativePath(file.getPath())));
         if (commitFileDTO == null ) {
             return !linesContainer.getLineNumbers().isEmpty();
         }
