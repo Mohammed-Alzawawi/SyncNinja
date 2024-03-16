@@ -80,8 +80,9 @@ public class CommitTreeService {
                     }
                 }
             }
-            commitNodeRepository.save(root);
+
         }
+        commitNodeRepository.save(root);
     }
 
     private boolean isFile(String path) {
@@ -91,9 +92,8 @@ public class CommitTreeService {
     public void unstage(String mainDirectoryPath, List<String> filesToUnstage) throws Exception {
         StateRoot stateRoot = stateTreeService.getStateRoot(mainDirectoryPath);
 
-
         NinjaNode currentNinjaNode = stateRoot.getCurrentCommit();
-        if (currentNinjaNode == null){
+        if (currentNinjaNode == null) {
             currentNinjaNode = stateRoot.getCurrentBranch();
         }
         CommitDirectory commitTreeRoot = currentNinjaNode.getNextCommit().getCommitTree();
@@ -102,8 +102,8 @@ public class CommitTreeService {
         for (String path : filesToUnstage) {
             regexBuilder.addFilePath(path);
         }
-
         String regex = regexBuilder.buildRegex();
+
         unstageFiles(commitTreeRoot, regex);
     }
 
@@ -113,11 +113,13 @@ public class CommitTreeService {
             commitNode.setPath(commitNode.getPath() + "\\");
             commitNodeList = ((CommitDirectory) commitNode).getCommitNodeList();
         }
-        for (CommitNode commitNodeChild : commitNodeList) {
-            unstageFiles(commitNodeChild, regex);
-        }
         if (commitNode.getPath().matches(regex)) {
             commitNodeRepository.delete(commitNode);
+
+        } else {
+            for (CommitNode commitNodeChild : commitNodeList) {
+                unstageFiles(commitNodeChild, regex);
+            }
         }
     }
 }

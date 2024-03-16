@@ -12,8 +12,7 @@ public abstract class CommitNode extends SyncNode {
         this.path = path;
     }
 
-    public CommitNode() {
-    }
+    public CommitNode() {}
 
     public String getPath() {
         return path;
