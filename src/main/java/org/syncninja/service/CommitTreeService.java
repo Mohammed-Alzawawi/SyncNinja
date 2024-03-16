@@ -1,7 +1,6 @@
 package org.syncninja.service;
 
 import org.syncninja.dto.StatusFileDTO;
-import org.syncninja.model.StateTree.StateRoot;
 import org.syncninja.model.commitTree.CommitDirectory;
 import org.syncninja.model.commitTree.CommitFile;
 import org.syncninja.model.commitTree.CommitNode;
@@ -40,46 +39,58 @@ public class CommitTreeService {
     private void addFilesToCommitTree(List<StatusFileDTO> statusFileDTOs, String mainDirectoryPath, List<String> listOfFilesToBeAdded) throws Exception {
         CommitDirectory root = createAndGetCommitTreeRoot(mainDirectoryPath);
 
+        // building regex for add command
         Regex regexBuilder = new Regex();
         for (String path : listOfFilesToBeAdded) {
             regexBuilder.addFilePath(path);
         }
         String regex = regexBuilder.buildRegex();
 
+
         for (StatusFileDTO statusFileDTO : statusFileDTOs) {
             if (statusFileDTO.getPath().matches(regex)) {
-                    String relativePath = statusFileDTO.getPath().substring(mainDirectoryPath.length() + 1);
+                String relativePath = statusFileDTO.getPath().substring(mainDirectoryPath.length() + 1);
                 String[] pathComponents = relativePath.split("\\\\");
-                CommitNode currentNode = root;
-                String previousPath = mainDirectoryPath;
 
-                for (String component : pathComponents) {
-                    previousPath = previousPath + "\\" + component;
-                    boolean found = false;
-                    if (currentNode instanceof CommitDirectory && ((CommitDirectory) currentNode).getCommitNodeList() != null) {
-                        for (CommitNode child : ((CommitDirectory) currentNode).getCommitNodeList()) {
-                            if (child.getPath().equals(previousPath)) {
-                                currentNode = child;
-                                found = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (!found) {
-                        CommitNode newNode;
-                        if (isFile(previousPath)) {
-                            LinesContainer linesContainer = CompareFileUtil.compareFiles(previousPath, statusFileDTO);
-                            newNode = new CommitFile(previousPath, linesContainer.getLineNumbers(), linesContainer.getNewLines(), linesContainer.getOldLines());
-                        } else {
-                            newNode = new CommitDirectory(previousPath);
-                        }
-                        ((CommitDirectory) currentNode).addNode(newNode);
-                        currentNode = newNode;
-                    }
-                }
+                addNodesInPath(pathComponents, mainDirectoryPath, root, statusFileDTO);
             }
         }
         commitNodeRepository.save(root);
+    }
+
+    private void addNodesInPath(String[] pathComponents, String mainDirectoryPath, CommitDirectory currentDirectory, StatusFileDTO statusFileDTO) throws Exception {
+        String previousPath = mainDirectoryPath;
+
+        for (String component : pathComponents) {
+            previousPath = previousPath + "\\" + component;
+            String path = previousPath;
+
+            // get node with the current path inside commitNode list
+            CommitNode commitNode =  currentDirectory.getCommitNodeList()
+                    .stream()
+                    .filter(child -> child.getPath().equals(path))
+                    .findFirst()
+                    .orElse(null);
+
+            if(isFile(path)) {
+                LinesContainer linesContainer = CompareFileUtil.compareFiles(path, statusFileDTO);
+                // new File
+                if(commitNode == null) {
+                    commitNode = new CommitFile(path, linesContainer.getLineNumbers(), linesContainer.getNewLines(), linesContainer.getOldLines());
+                    currentDirectory.addNode(commitNode);
+                } else {
+                    ((CommitFile) commitNode).updateCommitList(linesContainer);
+                }
+                break;
+            } else {
+                // new Directory
+                if(commitNode == null) {
+                    commitNode = new CommitDirectory(path);
+                }
+                currentDirectory.addNode(commitNode);
+                currentDirectory = (CommitDirectory) commitNode;
+            }
+        }
     }
     private CommitDirectory createAndGetCommitTreeRoot(String path) throws Exception {
         CommitDirectory root = (CommitDirectory) stateTreeService.getStagingArea(path);
