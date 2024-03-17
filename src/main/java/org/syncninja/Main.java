@@ -1,5 +1,4 @@
 package org.syncninja;
-
 import org.syncninja.command.MainCommand;
 import picocli.CommandLine;
 

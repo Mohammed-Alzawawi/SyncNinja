@@ -54,7 +54,6 @@ public class StateTreeService {
                 new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.FILE_NOT_FOUND, new Object[]{path})));
     }
 
-
     public StateRoot generateStateRootNode(String path, Branch currentBranch) throws Exception {
         StateRoot stateRoot = null;
         if (stateTreeRepository.findById(path).isPresent()) {

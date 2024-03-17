@@ -14,8 +14,8 @@ public enum ResourceBundleEnum {
     UNTRACKED_FILES("Untracked_files"),
     STAGE_AREA_IS_EMPTY("stage_area_is_empty"),
     SUCCESSFULLY_ADDED("successfully_added"),
+    SUCCESSFULLY_REMOVED("successfully_removed"),
     PATH_NOT_FILE("path_not_file");
-
     private final String key;
 
     ResourceBundleEnum(String key) {

@@ -7,6 +7,7 @@ import org.syncninja.model.commitTree.CommitNode;
 import org.syncninja.util.Neo4jSession;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 
 public class CommitNodeRepository {
@@ -20,6 +21,12 @@ public class CommitNodeRepository {
         Filter filter = new Filter("path", ComparisonOperator.EQUALS, path);
         Collection<CommitNode> commitNodes = session.loadAll(CommitNode.class, filter, -1);
         return Optional.ofNullable((commitNodes.isEmpty()) ? null : commitNodes.iterator().next());
+    }
+
+    public void delete(CommitNode commitNode) {
+        Session session = Neo4jSession.getSession();
+        session.query("MATCH (n:CommitNode)-[*]->(child:CommitNode) WHERE n.id =$nodeId DETACH DELETE n,child",
+                Collections.singletonMap("nodeId", commitNode.getId()));
     }
 }
 

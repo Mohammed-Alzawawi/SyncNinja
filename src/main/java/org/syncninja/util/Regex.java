@@ -16,14 +16,14 @@ public class Regex {
 
     public String buildRegex() {
         StringBuilder regexBuilder = new StringBuilder();
-        for(int index = 0; index < listOfFilesToBeAdded.size(); index++) {
+        for (int index = 0; index < listOfFilesToBeAdded.size(); index++) {
             String path = listOfFilesToBeAdded.get(index);
             regexBuilder.append(path);
-            if(path.endsWith(".")) {
+            if (path.endsWith(".")) {
                 regexBuilder.append("*");
             }
+            if (index != listOfFilesToBeAdded.size() - 1) {
 
-            if(index != listOfFilesToBeAdded.size() - 1){
                 regexBuilder.append("|");
             }
         }
@@ -31,4 +31,3 @@ public class Regex {
         return regexBuilder.toString();
     }
 }
-

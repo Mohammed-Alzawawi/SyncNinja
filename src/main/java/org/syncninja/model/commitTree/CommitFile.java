@@ -12,9 +12,7 @@ public class CommitFile extends CommitNode {
     private List<String> newValuesList;
     private List<String> oldValuesList;
 
-    public CommitFile() {
-
-    }
+    public CommitFile() {}
 
     public CommitFile(String path, List<Integer> lineNumberList, List<String> newValuesList, List<String> oldValuesList) {
         super(path);

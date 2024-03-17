@@ -11,9 +11,7 @@ public class CommitDirectory extends CommitNode {
     @Relationship(type = "HAS", direction = Relationship.Direction.OUTGOING)
     private List<CommitNode> commitNodeList = new ArrayList<>();
 
-    public CommitDirectory() {
-
-    }
+    public CommitDirectory() {}
 
     public CommitDirectory(String path) {
         super(path);

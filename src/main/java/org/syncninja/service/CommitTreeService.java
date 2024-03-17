@@ -1,6 +1,8 @@
 package org.syncninja.service;
 
 import org.syncninja.dto.StatusFileDTO;
+import org.syncninja.model.NinjaNode;
+import org.syncninja.model.StateTree.StateRoot;
 import org.syncninja.model.commitTree.CommitDirectory;
 import org.syncninja.model.commitTree.CommitFile;
 import org.syncninja.model.commitTree.CommitNode;
@@ -11,20 +13,21 @@ import org.syncninja.util.LinesContainer;
 import org.syncninja.util.Regex;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CommitTreeService {
     private final StatusService statusService;
     private final CommitNodeRepository commitNodeRepository;
     private final CommitService commitService;
-
     private final StateTreeService stateTreeService;
 
+
     public CommitTreeService() {
+        this.stateTreeService = new StateTreeService();
         this.statusService = new StatusService();
         this.commitNodeRepository = new CommitNodeRepository();
         this.commitService = new CommitService();
-        this.stateTreeService = new StateTreeService();
     }
 
     public void addFileToCommitTree(String mainDirectoryPath, List<String> listOfFilesToBeAdded) throws Exception {
@@ -54,6 +57,7 @@ public class CommitTreeService {
 
                 addNodesInPath(pathComponents, mainDirectoryPath, root, statusFileDTO);
             }
+
         }
         commitNodeRepository.save(root);
     }
@@ -102,5 +106,39 @@ public class CommitTreeService {
     }
     private boolean isFile(String path) {
         return new File(path).isFile();
+    }
+
+    public void unstage(String mainDirectoryPath, List<String> filesToUnstage) throws Exception {
+        StateRoot stateRoot = stateTreeService.getStateRoot(mainDirectoryPath);
+
+        NinjaNode currentNinjaNode = stateRoot.getCurrentCommit();
+        if (currentNinjaNode == null) {
+            currentNinjaNode = stateRoot.getCurrentBranch();
+        }
+        CommitDirectory commitTreeRoot = currentNinjaNode.getNextCommit().getCommitTree();
+
+        Regex regexBuilder = new Regex();
+        for (String path : filesToUnstage) {
+            regexBuilder.addFilePath(path);
+        }
+        String regex = regexBuilder.buildRegex();
+
+        unstageFiles(commitTreeRoot, regex);
+    }
+
+    private void unstageFiles(CommitNode commitNode, String regex) {
+        List<CommitNode> commitNodeList = new ArrayList<>();
+        if (commitNode instanceof CommitDirectory) {
+            commitNode.setPath(commitNode.getPath() + "\\");
+            commitNodeList = ((CommitDirectory) commitNode).getCommitNodeList();
+        }
+        if (commitNode.getPath().matches(regex)) {
+            commitNodeRepository.delete(commitNode);
+
+        } else {
+            for (CommitNode commitNodeChild : commitNodeList) {
+                unstageFiles(commitNodeChild, regex);
+            }
+        }
     }
 }
