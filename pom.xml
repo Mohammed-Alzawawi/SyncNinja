@@ -41,6 +41,14 @@
             <version>5.12.0</version>
         </dependency>
     </dependencies>
+<<<<<<< HEAD
+=======
+
+
+
+
+
+>>>>>>> 68022fc8628912f18e5d8d9c6fb1e3a1f643f27a
     <build>
         <plugins>
             <plugin>

@@ -13,7 +13,8 @@ import org.syncninja.model.commitTree.CommitNode;
 import org.syncninja.repository.StateTreeRepository;
 import org.syncninja.util.ResourceBundleEnum;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class StateTreeService {
     private final StateTreeRepository stateTreeRepository;
