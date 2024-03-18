@@ -28,7 +28,7 @@ public class CommitService {
         commit.setCommitted(true);
         commit.setMessage(message);
         commit.setNextCommit(createStagedCommit());
-        stateTreeService.updateStateRoot(stateTreeService.getStateRoot(commit.getCommitTreeRoot().getPath()), commit);
+        stateTreeService.updateStateRootCurrentCommit(stateTreeService.getStateRoot(commit.getCommitTreeRoot().getPath()), commit);
         return commitRepository.save(commit);
     }
 

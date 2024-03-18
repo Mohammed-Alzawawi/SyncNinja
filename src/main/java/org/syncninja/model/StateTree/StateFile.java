@@ -51,4 +51,3 @@ public class StateFile extends StateTree {
         return false;
     }
 }
-

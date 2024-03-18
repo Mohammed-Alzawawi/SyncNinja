@@ -13,9 +13,7 @@ import org.syncninja.model.commitTree.CommitNode;
 import org.syncninja.repository.StateTreeRepository;
 import org.syncninja.util.ResourceBundleEnum;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class StateTreeService {
     private final StateTreeRepository stateTreeRepository;
@@ -30,11 +28,10 @@ public class StateTreeService {
     }
 
     public void generateStateRootNode(String path, Branch currentBranch) throws Exception {
-        StateRoot stateRoot = null;
         if (stateTreeRepository.findById(path).isPresent()) {
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_ALREADY_INITIALIZED, new Object[]{path}));
         } else {
-            stateRoot = new StateRoot(path, currentBranch);
+            StateRoot stateRoot = new StateRoot(path, currentBranch);
             stateTreeRepository.save(stateRoot);
         }
     }
@@ -56,43 +53,52 @@ public class StateTreeService {
         }
         return commit.getCommitTreeRoot();
     }
-    public void updateStateRoot(StateRoot stateRoot, Commit newCommit) {
+    public void updateStateRootCurrentCommit(StateRoot stateRoot, Commit newCommit) {
         stateTreeRepository.updateStateRoot(stateRoot, newCommit);
     }
 
-    public void addChangesToStateTree(CommitNode commitNode, StateTree oldStateNode) throws Exception {
+    public void addChangesToStateTree(CommitNode commitNode, StateTree stateRoot, StateTree parentStateNode) throws Exception {
         List<CommitNode> commitNodeList = new ArrayList<>();
-        StateTree currentStateTree;
+        StateTree currentStateNode;
 
         if(commitNode instanceof CommitDirectory){
-            currentStateTree = getStateDirectory(commitNode.getPath());
-            stateTreeRepository.save(currentStateTree);
+            currentStateNode = getStateDirectory(commitNode.getPath());
             commitNodeList = ((CommitDirectory) commitNode).getCommitNodeList();
         } else {
-            currentStateTree = getStateFile(commitNode.getPath());
-            CommitFile commitFile = ((CommitFile)commitNode);
-            List<String> stateFileLines = ((StateFile)currentStateTree).getLines();
-
-            for(int index = 0; index < commitFile.getLineNumberList().size(); index++){
-                String newLine = commitFile.getNewValuesList().get(index);
-                int stateFileLineNumber = commitFile.getLineNumberList().get(index)-1;
-
-                if(stateFileLineNumber < stateFileLines.size()){
-                    ((StateFile)currentStateTree).getLines().remove(stateFileLineNumber);
-                }
-                ((StateFile)currentStateTree).getLines().add(stateFileLineNumber, newLine);
-            }
-            stateTreeRepository.save(currentStateTree);
+            currentStateNode = compareAndAddLines(commitNode, getStateFile(commitNode.getPath()));
         }
 
-        if(oldStateNode != null && oldStateNode.isDirectory()){
-            ((StateDirectory)oldStateNode).addFile(currentStateTree);
-            stateTreeRepository.save(oldStateNode);
+        if(parentStateNode != null &&!((StateDirectory)parentStateNode).getInternalNodes().contains(currentStateNode)){
+            ((StateDirectory)parentStateNode).addFile(currentStateNode);
         }
 
         for (CommitNode childCommitNode : commitNodeList) {
-            addChangesToStateTree(childCommitNode, currentStateTree);
+            addChangesToStateTree(childCommitNode, stateRoot, currentStateNode);
         }
+
+        // save the root
+        if (parentStateNode == null){
+            stateTreeRepository.save(currentStateNode);
+        }
+    }
+
+    private StateTree compareAndAddLines(CommitNode commitNode, StateTree currentStateTree) {
+        CommitFile commitFile = ((CommitFile)commitNode);
+        List<String> stateFileLines = ((StateFile)currentStateTree).getLines();
+
+        int commitFileLineIndex = 0;
+        while(commitFileLineIndex < commitFile.getLineNumberList().size()){
+            String newLine = commitFile.getNewValuesList().get(commitFileLineIndex);
+            int newLineNumber = commitFile.getLineNumberList().get(commitFileLineIndex)-1;
+
+            if (newLineNumber < stateFileLines.size()) {
+                ((StateFile) currentStateTree).getLines().remove(newLineNumber);
+            }
+
+            ((StateFile) currentStateTree).getLines().add(newLineNumber, newLine);
+            commitFileLineIndex++;
+        }
+        return currentStateTree;
     }
 
     private StateFile getStateFile(String path) throws Exception {
