@@ -21,15 +21,15 @@ public class CommitService {
         return commitRepository.save(commit);
     }
 
-    public void save(String message, Commit commit) throws Exception {
-        if (commit.getCommitTreeRoot() == null) {
+    public void save(String message, Commit commitTreeRoot) throws Exception {
+        if (commitTreeRoot == null) {
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.STAGE_AREA_IS_EMPTY));
         }
-        commit.setCommitted(true);
-        commit.setMessage(message);
-        commit.setNextCommit(createStagedCommit());
-        stateTreeService.updateStateRoot(stateTreeService.getStateRoot(commit.getCommitTreeRoot().getPath()), commit);
-        commitRepository.save(commit);
+        commitTreeRoot.setCommitted(true);
+        commitTreeRoot.setMessage(message);
+        commitTreeRoot.setNextCommit(createStagedCommit());
+        stateTreeService.updateStateRoot(stateTreeService.getStateRoot(commitTreeRoot.getCommitTreeRoot().getPath()), commitTreeRoot);
+        commitRepository.save(commitTreeRoot);
     }
 
     public void addCommitTreeRoot(CommitDirectory commitDirectory) throws Exception {
