@@ -4,6 +4,7 @@ import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 import org.syncninja.model.Branch;
 import org.syncninja.model.Commit;
+import org.syncninja.model.NinjaNode;
 
 @NodeEntity
 public class StateRoot extends StateDirectory {
@@ -38,6 +39,13 @@ public class StateRoot extends StateDirectory {
 
     public void setCurrentCommit(Commit currentCommit) {
         this.currentCommit = currentCommit;
+    }
+
+    public NinjaNode getCurrentNinjaNode(){
+        if(currentCommit == null){
+            return currentBranch;
+        }
+        return currentCommit;
     }
 
     @Override
