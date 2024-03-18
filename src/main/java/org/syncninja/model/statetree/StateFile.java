@@ -1,4 +1,4 @@
-package org.syncninja.model.StateTree;
+package org.syncninja.model.statetree;
 
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.syncninja.util.Fetcher;
@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.List;
 
 @NodeEntity
-public class StateFile extends StateTree {
+public class StateFile extends StateNode {
     private String hashValue;
     private List<String> lines;
 
@@ -51,4 +51,3 @@ public class StateFile extends StateTree {
         return false;
     }
 }
-

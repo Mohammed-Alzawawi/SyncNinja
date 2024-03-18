@@ -2,10 +2,10 @@ package org.syncninja.service;
 
 import org.syncninja.dto.StatusFileDTO;
 import org.syncninja.model.NinjaNode;
-import org.syncninja.model.StateTree.StateRoot;
-import org.syncninja.model.commitTree.CommitDirectory;
-import org.syncninja.model.commitTree.CommitFile;
-import org.syncninja.model.commitTree.CommitNode;
+import org.syncninja.model.statetree.StateRoot;
+import org.syncninja.model.committree.CommitDirectory;
+import org.syncninja.model.committree.CommitFile;
+import org.syncninja.model.committree.CommitNode;
 import org.syncninja.repository.CommitNodeRepository;
 import org.syncninja.util.CompareFileUtil;
 import org.syncninja.util.FileTrackingState;
@@ -101,7 +101,7 @@ public class CommitTreeService {
         if(root == null) {
             root = new CommitDirectory(path);
         }
-        commitService.addCommitTree(root);
+        commitService.addCommitTreeRoot(root);
         return root;
     }
     private boolean isFile(String path) {
@@ -115,7 +115,7 @@ public class CommitTreeService {
         if (currentNinjaNode == null) {
             currentNinjaNode = stateRoot.getCurrentBranch();
         }
-        CommitDirectory commitTreeRoot = currentNinjaNode.getNextCommit().getCommitTree();
+        CommitDirectory commitTreeRoot = currentNinjaNode.getNextCommit().getCommitTreeRoot();
 
         Regex regexBuilder = new Regex();
         for (String path : filesToUnstage) {

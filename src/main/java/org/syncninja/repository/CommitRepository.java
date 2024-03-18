@@ -10,9 +10,4 @@ public class CommitRepository {
         session.save(commit);
         return commit;
     }
-
-    public Commit getCommit(String id){
-        Session session = Neo4jSession.getSession();
-        return session.load(Commit.class, id);
-    }
 }

@@ -10,13 +10,11 @@ import java.util.List;
 public class FileTrackingState {
     private final List<StatusFileDTO> untracked;
     private final List<CommitFileDTO> tracked;
-    private final CommitNodeRepository commitNodeRepository;
 
 
     public FileTrackingState() {
         this.untracked = new ArrayList<>();
         this.tracked = new ArrayList<>();
-        this.commitNodeRepository = new CommitNodeRepository();
     }
 
     public List<StatusFileDTO> getUntracked() {
@@ -26,6 +24,4 @@ public class FileTrackingState {
     public List<CommitFileDTO> getTracked() {
         return tracked;
     }
-
-
 }

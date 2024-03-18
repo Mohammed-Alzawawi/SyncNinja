@@ -3,12 +3,11 @@ package org.syncninja.service;
 import org.syncninja.model.Branch;
 import org.syncninja.model.Commit;
 import org.syncninja.model.NinjaNode;
-import org.syncninja.model.StateTree.StateDirectory;
-import org.syncninja.model.StateTree.StateFile;
-import org.syncninja.model.StateTree.StateRoot;
-import org.syncninja.model.StateTree.StateTree;
-import org.syncninja.model.commitTree.CommitDirectory;
-import org.syncninja.model.commitTree.CommitNode;
+import org.syncninja.model.statetree.StateDirectory;
+import org.syncninja.model.statetree.StateFile;
+import org.syncninja.model.statetree.StateRoot;
+import org.syncninja.model.statetree.StateNode;
+import org.syncninja.model.committree.CommitNode;
 import org.syncninja.repository.StateTreeRepository;
 import org.syncninja.util.ResourceBundleEnum;
 
@@ -49,7 +48,7 @@ public class StateTreeService {
         return stateDirectory;
     }
 
-    public StateTree getStateNode(String path) throws Exception {
+    public StateNode getStateNode(String path) throws Exception {
         return stateTreeRepository.findById(path).orElseThrow(() ->
                 new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.FILE_NOT_FOUND, new Object[]{path})));
     }
@@ -80,7 +79,7 @@ public class StateTreeService {
         if(commit == null) {
             throw new Exception("Commit tree is no staging area init");
         }
-        return commit.getCommitTree();
+        return commit.getCommitTreeRoot();
     }
     public void updateStateRoot(StateRoot stateRoot, Commit newCommit) {
         stateTreeRepository.updateStateRoot(stateRoot, newCommit);

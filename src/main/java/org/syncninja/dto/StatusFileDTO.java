@@ -1,8 +1,6 @@
 package org.syncninja.dto;
 
-
-import org.syncninja.model.StateTree.StateFile;
-import org.syncninja.model.commitTree.CommitFile;
+import org.syncninja.model.statetree.StateFile;
 
 public class StatusFileDTO {
     private boolean isNew;
@@ -21,8 +19,8 @@ public class StatusFileDTO {
         return isNew;
     }
 
-    public void setNew(boolean aNew) {
-        isNew = aNew;
+    public void setNew(boolean isNew) {
+        this.isNew = isNew;
     }
 
     public StateFile getStateFile() {

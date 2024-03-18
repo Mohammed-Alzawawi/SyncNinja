@@ -2,7 +2,7 @@ package org.syncninja.service;
 
 import org.syncninja.model.Commit;
 import org.syncninja.model.NinjaNode;
-import org.syncninja.model.commitTree.CommitDirectory;
+import org.syncninja.model.committree.CommitDirectory;
 import org.syncninja.repository.CommitRepository;
 import org.syncninja.util.ResourceBundleEnum;
 
@@ -21,18 +21,18 @@ public class CommitService {
         return commitRepository.save(commit);
     }
 
-    public Commit save(String message, Commit commit) throws Exception {
-        if (commit.getCommitTree() == null) {
+    public void save(String message, Commit commit) throws Exception {
+        if (commit.getCommitTreeRoot() == null) {
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.STAGE_AREA_IS_EMPTY));
         }
         commit.setCommitted(true);
         commit.setMessage(message);
         commit.setNextCommit(createStagedCommit());
-        stateTreeService.updateStateRoot(stateTreeService.getStateRoot(commit.getCommitTree().getPath()), commit);
-        return commitRepository.save(commit);
+        stateTreeService.updateStateRoot(stateTreeService.getStateRoot(commit.getCommitTreeRoot().getPath()), commit);
+        commitRepository.save(commit);
     }
 
-    public void addCommitTree(CommitDirectory commitDirectory) throws Exception {
+    public void addCommitTreeRoot(CommitDirectory commitDirectory) throws Exception {
         NinjaNode currentNinjaNode = stateTreeService.getStateRoot(commitDirectory.getPath()).getCurrentCommit();
         if (currentNinjaNode == null) {
             currentNinjaNode = stateTreeService.getStateRoot(commitDirectory.getPath()).getCurrentBranch();

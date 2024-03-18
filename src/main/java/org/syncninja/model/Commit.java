@@ -2,10 +2,7 @@ package org.syncninja.model;
 
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
-import org.syncninja.model.commitTree.CommitDirectory;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.syncninja.model.committree.CommitDirectory;
 
 @NodeEntity
 public class Commit extends NinjaNode {
@@ -31,7 +28,7 @@ public class Commit extends NinjaNode {
         this.message = message;
     }
 
-    public CommitDirectory getCommitTree() {
+    public CommitDirectory getCommitTreeRoot() {
         return commitTree;
     }
 
