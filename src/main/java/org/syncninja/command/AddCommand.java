@@ -11,10 +11,10 @@ import java.util.List;
 @CommandLine.Command(name = "add", description = "Add files to the commit tree")
 public class AddCommand implements Runnable {
 
-    private CommitTreeService commitTreeService;
+    private final CommitTreeService commitTreeService;
 
     @CommandLine.Parameters(paramLabel = "files", description = "Specify one or more files")
-    private List<String> listOfFilesToAdd = new ArrayList<>();
+    private final List<String> listOfFilesToAdd = new ArrayList<>();
 
     public AddCommand() {
         this.commitTreeService = new CommitTreeService();

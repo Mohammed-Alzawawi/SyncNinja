@@ -1,16 +1,15 @@
 package org.syncninja.service;
 
-
 import org.syncninja.dto.CommitFileDTO;
 import org.syncninja.dto.StatusFileDTO;
 import org.syncninja.model.NinjaNode;
-import org.syncninja.model.StateTree.StateDirectory;
-import org.syncninja.model.StateTree.StateFile;
-import org.syncninja.model.StateTree.StateRoot;
-import org.syncninja.model.StateTree.StateTree;
-import org.syncninja.model.commitTree.CommitDirectory;
-import org.syncninja.model.commitTree.CommitFile;
-import org.syncninja.model.commitTree.CommitNode;
+import org.syncninja.model.statetree.StateDirectory;
+import org.syncninja.model.statetree.StateFile;
+import org.syncninja.model.statetree.StateRoot;
+import org.syncninja.model.statetree.StateNode;
+import org.syncninja.model.committree.CommitDirectory;
+import org.syncninja.model.committree.CommitFile;
+import org.syncninja.model.committree.CommitNode;
 import org.syncninja.repository.CommitNodeRepository;
 import org.syncninja.repository.StateTreeRepository;
 import org.syncninja.util.*;
@@ -22,11 +21,9 @@ import java.util.stream.Collectors;
 
 public class StatusService {
     private final StateTreeRepository stateTreeRepository;
-    private final CommitNodeRepository commitNodeRepository;
 
     public StatusService() {
         this.stateTreeRepository = new StateTreeRepository();
-        this.commitNodeRepository = new CommitNodeRepository();
     }
 
     public void getTracked(List<CommitFileDTO> tracked, CommitDirectory commitDirectory) {
@@ -44,7 +41,7 @@ public class StatusService {
 
     public void currentState(File directory, StateDirectory stateDirectory, List<StatusFileDTO> untracked, Map<String, CommitFileDTO> tracked) throws Exception {
         File[] filesList = directory.listFiles();
-        Map<String, StateTree> stateTreeMap = stateDirectory.getInternalNodes().stream()
+        Map<String, StateNode> stateTreeMap = stateDirectory.getInternalNodes().stream()
                 .collect(Collectors.toMap((stateTree) -> stateTree.getPath(), (stateTree -> stateTree)));
         for (File file : filesList) {
             if (file.isDirectory()) {
@@ -105,7 +102,7 @@ public class StatusService {
         if (currentCommit.getNextCommit() == null) {
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.STAGE_AREA_IS_EMPTY));
         }
-        return currentCommit.getNextCommit().getCommitTree();
+        return currentCommit.getNextCommit().getCommitTreeRoot();
     }
     //checking the state of the file
     public boolean isModified(StateFile stateFile, CommitFileDTO commitFileDTO, File file) throws Exception {

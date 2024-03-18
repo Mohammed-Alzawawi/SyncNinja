@@ -2,23 +2,23 @@ package org.syncninja.repository;
 
 import org.neo4j.ogm.session.Session;
 import org.syncninja.model.Commit;
-import org.syncninja.model.StateTree.StateRoot;
-import org.syncninja.model.StateTree.StateTree;
+import org.syncninja.model.statetree.StateRoot;
+import org.syncninja.model.statetree.StateNode;
 import org.syncninja.util.Neo4jSession;
 
 import java.util.Optional;
 
 public class StateTreeRepository {
 
-    public Optional<StateTree> findById(String path) throws Exception {
+    public Optional<StateNode> findById(String path) {
         Session session = Neo4jSession.getSession();
-        StateTree stateTreeNode = session.load(StateTree.class, path, -1);
-        return Optional.ofNullable(stateTreeNode);
+        StateNode stateNodeNode = session.load(StateNode.class, path, -1);
+        return Optional.ofNullable(stateNodeNode);
     }
 
-    public void save(StateTree stateTree) {
+    public void save(StateNode stateNode) {
         Session session = Neo4jSession.getSession();
-        session.save(stateTree);
+        session.save(stateNode);
     }
 
     public void updateStateRoot(StateRoot stateRoot, Commit commit){

@@ -1,6 +1,6 @@
 package org.syncninja.dto;
 
-import org.syncninja.model.commitTree.CommitFile;
+import org.syncninja.model.committree.CommitFile;
 
 public class CommitFileDTO {
     private CommitFile commitFile;

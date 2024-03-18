@@ -1,4 +1,4 @@
-package org.syncninja.model.commitTree;
+package org.syncninja.model.committree;
 
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.syncninja.util.LinesContainer;

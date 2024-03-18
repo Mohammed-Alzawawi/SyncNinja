@@ -1,4 +1,4 @@
-package org.syncninja.model.StateTree;
+package org.syncninja.model.statetree;
 
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
@@ -6,15 +6,15 @@ import org.neo4j.ogm.annotation.NodeEntity;
 import java.io.File;
 
 @NodeEntity
-public abstract class StateTree {
+public abstract class StateNode {
     @Id
     protected String path;
     protected long lastModified;
 
-    public StateTree() {
+    public StateNode() {
     }
 
-    public StateTree(String path) {
+    public StateNode(String path) {
         this.path = path;
         File file = new File(path);
         this.lastModified = file.lastModified();

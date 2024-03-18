@@ -17,23 +17,11 @@ public class LinesContainer {
         return lineNumbers;
     }
 
-    public void setLineNumbers(List<Integer> lineNumbers) {
-        this.lineNumbers = lineNumbers;
-    }
-
     public List<String> getNewLines() {
         return newLines;
     }
 
-    public void setNewLines(List<String> newLines) {
-        this.newLines = newLines;
-    }
-
     public List<String> getOldLines() {
         return oldLines;
-    }
-
-    public void setOldLines(List<String> oldLines) {
-        this.oldLines = oldLines;
     }
 }

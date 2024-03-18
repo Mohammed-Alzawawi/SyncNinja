@@ -13,7 +13,7 @@ public class UnstageCommand implements Runnable {
     private final CommitTreeService commitTreeService;
 
     @CommandLine.Parameters(paramLabel = "files", description = "Specify one or more files to unstage from the staging area")
-    private List<String> filesToUnstage = new ArrayList<>();
+    private final List<String> filesToUnstage = new ArrayList<>();
 
     public UnstageCommand() {
         this.commitTreeService=new CommitTreeService();
