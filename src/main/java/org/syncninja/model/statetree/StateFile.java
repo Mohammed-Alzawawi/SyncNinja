@@ -4,6 +4,7 @@ import org.neo4j.ogm.annotation.NodeEntity;
 import org.syncninja.util.Fetcher;
 import org.syncninja.util.SHA256;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -11,11 +12,14 @@ import java.util.List;
 public class StateFile extends StateNode {
     private String hashValue;
     private List<String> lines;
+    private long lastModified;
 
     public StateFile(String path) throws IOException {
         super(path);
         hashValue = SHA256.hashValue(path);
         lines = Fetcher.readFile(path);
+        File file = new File(path);
+        this.lastModified = file.lastModified();
     }
 
     public StateFile() {
@@ -44,6 +48,14 @@ public class StateFile extends StateNode {
 
     public void setHashValue(String hashValue) {
         this.hashValue = hashValue;
+    }
+
+    public long getLastModified() {
+        return lastModified;
+    }
+
+    public void setLastModified(long lastModified) {
+        this.lastModified = lastModified;
     }
 
     @Override

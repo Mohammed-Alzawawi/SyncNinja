@@ -15,6 +15,10 @@ import org.syncninja.repository.StateTreeRepository;
 import org.syncninja.util.*;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -46,10 +50,13 @@ public class StatusService {
         for (File file : filesList) {
             if (file.isDirectory()) {
                 StateDirectory stateDirectoryChild = (StateDirectory) stateTreeMap.get(file.getPath());
+                //creates a path object so we can get the last access time for this directory
+                Path path = Paths.get(file.toString());
+                BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
                 if (stateDirectoryChild == null) {
                     // the directory is new add everything inside it
                     addAllFilesInDirectory(file, untracked, tracked);
-                } else if (stateDirectoryChild.getLastModified() != file.lastModified()) {
+                } else if (stateDirectoryChild.getLastAccessed() != attrs.lastAccessTime().toMillis()) {
                     currentState(file, stateDirectoryChild, untracked, tracked);
                 }
             } else {

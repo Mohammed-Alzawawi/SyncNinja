@@ -6,6 +6,8 @@ import org.syncninja.model.Branch;
 import org.syncninja.model.Commit;
 import org.syncninja.model.NinjaNode;
 
+import java.io.IOException;
+
 @NodeEntity
 public class StateRoot extends StateDirectory {
     @Relationship(type = "CURRENT_BRANCH", direction = Relationship.Direction.OUTGOING)
@@ -16,11 +18,11 @@ public class StateRoot extends StateDirectory {
     public StateRoot() {
     }
 
-    public StateRoot(String path) {
+    public StateRoot(String path) throws IOException {
         super(path);
     }
 
-    public StateRoot(String path, Branch currentBranch) {
+    public StateRoot(String path, Branch currentBranch) throws IOException {
         super(path);
         this.currentBranch = currentBranch;
     }
