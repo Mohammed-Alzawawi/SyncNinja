@@ -21,6 +21,7 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class StatusService {
@@ -38,6 +39,22 @@ public class StatusService {
                     getTracked(tracked, (CommitDirectory) commitNode);
                 } else {
                     tracked.add(new CommitFileDTO((CommitFile) commitNode, commitNode.getPath(), Fetcher.getRelativePath(commitNode.getPath())));
+                }
+            }
+        }
+    }
+
+    public void getDeleted(List<StatusFileDTO> deleted ,StateDirectory rootDirectory){
+        if(rootDirectory!=null){
+            Set<StateNode> stateTree =  rootDirectory.getInternalNodes();
+            File directory = new File(rootDirectory.getPath());
+            List<File> filesList = List.of(directory.listFiles());
+            for(StateNode stateNode : stateTree){
+                if(stateNode instanceof StateDirectory){
+                    getDeleted(deleted, (StateDirectory) stateNode);
+                }
+                else if(!filesList.contains(new File(stateNode.getPath()))){
+                    deleted.add(new StatusFileDTO(false,(StateFile) stateNode,stateNode.getPath() , Fetcher.getRelativePath(stateNode.getPath())));
                 }
             }
         }
@@ -97,6 +114,7 @@ public class StatusService {
                 .collect(Collectors.toMap((commitFileDTO) -> commitFileDTO.getPath(), (commitFileDTO -> commitFileDTO)));
 
         currentState(new File(path), stateDirectory, fileTrackingState.getUntracked(), stagingAreaMap);
+        getDeleted(fileTrackingState.getDeleted() , stateDirectory);
         return fileTrackingState;
     }
 

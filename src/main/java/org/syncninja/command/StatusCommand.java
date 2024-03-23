@@ -34,11 +34,11 @@ public class StatusCommand implements Runnable {
     private void printStatus(FileTrackingState state) {
         List<CommitFileDTO> tracked = state.getTracked();
         List<StatusFileDTO> untracked = state.getUntracked();
-
+        List<StatusFileDTO> deleted = state.getDeleted();
         String greenColor = "\u001B[32m";
         String redColorCode = "\u001B[31m";
         String resetColorCode = "\u001B[0m";
-        System.out.println(ResourceMessagingService.getMessage(ResourceBundleEnum.FILES_READY_TO_BE_COMMITTED));
+        System.out.println(ResourceMessagingService.getMessage(ResourceBundleEnum.CHANGES_READY_TO_BE_COMMITTED));
 
         for (int i = 0; i < tracked.size(); i++) {
             System.out.println(greenColor + "\t" + tracked.get(i).getRelativePath() + resetColorCode);
@@ -49,6 +49,14 @@ public class StatusCommand implements Runnable {
 
         for (int i = 0; i < untracked.size(); i++) {
             System.out.println(redColorCode + "\t" + untracked.get(i).getRelativePath() + resetColorCode);
+        }
+
+        if(!deleted.isEmpty()){
+            System.out.println("\n" + "\n");
+            System.out.println(ResourceMessagingService.getMessage(ResourceBundleEnum.CHANGES_NOT_STAGED_FOR_COMMIT) + "\n");
+            for (int i = 0; i < deleted.size(); i++) {
+                System.out.println(redColorCode + "\t" + "deleted: " + "\t" + deleted.get(i).getRelativePath() + resetColorCode);
+            }
         }
 
         System.out.println();
