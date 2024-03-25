@@ -10,7 +10,6 @@ import org.syncninja.model.statetree.StateNode;
 import org.syncninja.model.committree.CommitDirectory;
 import org.syncninja.model.committree.CommitFile;
 import org.syncninja.model.committree.CommitNode;
-import org.syncninja.repository.CommitNodeRepository;
 import org.syncninja.repository.StateTreeRepository;
 import org.syncninja.util.*;
 

@@ -7,7 +7,8 @@ import picocli.CommandLine;
         StatusCommand.class,
         AddCommand.class,
         CommitCommand.class,
-        UnstageCommand.class
+        UnstageCommand.class,
+        RestoreCommand.class
 })
 
 public class MainCommand implements Runnable {
