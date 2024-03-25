@@ -21,7 +21,6 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class StatusService {
@@ -45,7 +44,7 @@ public class StatusService {
     }
 
     public void addAllDeletedFilesInStateDirectory(List<StatusFileDTO> untracked, StateDirectory rootDirectory) {
-        Set<StateNode> stateNodes = rootDirectory.getInternalNodes();
+        List<StateNode> stateNodes = rootDirectory.getInternalNodes();
         for (StateNode stateNode : stateNodes) {
             if (stateNode instanceof StateDirectory) {
                 addAllDeletedFilesInStateDirectory(untracked, (StateDirectory) stateNode);
@@ -58,7 +57,7 @@ public class StatusService {
 
     public void getDeleted(List<StatusFileDTO> untracked, StateDirectory rootDirectory, File[] filesList) {
         if (rootDirectory != null) {
-            Set<StateNode> stateTree = rootDirectory.getInternalNodes();
+            List<StateNode> stateTree = rootDirectory.getInternalNodes();
             List<File> files = List.of(filesList);
             for (StateNode stateNode : stateTree) {
                 if (stateNode instanceof StateDirectory && !files.contains(new File(stateNode.getPath()))) {
@@ -77,7 +76,8 @@ public class StatusService {
         for (File file : filesList) {
             if (file.isDirectory()) {
                 StateDirectory stateDirectoryChild = (StateDirectory) stateTreeMap.get(file.getPath());
-                // creates a path object so we can get the last access time for this directory
+
+                // creates a path object, so we can get the last access time for this directory
                 Path path = Paths.get(file.toString());
                 BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
                 if (stateDirectoryChild == null) {
@@ -150,9 +150,6 @@ public class StatusService {
         if (commitFileDTO == null) {
             return !linesContainer.getLineNumbers().isEmpty();
         }
-        if (!commitFileDTO.getCommitFile().getNewValuesList().equals(linesContainer.getNewLines())) {
-            return true;
-        }
-        return false;
+        return !commitFileDTO.getCommitFile().getNewValuesList().equals(linesContainer.getNewLines());
     }
 }

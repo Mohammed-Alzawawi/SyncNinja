@@ -16,7 +16,9 @@ public enum ResourceBundleEnum {
     STAGE_AREA_IS_EMPTY("stage_area_is_empty"),
     SUCCESSFULLY_ADDED("successfully_added"),
     SUCCESSFULLY_REMOVED("successfully_removed"),
-    PATH_NOT_FILE("path_not_file");
+    PATH_NOT_FILE("path_not_file"),
+    RESTORED_SUCCESSFULLY("restored_successfully");
+
     private final String key;
 
     ResourceBundleEnum(String key) {
