@@ -5,7 +5,6 @@ import org.neo4j.ogm.annotation.Relationship;
 import org.syncninja.model.Branch;
 import org.syncninja.model.Commit;
 import org.syncninja.model.NinjaNode;
-
 import java.io.IOException;
 
 @NodeEntity
