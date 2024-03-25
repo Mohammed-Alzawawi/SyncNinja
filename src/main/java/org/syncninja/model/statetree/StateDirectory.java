@@ -8,14 +8,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @NodeEntity
 public class StateDirectory extends StateNode {
+
     @Relationship(type = "HAS", direction = Relationship.Direction.OUTGOING)
-    protected Set<StateNode> internalNodes = new HashSet<>();
+    protected List<StateNode> internalNodes = new ArrayList<>();
     private long lastAccessed;
 
     public StateDirectory() {
@@ -23,25 +23,18 @@ public class StateDirectory extends StateNode {
 
     public StateDirectory(String path) throws IOException {
         super(path);
-        this.internalNodes = new HashSet<>();
+        this.internalNodes = new ArrayList<>();
         Path file = Paths.get(path);
         BasicFileAttributes attrs = Files.readAttributes(file, BasicFileAttributes.class);
         this.lastAccessed = attrs.lastAccessTime().toMillis();
-
     }
+
     public long getLastAccessed() {
         return lastAccessed;
     }
-    public void setLastAccessed(long lastAccessed) {
-        this.lastAccessed = lastAccessed;
-    }
 
-    public Set<StateNode> getInternalNodes() {
+    public List<StateNode> getInternalNodes() {
         return internalNodes;
-    }
-
-    public void setInternalNodes(Set<StateNode> internalNodes) {
-        this.internalNodes = internalNodes;
     }
 
     @Override

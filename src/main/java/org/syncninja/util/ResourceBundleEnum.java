@@ -19,7 +19,8 @@ public enum ResourceBundleEnum {
     BRANCH_ADDED_SUCCESSFULLY("branch_created_successfully"),
     BRANCH_CHECKED_OUT_SUCCESSFULLY("switched_to_branch"),
     BRANCH_NOT_FOUND("branch_not_found"),
-    PATH_NOT_FILE("path_not_file");
+    PATH_NOT_FILE("path_not_file"),
+    RESTORED_SUCCESSFULLY("restored_successfully");
 
     private final String key;
 

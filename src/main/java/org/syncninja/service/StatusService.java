@@ -45,7 +45,7 @@ public class StatusService {
     }
 
     public void addAllDeletedFilesInStateDirectory(List<StatusFileDTO> untracked, StateDirectory rootDirectory) {
-        Set<StateNode> stateNodes = rootDirectory.getInternalNodes();
+        List<StateNode> stateNodes = rootDirectory.getInternalNodes();
         for (StateNode stateNode : stateNodes) {
             if (stateNode instanceof StateDirectory) {
                 addAllDeletedFilesInStateDirectory(untracked, (StateDirectory) stateNode);
@@ -58,7 +58,7 @@ public class StatusService {
 
     public void getDeleted(List<StatusFileDTO> untracked, StateDirectory rootDirectory, File[] filesList) {
         if (rootDirectory != null) {
-            Set<StateNode> stateTree = rootDirectory.getInternalNodes();
+            List<StateNode> stateTree = rootDirectory.getInternalNodes();
             List<File> files = List.of(filesList);
             for (StateNode stateNode : stateTree) {
                 if (stateNode instanceof StateDirectory && !files.contains(new File(stateNode.getPath()))) {
