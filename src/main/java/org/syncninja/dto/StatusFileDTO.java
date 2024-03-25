@@ -3,24 +3,24 @@ package org.syncninja.dto;
 import org.syncninja.model.statetree.StateFile;
 
 public class StatusFileDTO {
-    private boolean isNew;
     private StateFile stateFile;
     private String path;
     private String relativePath;
+    private FileStatusEnum fileStatus;
 
-    public StatusFileDTO(boolean isNew, StateFile stateFile, String path, String relativePath) {
+    public StatusFileDTO(FileStatusEnum fileStatus, StateFile stateFile, String path, String relativePath) {
         this.relativePath = relativePath;
-        this.isNew = isNew;
+        this.fileStatus = fileStatus;
         this.stateFile = stateFile;
         this.path = path;
     }
 
-    public boolean isNew() {
-        return isNew;
+    public FileStatusEnum getFileStatus() {
+        return fileStatus;
     }
 
-    public void setNew(boolean isNew) {
-        this.isNew = isNew;
+    public void setFileStatus(FileStatusEnum fileStatus) {
+        this.fileStatus = fileStatus;
     }
 
     public StateFile getStateFile() {
