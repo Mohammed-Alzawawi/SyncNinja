@@ -9,23 +9,11 @@ import java.io.File;
 public abstract class StateNode {
     @Id
     protected String path;
-    protected long lastModified;
-
     public StateNode() {
     }
 
     public StateNode(String path) {
         this.path = path;
-        File file = new File(path);
-        this.lastModified = file.lastModified();
-    }
-
-    public long getLastModified() {
-        return lastModified;
-    }
-
-    public void setLastModified(long lastModified) {
-        this.lastModified = lastModified;
     }
 
     public String getPath() {

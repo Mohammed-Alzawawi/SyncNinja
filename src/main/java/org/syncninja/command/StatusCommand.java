@@ -1,6 +1,7 @@
 package org.syncninja.command;
 
 import org.syncninja.dto.CommitFileDTO;
+import org.syncninja.dto.FileStatusEnum;
 import org.syncninja.dto.StatusFileDTO;
 import org.syncninja.service.ResourceMessagingService;
 import org.syncninja.service.StatusService;
@@ -31,14 +32,23 @@ public class StatusCommand implements Runnable {
             throw new RuntimeException(e);
         }
     }
+
+    private String getStatusFileString(FileStatusEnum fileStatusEnum) {
+        if (fileStatusEnum == FileStatusEnum.IS_DELETED) {
+            return "deleted: ";
+        } else if (fileStatusEnum == FileStatusEnum.IS_NEW) {
+            return "new file: ";
+        }
+        return "modified: ";
+    }
+
     private void printStatus(FileTrackingState state) {
         List<CommitFileDTO> tracked = state.getTracked();
         List<StatusFileDTO> untracked = state.getUntracked();
-
         String greenColor = "\u001B[32m";
         String redColorCode = "\u001B[31m";
         String resetColorCode = "\u001B[0m";
-        System.out.println(ResourceMessagingService.getMessage(ResourceBundleEnum.FILES_READY_TO_BE_COMMITTED));
+        System.out.println(ResourceMessagingService.getMessage(ResourceBundleEnum.CHANGES_READY_TO_BE_COMMITTED));
 
         for (int i = 0; i < tracked.size(); i++) {
             System.out.println(greenColor + "\t" + tracked.get(i).getRelativePath() + resetColorCode);
@@ -48,9 +58,8 @@ public class StatusCommand implements Runnable {
         System.out.println(ResourceMessagingService.getMessage(ResourceBundleEnum.UNTRACKED_FILES) + "\n");
 
         for (int i = 0; i < untracked.size(); i++) {
-            System.out.println(redColorCode + "\t" + untracked.get(i).getRelativePath() + resetColorCode);
+            System.out.println(redColorCode + "\t" + getStatusFileString(untracked.get(i).getFileStatus()) + " " + untracked.get(i).getRelativePath() + resetColorCode);
         }
-
         System.out.println();
     }
 }

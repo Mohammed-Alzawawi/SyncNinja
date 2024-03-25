@@ -5,17 +5,19 @@ import org.syncninja.model.Commit;
 import org.syncninja.model.NinjaNode;
 import org.syncninja.model.committree.CommitDirectory;
 import org.syncninja.model.committree.CommitFile;
+import org.syncninja.model.committree.CommitNode;
 import org.syncninja.model.statetree.StateDirectory;
 import org.syncninja.model.statetree.StateFile;
-import org.syncninja.model.statetree.StateRoot;
 import org.syncninja.model.statetree.StateNode;
-import org.syncninja.model.committree.CommitNode;
+import org.syncninja.model.statetree.StateRoot;
 import org.syncninja.repository.StateTreeRepository;
 import org.syncninja.util.ResourceBundleEnum;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class StateTreeService {
     private final StateTreeRepository stateTreeRepository;
@@ -76,15 +78,16 @@ public class StateTreeService {
     public CommitNode getStagingArea(String path) throws Exception {
         StateRoot stateRoot = getStateRoot(path);
         NinjaNode currentNode = stateRoot.getCurrentCommit();
-        if(currentNode == null){
+        if (currentNode == null) {
             currentNode = stateRoot.getCurrentBranch();
         }
         Commit commit = currentNode.getNextCommit();
-        if(commit == null) {
+        if (commit == null) {
             throw new Exception("Commit tree is no staging area init");
         }
         return commit.getCommitTreeRoot();
     }
+
     public void updateStateRoot(StateRoot stateRoot, Commit newCommit) {
         stateTreeRepository.updateStateRoot(stateRoot, newCommit);
     }
@@ -93,15 +96,15 @@ public class StateTreeService {
         List<CommitNode> commitNodeList = new ArrayList<>();
         StateNode currentStateNode;
 
-        if(commitNode instanceof CommitDirectory){
+        if (commitNode instanceof CommitDirectory) {
             currentStateNode = getStateDirectory(commitNode.getPath());
             commitNodeList = ((CommitDirectory) commitNode).getCommitNodeList();
         } else {
             currentStateNode = compareAndAddLines(commitNode, getStateFile(commitNode.getPath()));
         }
 
-        if(parentStateNode != null &&!((StateDirectory)parentStateNode).getInternalNodes().contains(currentStateNode)){
-            ((StateDirectory)parentStateNode).addFile(currentStateNode);
+        if (parentStateNode != null && !((StateDirectory) parentStateNode).getInternalNodes().contains(currentStateNode)) {
+            ((StateDirectory) parentStateNode).addFile(currentStateNode);
         }
 
         for (CommitNode childCommitNode : commitNodeList) {
@@ -109,19 +112,19 @@ public class StateTreeService {
         }
 
         // save the root
-        if (parentStateNode == null){
+        if (parentStateNode == null) {
             stateTreeRepository.save(currentStateNode);
         }
     }
 
     private StateNode compareAndAddLines(CommitNode commitNode, StateNode currentStateTree) {
-        CommitFile commitFile = ((CommitFile)commitNode);
-        List<String> stateFileLines = ((StateFile)currentStateTree).getLines();
+        CommitFile commitFile = ((CommitFile) commitNode);
+        List<String> stateFileLines = ((StateFile) currentStateTree).getLines();
 
         int commitFileLineIndex = 0;
-        while(commitFileLineIndex < commitFile.getLineNumberList().size()){
+        while (commitFileLineIndex < commitFile.getLineNumberList().size()) {
             String newLine = commitFile.getNewValuesList().get(commitFileLineIndex);
-            int newLineNumber = commitFile.getLineNumberList().get(commitFileLineIndex)-1;
+            int newLineNumber = commitFile.getLineNumberList().get(commitFileLineIndex) - 1;
 
             if (newLineNumber < stateFileLines.size()) {
                 ((StateFile) currentStateTree).getLines().remove(newLineNumber);
@@ -139,7 +142,7 @@ public class StateTreeService {
         );
     }
 
-    private StateDirectory getStateDirectory(String path) {
+    private StateDirectory getStateDirectory(String path) throws IOException {
         return (StateDirectory) stateTreeRepository.findById(path).orElse(
                 new StateDirectory(path)
         );
