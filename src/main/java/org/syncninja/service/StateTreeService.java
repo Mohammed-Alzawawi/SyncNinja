@@ -88,8 +88,8 @@ public class StateTreeService {
         return commit.getCommitTreeRoot();
     }
 
-    public void updateStateRoot(StateRoot stateRoot, Commit newCommit) {
-        stateTreeRepository.updateStateRoot(stateRoot, newCommit);
+    public void updateStateRoot(StateRoot stateRoot, NinjaNode ninjaNode) {
+        stateTreeRepository.updateStateRoot(stateRoot, ninjaNode);
     }
 
     public void addChangesToStateTree(CommitNode commitNode, StateNode stateRoot, StateNode parentStateNode) throws Exception {

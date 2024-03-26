@@ -3,13 +3,14 @@ package org.syncninja.model;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @NodeEntity
 public abstract class NinjaNode extends SyncNode {
 
     @Relationship(type = "ParentOf")
-    private List<Branch> branchList;
+    private final List<Branch> branchList = new ArrayList<>();
 
     @Relationship(type = "nextCommit")
     private Commit nextCommit;

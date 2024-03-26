@@ -16,7 +16,11 @@ public enum ResourceBundleEnum {
     STAGE_AREA_IS_EMPTY("stage_area_is_empty"),
     SUCCESSFULLY_ADDED("successfully_added"),
     SUCCESSFULLY_REMOVED("successfully_removed"),
+    BRANCH_ADDED_SUCCESSFULLY("branch_created_successfully"),
+    BRANCH_CHECKED_OUT_SUCCESSFULLY("switched_to_branch"),
+    BRANCH_NOT_FOUND("branch_not_found"),
     PATH_NOT_FILE("path_not_file");
+
     private final String key;
 
     ResourceBundleEnum(String key) {
