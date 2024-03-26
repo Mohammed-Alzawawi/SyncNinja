@@ -7,10 +7,7 @@ import org.syncninja.model.committree.CommitDirectory;
 import org.syncninja.model.committree.CommitFile;
 import org.syncninja.model.committree.CommitNode;
 import org.syncninja.repository.CommitNodeRepository;
-import org.syncninja.util.CompareFileUtil;
-import org.syncninja.util.FileTrackingState;
-import org.syncninja.util.LinesContainer;
-import org.syncninja.util.Regex;
+import org.syncninja.util.*;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -33,7 +30,7 @@ public class CommitTreeService {
     public void addFileToCommitTree(String mainDirectoryPath, List<String> listOfFilesToBeAdded) throws Exception {
         FileTrackingState fileTrackingState = statusService.getState(mainDirectoryPath);
         if (fileTrackingState == null) {
-            throw new IllegalStateException("Failed to retrieve file tracking state for directory: " + mainDirectoryPath);
+            throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_NOT_INITIALIZED, new Object[]{mainDirectoryPath}));
         }
         List<StatusFileDTO> untrackedFiles = fileTrackingState.getUntracked();
         addFilesToCommitTree(untrackedFiles, mainDirectoryPath, listOfFilesToBeAdded);
