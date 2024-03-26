@@ -128,38 +128,24 @@ public class StateTreeService {
     public void restore(List<String> pathList, String mainDirectoryPath) throws Exception {
         StateRoot stateRoot = getStateRoot(mainDirectoryPath);
 
+        // building regex
         Regex regexBuilder = new Regex();
         for (String path : pathList) {
             regexBuilder.addFilePath(path);
         }
         String regex = regexBuilder.buildRegex();
 
+        // looping through the untracked
         FileTrackingState fileTrackingState = statusService.getState(mainDirectoryPath);
         if (fileTrackingState == null) {
-            throw new IllegalStateException("Failed to retrieve file tracking state for directory: " + mainDirectoryPath);
+            throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_NOT_INITIALIZED, new Object[]{mainDirectoryPath}));
         }
         List<StatusFileDTO> untrackedFiles = fileTrackingState.getUntracked();
-        List<String> untrackedPaths = new ArrayList<>();
 
         for(StatusFileDTO statusFileDTO : untrackedFiles){
-            untrackedPaths.add(statusFileDTO.getPath());
-        }
-
-        restoreFiles(stateRoot, regex, untrackedPaths);
-    }
-
-    private void restoreFiles(StateNode currentStateTree, String regex, List<String> untrackedPaths) throws IOException {
-        List<StateNode> stateNodeList = new ArrayList<>();
-        String currentStateTreePath = currentStateTree.getPath();
-
-        if(currentStateTree instanceof StateDirectory){
-            stateNodeList = ((StateDirectory)currentStateTree).getInternalNodes();
-        } else if(currentStateTreePath.matches(regex) && untrackedPaths.contains(currentStateTreePath)){
-            restoreOldLines(currentStateTreePath, currentStateTree);
-        }
-
-        for(StateNode stateNode : stateNodeList){
-            restoreFiles(stateNode, regex, untrackedPaths);
+            if(statusFileDTO.getPath().matches(regex) && statusFileDTO.getStateFile() != null){
+                restoreOldLines(statusFileDTO.getPath(), statusFileDTO.getStateFile());
+            }
         }
     }
 
