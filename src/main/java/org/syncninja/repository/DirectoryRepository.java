@@ -20,7 +20,7 @@ public class DirectoryRepository {
         return Optional.ofNullable(directory);
     }
 
-    public static Optional<Directory> findByPath(String path) {
+    public Optional<Directory> findByPath(String path) {
         Session session = Neo4jSession.getSession();
         Directory directory = session.queryForObject(Directory.class, "MATCH(d:Directory) WHERE d.path = $path RETURN d", Collections.singletonMap("path", path));
         return Optional.ofNullable(directory);
