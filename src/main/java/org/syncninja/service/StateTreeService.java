@@ -1,5 +1,6 @@
 package org.syncninja.service;
 
+import org.syncninja.dto.StatusFileDTO;
 import org.syncninja.model.Branch;
 import org.syncninja.model.Commit;
 import org.syncninja.model.NinjaNode;
@@ -11,47 +12,23 @@ import org.syncninja.model.statetree.StateFile;
 import org.syncninja.model.statetree.StateNode;
 import org.syncninja.model.statetree.StateRoot;
 import org.syncninja.repository.StateTreeRepository;
+import org.syncninja.util.FileTrackingState;
+import org.syncninja.util.Regex;
 import org.syncninja.util.ResourceBundleEnum;
 
-import java.io.File;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class StateTreeService {
     private final StateTreeRepository stateTreeRepository;
+    private final StatusService statusService;
 
     public StateTreeService() {
         stateTreeRepository = new StateTreeRepository();
-    }
-
-    public StateFile generateStateFileNode(String path) throws Exception {
-        StateFile file = null;
-        if (stateTreeRepository.findById(path).isPresent()) {
-            throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.FILE_ALREADY_EXISTS, new Object[]{path}));
-        } else {
-            file = new StateFile(path);
-            stateTreeRepository.save(file);
-        }
-        StateDirectory parent = (StateDirectory) stateTreeRepository.findById(new File(path).getParent().toString()).orElse(null);
-        if (parent == null) {
-            parent = new StateDirectory(new File(path).getParent().toString());
-        }
-        parent.getInternalNodes().add(file);
-        stateTreeRepository.save(parent);
-        return file;
-    }
-
-    public StateDirectory generateStateDirectoryNode(String path) throws Exception {
-        StateDirectory stateDirectory = null;
-        if (stateTreeRepository.findById(path).isPresent()) {
-            throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.SUB_DIRECTORY_ALREADY_EXISTS, new Object[]{path}));
-        } else {
-            stateDirectory = new StateDirectory(path);
-            stateTreeRepository.save(stateDirectory);
-        }
-        return stateDirectory;
+        statusService = new StatusService();
     }
 
     public StateNode getStateNode(String path) throws Exception {
@@ -92,7 +69,7 @@ public class StateTreeService {
         stateTreeRepository.updateStateRoot(stateRoot, ninjaNode);
     }
 
-    public void addChangesToStateTree(CommitNode commitNode, StateNode stateRoot, StateNode parentStateNode) throws Exception {
+    public void addChangesToStateTree(CommitNode commitNode, StateNode parentStateNode) throws Exception {
         List<CommitNode> commitNodeList = new ArrayList<>();
         StateNode currentStateNode;
 
@@ -108,7 +85,7 @@ public class StateTreeService {
         }
 
         for (CommitNode childCommitNode : commitNodeList) {
-            addChangesToStateTree(childCommitNode, stateRoot, currentStateNode);
+            addChangesToStateTree(childCommitNode, currentStateNode);
         }
 
         // save the root
@@ -146,5 +123,38 @@ public class StateTreeService {
         return (StateDirectory) stateTreeRepository.findById(path).orElse(
                 new StateDirectory(path)
         );
+    }
+
+    public void restore(List<String> pathList, String mainDirectoryPath) throws Exception {
+        StateRoot stateRoot = getStateRoot(mainDirectoryPath);
+
+        // building regex
+        Regex regexBuilder = new Regex();
+        for (String path : pathList) {
+            regexBuilder.addFilePath(path);
+        }
+        String regex = regexBuilder.buildRegex();
+
+        // looping through the untracked
+        FileTrackingState fileTrackingState = statusService.getState(mainDirectoryPath);
+        if (fileTrackingState == null) {
+            throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_NOT_INITIALIZED, new Object[]{mainDirectoryPath}));
+        }
+        List<StatusFileDTO> untrackedFiles = fileTrackingState.getUntracked();
+
+        for(StatusFileDTO statusFileDTO : untrackedFiles){
+            if(statusFileDTO.getPath().matches(regex) && statusFileDTO.getStateFile() != null){
+                restoreOldLines(statusFileDTO.getPath(), statusFileDTO.getStateFile());
+            }
+        }
+    }
+
+    private void restoreOldLines(String path, StateNode stateNode) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(path))) {
+            for (String line : ((StateFile)stateNode).getLines()) {
+                writer.write(line);
+                writer.newLine();
+            }
+        }
     }
 }

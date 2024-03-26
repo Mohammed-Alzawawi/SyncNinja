@@ -29,9 +29,7 @@ public class CommitCommand implements Runnable {
             NinjaNode currentNinjaNode = stateRoot.getCurrentNinjaNode();
             commitService.save(message, currentNinjaNode.getNextCommit());
             stateTreeService.addChangesToStateTree(
-                    currentNinjaNode.getNextCommit().getCommitTreeRoot(),
-                    stateRoot,
-                    null);
+                    currentNinjaNode.getNextCommit().getCommitTreeRoot(), null);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
