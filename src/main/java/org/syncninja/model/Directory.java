@@ -28,4 +28,12 @@ public class Directory extends SyncNode {
     public void setBranch(Branch branch) {
         this.branch = branch;
     }
+
+    @Override
+    public String toString() {
+        return "Directory{" +
+                "path='" + path + '\'' +
+                ", branch=" + branch +
+                '}';
+    }
 }

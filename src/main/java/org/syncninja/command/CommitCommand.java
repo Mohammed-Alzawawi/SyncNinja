@@ -8,7 +8,7 @@ import org.syncninja.service.StateTreeService;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "commit")
-public class CommitCommand implements Runnable {
+public class CommitCommand extends CommonOptions implements Runnable {
 
     @CommandLine.Option(names = {"-m"}, paramLabel = "message", description = "Enter a message for the commit", required = true)
     private String message;
@@ -23,8 +23,9 @@ public class CommitCommand implements Runnable {
 
     @Override
     public void run() {
-        String path = System.getProperty("user.dir");
+        String path = directory;
         try {
+            long startTime = System.currentTimeMillis();
             StateRoot stateRoot = stateTreeService.getStateRoot(path);
             NinjaNode currentNinjaNode = stateRoot.getCurrentNinjaNode();
             commitService.save(message, currentNinjaNode.getNextCommit());

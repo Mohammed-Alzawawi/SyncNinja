@@ -12,5 +12,7 @@ import picocli.CommandLine;
 
 public class MainCommand implements Runnable {
     @Override
-    public void run() {}
+    public void run() {
+        System.out.println("HELL");
+    }
 }

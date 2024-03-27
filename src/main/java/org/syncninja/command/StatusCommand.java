@@ -1,5 +1,6 @@
 package org.syncninja.command;
 
+import org.syncninja.OutputCollector;
 import org.syncninja.dto.CommitFileDTO;
 import org.syncninja.dto.StatusFileDTO;
 import org.syncninja.service.ResourceMessagingService;
@@ -11,7 +12,7 @@ import picocli.CommandLine;
 import java.util.List;
 
 @CommandLine.Command(name = "status")
-public class StatusCommand implements Runnable {
+public class StatusCommand extends CommonOptions implements Runnable {
     private final StatusService statusService;
 
     public StatusCommand() {
@@ -20,7 +21,7 @@ public class StatusCommand implements Runnable {
 
     @Override
     public void run() {
-        String path = System.getProperty("user.dir");
+        String path = this.directory;
         try {
             FileTrackingState state = statusService.getState(path);
             if (state == null) {
@@ -38,19 +39,19 @@ public class StatusCommand implements Runnable {
         String greenColor = "\u001B[32m";
         String redColorCode = "\u001B[31m";
         String resetColorCode = "\u001B[0m";
-        System.out.println(ResourceMessagingService.getMessage(ResourceBundleEnum.FILES_READY_TO_BE_COMMITTED));
+        OutputCollector.addString(sessionId, ResourceMessagingService.getMessage(ResourceBundleEnum.FILES_READY_TO_BE_COMMITTED));
 
         for (int i = 0; i < tracked.size(); i++) {
-            System.out.println(greenColor + "\t" + tracked.get(i).getRelativePath() + resetColorCode);
+            OutputCollector.addString(sessionId, greenColor + "\t" + tracked.get(i).getRelativePath() + resetColorCode);
         }
 
         System.out.println("\n" + "\n");
-        System.out.println(ResourceMessagingService.getMessage(ResourceBundleEnum.UNTRACKED_FILES) + "\n");
+        OutputCollector.addString(sessionId, ResourceMessagingService.getMessage(ResourceBundleEnum.UNTRACKED_FILES) + "\n");
 
         for (int i = 0; i < untracked.size(); i++) {
-            System.out.println(redColorCode + "\t" + untracked.get(i).getRelativePath() + resetColorCode);
+            OutputCollector.addString(sessionId, redColorCode + "\t" + untracked.get(i).getRelativePath() + resetColorCode);
         }
 
-        System.out.println();
+        OutputCollector.addString(sessionId, "");
     }
 }
