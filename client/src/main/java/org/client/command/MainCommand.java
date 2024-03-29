@@ -1,18 +1,19 @@
-package org.syncninja.command;
+package org.client.command;
 
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "", subcommands = {
         InitCommand.class,
-        StatusCommand.class,
         AddCommand.class,
         CommitCommand.class,
+        RestoreCommand.class,
+        StatusCommand.class,
         UnstageCommand.class,
-        CheckOutCommand.class,
-        RestoreCommand.class
+        CheckoutCommand.class
 })
-
 public class MainCommand implements Runnable {
     @Override
-    public void run() {}
+    public void run() {
+        System.out.println("welcome to SyncNinja :)");
+    }
 }

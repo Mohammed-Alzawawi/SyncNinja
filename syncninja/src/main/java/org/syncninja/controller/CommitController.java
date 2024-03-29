@@ -1,37 +1,37 @@
-package org.syncninja.command;
+package org.syncninja.controller;
 
+import org.syncninja.util.OutputCollector;
 import org.syncninja.model.NinjaNode;
 import org.syncninja.model.statetree.StateRoot;
 import org.syncninja.service.CommitService;
+import org.syncninja.service.ResourceMessagingService;
 import org.syncninja.service.StateTreeService;
 
-import picocli.CommandLine;
+import org.syncninja.util.Neo4jSession;
+import org.syncninja.util.ResourceBundleEnum;
 
-@CommandLine.Command(name = "commit")
-public class CommitCommand implements Runnable {
-
-    @CommandLine.Option(names = {"-m"}, paramLabel = "message", description = "Enter a message for the commit", required = true)
-    private String message;
+public class CommitController {
 
     private final CommitService commitService;
     private final StateTreeService stateTreeService;
 
-    public CommitCommand() {
+    public CommitController() {
         this.commitService = new CommitService();
         this.stateTreeService = new StateTreeService();
     }
 
-    @Override
-    public void run() {
-        String path = System.getProperty("user.dir");
+    public void run(String message, String path) {
         try {
             StateRoot stateRoot = stateTreeService.getStateRoot(path);
             NinjaNode currentNinjaNode = stateRoot.getCurrentNinjaNode();
             commitService.save(message, currentNinjaNode.getNextCommit());
             stateTreeService.addChangesToStateTree(
-                    currentNinjaNode.getNextCommit().getCommitTreeRoot(), null);
+                    currentNinjaNode.getNextCommit().getCommitTreeRoot(),
+                    null);
+            OutputCollector.addString(ResourceMessagingService.getMessage(ResourceBundleEnum.COMMIT_SUCCESSFULLY));
+            Neo4jSession.closeSession();
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            OutputCollector.addString(e.getMessage());
         }
     }
 }
