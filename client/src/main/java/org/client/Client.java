@@ -24,4 +24,9 @@ public class Client {
             System.out.println(e.getMessage());
         }
     }
+
+    public static String escapeBackslashes(String input) {
+        return input.replace("\\", "\\\\");
+    }
+
 }

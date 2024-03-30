@@ -1,6 +1,7 @@
 package org.syncninja;
 
 import com.sun.net.httpserver.HttpServer;
+import org.syncninja.handler.*;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -28,6 +29,14 @@ public class Main {
                     exchange.sendResponseHeaders(405, -1); // Method not allowed
                 }
             });
+
+            server.createContext("/init", new InitHandler());
+            server.createContext("/add", new AddHandler());
+            server.createContext("/checkout", new CheckoutHandler());
+            server.createContext("/commit", new CommitHandler());
+            server.createContext("/restore", new RestoreHandler());
+            server.createContext("/status", new StatusHandler());
+            server.createContext("/unstage", new UnstageHandler());
 
             timer = new Timer();
             timer.schedule(new ShutdownTask(), SERVER_TIMEOUT);

@@ -1,22 +1,25 @@
 package org.client.command;
 
-import org.syncninja.util.OutputCollector;
-import org.syncninja.controller.StatusController;
+import org.codehaus.jettison.json.JSONObject;
 import picocli.CommandLine;
 
-@CommandLine.Command(name = "status")
-public class StatusCommand implements Runnable {
-    private final StatusController statusController;
+import java.net.HttpURLConnection;
 
-    public StatusCommand() {
-        this.statusController = new StatusController();
-    }
+@CommandLine.Command(name = "status")
+public class StatusCommand extends BaseCommand {
 
     @Override
     public void run() {
-        String path = System.getProperty("user.dir");
-        statusController.run(path);
-        System.out.println(OutputCollector.getString());
-        OutputCollector.refresh();
+        try{
+            HttpURLConnection connection = serverConnection("status");
+
+            JSONObject jsonRequest = new JSONObject();
+            jsonRequest.put("path", System.getProperty("user.dir"));
+            sendToServer(jsonRequest, connection);
+
+            getResponse(connection);
+        } catch (Exception e){
+            System.out.println(e.getMessage());
+        }
     }
 }

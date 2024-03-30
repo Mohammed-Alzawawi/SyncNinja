@@ -1,22 +1,25 @@
 package org.client.command;
 
-import org.syncninja.util.OutputCollector;
-import org.syncninja.controller.InitController;
+import org.codehaus.jettison.json.JSONObject;
 import picocli.CommandLine;
 
-@CommandLine.Command(name = "init", description = "Initialize directory")
-public class InitCommand implements Runnable {
-    private final InitController initController;
+import java.net.HttpURLConnection;
 
-    public InitCommand() {
-        this.initController = new InitController();
-    }
+@CommandLine.Command(name = "init", description = "Initialize directory")
+public class InitCommand extends BaseCommand {
 
     @Override
     public void run() {
-        String path = System.getProperty("user.dir");
-        initController.run(path);
-        System.out.println(OutputCollector.getString());
-        OutputCollector.refresh();
+        try {
+            HttpURLConnection connection = serverConnection("init");
+
+            JSONObject jsonRequest = new JSONObject();
+            jsonRequest.put("path", System.getProperty("user.dir"));
+            sendToServer(jsonRequest, connection);
+
+            getResponse(connection);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 }

@@ -1,27 +1,29 @@
 package org.client.command;
 
-import org.syncninja.util.OutputCollector;
-import org.syncninja.controller.CommitController;
-
+import org.codehaus.jettison.json.JSONObject;
 import picocli.CommandLine;
 
+import java.net.HttpURLConnection;
+
 @CommandLine.Command(name = "commit")
-public class CommitCommand implements Runnable {
+public class CommitCommand extends BaseCommand {
 
     @CommandLine.Option(names = {"-m"}, paramLabel = "message", description = "Enter a message for the commit", required = true)
     private String message;
 
-    private final CommitController commitController;
-
-    public CommitCommand() {
-        this.commitController = new CommitController();
-    }
-
     @Override
     public void run() {
-        String path = System.getProperty("user.dir");
-        commitController.run(message, path);
-        System.out.println(OutputCollector.getString());
-        OutputCollector.refresh();
+        try{
+            HttpURLConnection connection = serverConnection("commit");
+
+            JSONObject jsonRequest = new JSONObject();
+            jsonRequest.put("path", System.getProperty("user.dir"));
+            jsonRequest.put("message", message);
+            sendToServer(jsonRequest, connection);
+
+            getResponse(connection);
+        } catch (Exception e){
+            System.out.println(e.getMessage());
+        }
     }
 }
