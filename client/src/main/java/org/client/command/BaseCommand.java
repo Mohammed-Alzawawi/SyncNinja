@@ -11,7 +11,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 public abstract class BaseCommand implements Runnable {
-    HttpURLConnection serverConnection(String endpoint) throws IOException {
+    protected HttpURLConnection serverConnection(String endpoint) throws IOException {
         URL url = new URL("http://localhost:8080/" + endpoint);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
@@ -21,18 +21,18 @@ public abstract class BaseCommand implements Runnable {
         return connection;
     }
 
-    void sendToServer(JSONObject jsonRequest, HttpURLConnection connection) throws Exception {
+    protected void sendToServer(JSONObject jsonRequest, HttpURLConnection connection) throws Exception {
         try (OutputStream os = connection.getOutputStream()) {
             os.write(jsonRequest.toString().getBytes());
         }
     }
 
-    void getResponse(HttpURLConnection connection) throws IOException {
+    protected void getResponse(HttpURLConnection connection) throws IOException {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
             StringBuilder response = new StringBuilder();
-            String responseLine;
-            while ((responseLine = br.readLine()) != null) {
-                response.append(responseLine.trim());
+            int character;
+            while ((character = br.read()) != -1) {
+                response.append((char) character);
             }
             System.out.println(response);
         }

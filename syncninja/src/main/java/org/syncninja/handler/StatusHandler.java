@@ -5,7 +5,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.syncninja.controller.StatusController;
 
 public class StatusHandler extends BaseHandler{
-    StatusController statusController;
+    private final StatusController statusController;
 
     public StatusHandler() {
         this.statusController = new StatusController();
@@ -27,5 +27,10 @@ public class StatusHandler extends BaseHandler{
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
+    }
+    @Override
+    protected String handleRequest(JSONObject jsonObject) throws Exception {
+        String path = jsonObject.getString("path");
+        return statusController.run(path);
     }
 }

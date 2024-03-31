@@ -24,18 +24,6 @@
             <version>4.7.0</version>
         </dependency>
         <dependency>
-            <groupId>org.example</groupId>
-            <artifactId>syncninja</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.syncninja</groupId>
-            <artifactId>syncninja</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>org.codehaus.jettison</groupId>
             <artifactId>jettison</artifactId>
             <version>1.5.4</version>
