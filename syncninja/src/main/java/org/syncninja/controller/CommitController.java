@@ -16,7 +16,7 @@ public class CommitController {
         this.stateTreeService = new StateTreeService();
     }
 
-    public void run(String message, String path) throws Exception {
+    public void run(String path, String message) throws Exception {
         StateRoot stateRoot = stateTreeService.getStateRoot(path);
         NinjaNode currentNinjaNode = stateRoot.getCurrentNinjaNode();
         commitService.save(message, currentNinjaNode.getNextCommit());
