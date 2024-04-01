@@ -6,11 +6,20 @@ import org.neo4j.ogm.annotation.NodeEntity;
 public class Branch extends NinjaNode {
     private String name;
 
+    private Commit lastCommit;
     public Branch() {}
 
     public Branch(String name) {
         super();
         this.name = name;
+    }
+
+    public Commit getLastCommit() {
+        return lastCommit;
+    }
+
+    public void setLastCommit(Commit lastCommit) {
+        this.lastCommit = lastCommit;
     }
 
     public String getName() {
