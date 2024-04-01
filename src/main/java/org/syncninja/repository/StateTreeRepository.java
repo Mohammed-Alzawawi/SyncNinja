@@ -30,7 +30,9 @@ public class StateTreeRepository {
         } else {
             Branch branch = (Branch) ninjaNode;
             stateRoot.setCurrentBranch(branch);
-            stateRoot.setCurrentCommit(branch.getLastCommit());
+            if(branch.hasLastCommit()){
+                stateRoot.setCurrentCommit(branch.getLastCommit());
+            }
         }
         session.save(stateRoot);
     }

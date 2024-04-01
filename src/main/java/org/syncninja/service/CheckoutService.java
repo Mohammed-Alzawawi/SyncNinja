@@ -37,23 +37,12 @@ public class CheckoutService {
 
     public NinjaNode getAncestorNode(Map<String, String>[] relationships, ArrayList<NinjaNode> ninjaNodes) {
         Map<String, Integer> occurenceOfEachNode = new HashMap<String, Integer>();
+        String ancestorId = null;
         for (Map<String, String> map : relationships) {
-            for (Map.Entry<String, String> entry : map.entrySet()) {
-                if (entry.getKey().equals("startNodeId")) {
-                    if (occurenceOfEachNode.containsKey(entry.getValue())) {
-                        int occurence = occurenceOfEachNode.get(entry.getValue()) + 1;
-                        occurenceOfEachNode.put(entry.getValue(), occurence);
-                    } else {
-                        occurenceOfEachNode.put(entry.getValue(), 1);
-                    }
-                }
-            }
-        }
-        String ancestorId = "";
-        for (Map.Entry<String, Integer> node : occurenceOfEachNode.entrySet()) {
-            if (node.getValue() == 2) {
-                ancestorId = node.getKey();
-                break;
+            String startNodeId = map.get("startNodeId");
+            occurenceOfEachNode.put(startNodeId, occurenceOfEachNode.getOrDefault(startNodeId, 0)+1);
+            if(occurenceOfEachNode.getOrDefault(startNodeId, 0)==2){
+                ancestorId = startNodeId;
             }
         }
         for (NinjaNode ninjaNode : ninjaNodes) {
@@ -75,7 +64,7 @@ public class CheckoutService {
         return ninjaNodes;
     }
 
-    public void commitsToAdd(ArrayList<NinjaNode> listOfCommitsToAdd, NinjaNode ancestorNode, ArrayList<NinjaNode> nodesInpath) {
+    public void commitsToAdd(ArrayList<NinjaNode> listOfCommitsToAdd, NinjaNode ancestorNode, ArrayList<NinjaNode> nodesInpath , Map<String, String>[] relationships) {
         if (ancestorNode != null) {
             int indexOfAncestor = nodesInpath.indexOf(ancestorNode);
             for (int i = indexOfAncestor + 1; i < nodesInpath.size(); i++) {
@@ -86,7 +75,8 @@ public class CheckoutService {
             }
         } else {
             //target branch is a child of the current branch that means all the commits in the path should be added
-            if (nodesInpath.get(nodesInpath.size() - 1).getBranchList().size() == 0) {
+            //use relationship array to see if its startNode or Endnode
+            if (relationships[0].get("startNodeId").equals(nodesInpath.get(0))) {
                 for (int i = 1; i < nodesInpath.size(); i++) {
                     NinjaNode node = nodesInpath.get(i);
                     if (node instanceof Commit) {
@@ -97,7 +87,7 @@ public class CheckoutService {
         }
     }
 
-    public void commitsToRemove(ArrayList<NinjaNode> listOfCommitsToRemove, NinjaNode ancestorNode, ArrayList<NinjaNode> nodesInpath) {
+    public void commitsToRemove(ArrayList<NinjaNode> listOfCommitsToRemove, NinjaNode ancestorNode, ArrayList<NinjaNode> nodesInpath, Map<String, String>[] relationships) {
         if (ancestorNode != null) {
             int indexOfAncestor = nodesInpath.indexOf(ancestorNode);
             for (int i = 0; i < indexOfAncestor; i++) {
@@ -108,7 +98,7 @@ public class CheckoutService {
             }
         } else {
             //target branch is the parent of the current branch that means all the commits in the path should be removed
-            if (nodesInpath.get(nodesInpath.size() - 1).getBranchList().size() > 0) {
+            if (relationships[0].get("endNodeId").equals(nodesInpath.get(0))) {
                 for (int i = 0; i < nodesInpath.size() - 1; i++) {
                     NinjaNode node = nodesInpath.get(i);
                     if (node instanceof Commit) {
@@ -128,9 +118,6 @@ public class CheckoutService {
         Branch newBranch = new Branch(branchName);
         newBranch.setNextCommit(commitService.createStagedCommit());
         StateRoot stateRoot = stateTreeService.getStateRoot(path);
-        Branch currentBranch = stateRoot.getCurrentBranch();
-        currentBranch.setLastCommit(stateRoot.getCurrentCommit());
-        session.save(currentBranch);
         linkNewBranchWithNinjaNode(stateRoot, newBranch);
         updateStateRootWithNewBranch(stateRoot, newBranch);
     }
@@ -152,16 +139,24 @@ public class CheckoutService {
         Optional<Branch> branchOptional = branchRepository.findByName(branchName, path);
         if (branchOptional.isPresent()) {
             Branch branch = branchOptional.get();
-            Result result = branchRepository.getPathOfNinjaNodes(stateRoot.getCurrentCommit(), branch.getLastCommit()).get();
+            // get both sides of the path
+            NinjaNode currentNode = stateRoot.getCurrentNinjaNode() ,targetNode = branch.getLastNinjaNode();;
+            Result result = branchRepository.getPathOfNinjaNodes(currentNode, targetNode).get();
+
+            // get the relationships and nodes in the path
             Map<String, String>[] relationships = getRelationshipsInPath(result);
             ArrayList<NinjaNode> ninjaNodesInPath = getNinjaNodesInPath(result);
-            CommitContainer commitContainer = new CommitContainer();
+
+
             //use these arrays to update the file system and the state tree and they are sorted
+            CommitContainer commitContainer = new CommitContainer();
             ArrayList<NinjaNode> addedCommits = commitContainer.getCommitsToAdd();
             ArrayList<NinjaNode> removedCommits = commitContainer.getCommitsToRemove();
+
+            // start the checkout logic
             NinjaNode ancestorNode = getAncestorNode(relationships, ninjaNodesInPath);
-            commitsToAdd(addedCommits, ancestorNode, ninjaNodesInPath);
-            commitsToRemove(removedCommits, ancestorNode, ninjaNodesInPath);
+            commitsToAdd(addedCommits, ancestorNode, ninjaNodesInPath , relationships);
+            commitsToRemove(removedCommits, ancestorNode, ninjaNodesInPath, relationships);
             //now the arrays have the list of commits to add and remove
             stateTreeRepository.updateStateRoot(stateRoot, branch);
         } else {

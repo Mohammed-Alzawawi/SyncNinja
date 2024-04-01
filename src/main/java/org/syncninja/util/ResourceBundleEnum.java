@@ -20,7 +20,8 @@ public enum ResourceBundleEnum {
     BRANCH_CHECKED_OUT_SUCCESSFULLY("switched_to_branch"),
     BRANCH_NOT_FOUND("branch_not_found"),
     PATH_NOT_FILE("path_not_file"),
-    RESTORED_SUCCESSFULLY("restored_successfully");
+    RESTORED_SUCCESSFULLY("restored_successfully"),
+    YOU_ARE_ALREADY_IN_BRANCH("you_are_already_in_branch");
 
     private final String key;
 

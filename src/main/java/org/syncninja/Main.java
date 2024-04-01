@@ -6,6 +6,7 @@ import org.syncninja.model.NinjaNode;
 import org.syncninja.util.Neo4jSession;
 import picocli.CommandLine;
 
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;

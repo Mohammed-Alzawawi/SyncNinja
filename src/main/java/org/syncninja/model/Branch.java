@@ -18,6 +18,13 @@ public class Branch extends NinjaNode {
         return lastCommit;
     }
 
+    public NinjaNode getLastNinjaNode() {
+        if(lastCommit==null){
+            return this;
+        }
+        return lastCommit;
+    }
+
     public void setLastCommit(Commit lastCommit) {
         this.lastCommit = lastCommit;
     }
@@ -28,5 +35,8 @@ public class Branch extends NinjaNode {
 
     public void setName(String name) {
         this.name = name;
+    }
+    public boolean hasLastCommit(){
+        return lastCommit!=null;
     }
 }
