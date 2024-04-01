@@ -20,15 +20,6 @@ public class Main {
 
         try {
             server = HttpServer.create(new InetSocketAddress(port), 0);
-            server.createContext("/process", exchange -> {
-                if ("POST".equals(exchange.getRequestMethod())) {
-                    timer.cancel();
-                    timer = new Timer();
-                    timer.schedule(new ShutdownTask(), SERVER_TIMEOUT);
-                } else {
-                    exchange.sendResponseHeaders(405, -1); // Method not allowed
-                }
-            });
 
             server.createContext("/init", new InitHandler());
             server.createContext("/add", new AddHandler());
