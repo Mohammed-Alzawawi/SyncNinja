@@ -26,9 +26,11 @@ public class StateTreeRepository {
     public void updateStateRoot(StateRoot stateRoot, NinjaNode ninjaNode){
         Session session = Neo4jSession.getSession();
         if (ninjaNode instanceof Commit){
-            stateRoot.setCurrentCommit((Commit)ninjaNode);
+            stateRoot.setCurrentCommit((Commit) ninjaNode);
         } else {
-            stateRoot.setCurrentBranch((Branch)ninjaNode);
+            Branch branch = (Branch) ninjaNode;
+            stateRoot.setCurrentBranch(branch);
+            stateRoot.setCurrentCommit(branch.getLastCommit());
         }
         session.save(stateRoot);
     }
