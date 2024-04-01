@@ -76,7 +76,7 @@ public class CheckoutService {
         } else {
             //target branch is a child of the current branch that means all the commits in the path should be added
             //use relationship array to see if its startNode or Endnode
-            if (relationships[0].get("startNodeId").equals(nodesInpath.get(0))) {
+            if (relationships[0].get("startNodeId").equals(nodesInpath.get(0).getId())) {
                 for (int i = 1; i < nodesInpath.size(); i++) {
                     NinjaNode node = nodesInpath.get(i);
                     if (node instanceof Commit) {
@@ -98,7 +98,7 @@ public class CheckoutService {
             }
         } else {
             //target branch is the parent of the current branch that means all the commits in the path should be removed
-            if (relationships[0].get("endNodeId").equals(nodesInpath.get(0))) {
+            if (relationships[0].get("endNodeId").equals(nodesInpath.get(0).getId())) {
                 for (int i = 0; i < nodesInpath.size() - 1; i++) {
                     NinjaNode node = nodesInpath.get(i);
                     if (node instanceof Commit) {
