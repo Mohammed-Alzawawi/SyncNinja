@@ -6,6 +6,7 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.syncninja.Main;
+import org.syncninja.util.Neo4jSession;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -28,6 +29,7 @@ public abstract class BaseHandler implements HttpHandler {
         } catch (Exception e) {
             sendResponse(exchange, e.getMessage());
         } finally {
+            Neo4jSession.closeSession();
             exchange.close();
         }
     }

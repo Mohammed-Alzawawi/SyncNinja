@@ -21,8 +21,10 @@ public class CommitController {
         StateRoot stateRoot = stateTreeService.getStateRoot(path);
         NinjaNode currentNinjaNode = stateRoot.getCurrentNinjaNode();
         commitService.save(message, currentNinjaNode.getNextCommit());
+
         Branch branch = stateRoot.getCurrentBranch();
         branch.setLastCommit(currentNinjaNode.getNextCommit());
+
         stateTreeService.addChangesToStateTree(
                 currentNinjaNode.getNextCommit().getCommitTreeRoot(),
                 null);

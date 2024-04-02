@@ -32,6 +32,8 @@ public class StateTreeRepository {
             stateRoot.setCurrentBranch(branch);
             if(branch.hasLastCommit()){
                 stateRoot.setCurrentCommit(branch.getLastCommit());
+            } else {
+                stateRoot.setCurrentCommit(null);
             }
         }
         session.save(stateRoot);

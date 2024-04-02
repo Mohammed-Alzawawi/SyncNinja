@@ -114,7 +114,6 @@ public class CheckoutService {
         if (branchRepository.findByName(branchName, path).isPresent()) {
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.BRANCH_NAME_EXISTS, new Object[]{branchName}));
         }
-        Session session = Neo4jSession.getSession();
         Branch newBranch = new Branch(branchName);
         newBranch.setNextCommit(commitService.createStagedCommit());
         StateRoot stateRoot = stateTreeService.getStateRoot(path);
@@ -140,7 +139,8 @@ public class CheckoutService {
         if (branchOptional.isPresent()) {
             Branch branch = branchOptional.get();
             // get both sides of the path
-            NinjaNode currentNode = stateRoot.getCurrentNinjaNode() ,targetNode = branch.getLastNinjaNode();;
+            NinjaNode currentNode = stateRoot.getCurrentNinjaNode();
+            NinjaNode targetNode = branch.getLastNinjaNode();
             Result result = branchRepository.getPathOfNinjaNodes(currentNode, targetNode).get();
 
             // get the relationships and nodes in the path

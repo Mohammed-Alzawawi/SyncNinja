@@ -19,7 +19,7 @@ public class Main {
         int port = PORT;
 
         try {
-            server = HttpServer.create(new InetSocketAddress(port), 0);
+            server = HttpServer.create(new InetSocketAddress(port), 1);
 
             server.createContext("/init", new InitHandler());
             server.createContext("/add", new AddHandler());

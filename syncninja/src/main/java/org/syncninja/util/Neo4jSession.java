@@ -6,6 +6,7 @@ import org.neo4j.ogm.session.SessionFactory;
 
 public class Neo4jSession {
     private static SessionFactory sessionFactory;
+    private static Session session;
 
     private Neo4jSession() {
         Configuration configuration = new Configuration.Builder()
@@ -21,10 +22,14 @@ public class Neo4jSession {
         if (sessionFactory == null) {
             new Neo4jSession();
         }
-        return sessionFactory.openSession();
+        if (session == null) {
+            session = sessionFactory.openSession();
+        }
+        return session;
     }
 
     public static void closeSession(){
+        session = null;
         sessionFactory.close();
     }
 

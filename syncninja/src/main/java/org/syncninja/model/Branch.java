@@ -5,7 +5,6 @@ import org.neo4j.ogm.annotation.NodeEntity;
 @NodeEntity
 public class Branch extends NinjaNode {
     private String name;
-
     private Commit lastCommit;
     public Branch() {}
 
@@ -19,7 +18,7 @@ public class Branch extends NinjaNode {
     }
 
     public NinjaNode getLastNinjaNode() {
-        if(lastCommit==null){
+        if(lastCommit == null){
             return this;
         }
         return lastCommit;
@@ -37,6 +36,6 @@ public class Branch extends NinjaNode {
         this.name = name;
     }
     public boolean hasLastCommit(){
-        return lastCommit!=null;
+        return lastCommit != null;
     }
 }
