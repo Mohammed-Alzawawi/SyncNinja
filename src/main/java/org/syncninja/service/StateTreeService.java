@@ -155,7 +155,7 @@ public class StateTreeService {
             for(int index = 0; index < lines.size(); index++) {
                 writer.write(lines.get(index));
                 if(index != lines.size() - 1) {
-                    writer.write('\n');
+                    writer.newLine();
                 }
             }
         }
