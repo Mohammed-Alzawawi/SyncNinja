@@ -1,6 +1,5 @@
 package org.syncninja.handler;
 
-import com.sun.net.httpserver.HttpExchange;
 import org.codehaus.jettison.json.JSONObject;
 import org.syncninja.controller.CheckoutController;
 import org.syncninja.service.ResourceMessagingService;

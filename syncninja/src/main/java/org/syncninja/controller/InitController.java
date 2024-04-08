@@ -1,5 +1,6 @@
 package org.syncninja.controller;
 
+import org.neo4j.ogm.session.Session;
 import org.syncninja.model.Branch;
 import org.syncninja.model.Directory;
 import org.syncninja.service.CommitService;
@@ -12,7 +13,6 @@ public class InitController {
     private final StateTreeService stateTreeService;
     private final CommitService commitService;
 
-
     public InitController() {
         this.directoryService = new DirectoryService();
         this.stateTreeService = new StateTreeService();
@@ -20,6 +20,9 @@ public class InitController {
     }
 
     public void run(String path) throws Exception {
+        Session session = Neo4jSession.getSession();
+        session.beginTransaction();
+
         Directory directory = directoryService.createDirectory(path);
         // creating main branch
         directoryService.createDirectoryMainBranch(directory, "main");
@@ -28,6 +31,8 @@ public class InitController {
         mainBranch.setNextCommit(commitService.createStagedCommit());
         // creating state tree
         stateTreeService.generateStateRootNode(path, mainBranch);
+
+        session.getTransaction().commit();
         Neo4jSession.closeSession();
     }
 }

@@ -13,12 +13,21 @@ public class Fetcher {
     public static List<String> readFile(String filePath) throws IOException {
         Path path = Path.of(filePath);
         List<String> lines = new ArrayList<>();
+        StringBuilder currentLine = new StringBuilder();
 
-        try (InputStream inputStream = Files.newInputStream(path);
-             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                lines.add(line);
+        try (InputStream inputStream = Files.newInputStream(path)) {
+            int charInt;
+            while ((charInt = inputStream.read()) != -1) {
+                char character = (char) charInt;
+                if (character == '\n') {
+                    lines.add(currentLine.toString());
+                    currentLine = new StringBuilder();
+                } else {
+                    currentLine.append(character);
+                }
+            }
+            if (!currentLine.isEmpty()) {
+                lines.add(currentLine.toString());
             }
         }
 

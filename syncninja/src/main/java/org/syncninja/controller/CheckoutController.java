@@ -1,5 +1,6 @@
 package org.syncninja.controller;
 
+import org.neo4j.ogm.session.Session;
 import org.syncninja.service.CheckoutService;
 import org.syncninja.service.ResourceMessagingService;
 import org.syncninja.service.StateTreeService;
@@ -16,6 +17,9 @@ public class CheckoutController {
     }
 
     public void run(String path, String branchName, boolean isNewBranch) throws Exception {
+        Session session = Neo4jSession.getSession();
+        session.beginTransaction();
+
         if (isNewBranch) {
             checkoutService.createNewBranch(branchName, path);
         } else if(stateTreeService.getStateRoot(path).getCurrentBranch().getName().equals(branchName)){
@@ -23,6 +27,8 @@ public class CheckoutController {
         } else {
             checkoutService.checkout(branchName, path);
         }
+
+        session.getTransaction().commit();
         Neo4jSession.closeSession();
     }
 }
