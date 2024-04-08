@@ -19,7 +19,7 @@ public class Fetcher {
             int charInt;
             while ((charInt = inputStream.read()) != -1) {
                 char character = (char) charInt;
-                if (character == '\n') {
+                if (character == '\n' || character == '\r') {
                     lines.add(currentLine.toString());
                     currentLine = new StringBuilder();
                 } else {

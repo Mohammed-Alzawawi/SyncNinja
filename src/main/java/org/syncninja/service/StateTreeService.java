@@ -151,9 +151,12 @@ public class StateTreeService {
 
     private void restoreOldLines(String path, StateNode stateNode) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(path))) {
-            for (String line : ((StateFile)stateNode).getLines()) {
-                writer.write(line);
-                writer.newLine();
+            List<String> lines = ((StateFile) stateNode).getLines();
+            for(int index = 0; index < lines.size(); index++) {
+                writer.write(lines.get(index));
+                if(index != lines.size() - 1) {
+                    writer.write('\n');
+                }
             }
         }
     }

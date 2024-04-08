@@ -1,4 +1,4 @@
-package org.syncninja.controller;
+package org.syncninja.command;
 
 import org.syncninja.dto.CommitFileDTO;
 import org.syncninja.dto.StatusFileDTO;
@@ -12,48 +12,48 @@ import picocli.CommandLine;
 import java.util.List;
 
 @CommandLine.Command(name = "status")
-public class StatusController {
+public class StatusCommand extends BaseCommand {
     private final StatusService statusService;
 
-    public StatusController() {
+    public StatusCommand() {
         this.statusService = new StatusService();
     }
 
-    public String run(String path) {
+    @Override
+    public void run() {
         try {
+            String path = System.getProperty("user.dir");
             FileTrackingState state = statusService.getState(path);
             if (state == null) {
                 throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_NOT_INITIALIZED, new Object[]{path}));
             }
-            String response = getStatusMessage(state);
+            printStatusMessage(state);
             Neo4jSession.closeSession();
-            return response;
-        } catch (Exception e) {
-            return e.getMessage();
+        } catch (Exception e){
+            System.out.println(e.getMessage());
         }
     }
-    private String getStatusMessage(FileTrackingState state) {
+
+    private void printStatusMessage(FileTrackingState state) {
         List<CommitFileDTO> tracked = state.getTracked();
         List<StatusFileDTO> untracked = state.getUntracked();
 
-        StringBuilder response = new StringBuilder();
-
+        
         String greenColor = "\u001B[32m";
         String redColorCode = "\u001B[31m";
         String resetColorCode = "\u001B[0m";
-        response.append(ResourceMessagingService.getMessage(ResourceBundleEnum.CHANGES_READY_TO_BE_COMMITTED)).append("\n\n");
+        System.out.print(ResourceMessagingService.getMessage(ResourceBundleEnum.CHANGES_READY_TO_BE_COMMITTED) + "\n\n");
 
         for (CommitFileDTO commitFileDTO : tracked) {
-            response.append(greenColor).append("\t").append(commitFileDTO.getRelativePath()).append(resetColorCode).append("\n");
+            System.out.print(greenColor + "\t" + commitFileDTO.getRelativePath() + resetColorCode + "\n");
         }
 
-        response.append("\n");
-        response.append(ResourceMessagingService.getMessage(ResourceBundleEnum.UNTRACKED_FILES)).append("\n\n");
+        System.out.print("\n");
+        System.out.print(ResourceMessagingService.getMessage(ResourceBundleEnum.UNTRACKED_FILES) + "\n\n");
 
         for (StatusFileDTO statusFileDTO : untracked) {
-            response.append(redColorCode).append("\t").append(statusFileDTO.getRelativePath()).append(resetColorCode).append("\n");
+            System.out.print(redColorCode + "\t" + statusFileDTO.getRelativePath() + resetColorCode + "\n");
         }
-
-        return response.toString();
     }
+
 }
