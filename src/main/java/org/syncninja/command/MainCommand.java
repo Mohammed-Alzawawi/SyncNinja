@@ -1,4 +1,4 @@
-package org.client.command;
+package org.syncninja.command;
 
 import picocli.CommandLine;
 

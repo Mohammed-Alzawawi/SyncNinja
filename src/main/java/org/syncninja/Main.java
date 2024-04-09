@@ -1,9 +1,9 @@
-package org.client;
+package org.syncninja;
 
-import org.client.command.MainCommand;
+import org.syncninja.command.MainCommand;
 import picocli.CommandLine;
 
-public class Client {
+public class Main {
     public static void main(String[] args) {
         int exitCode = new CommandLine(new MainCommand()).execute(args);
         System.exit(exitCode);
