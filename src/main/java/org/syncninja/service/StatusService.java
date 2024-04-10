@@ -43,11 +43,12 @@ public class StatusService {
         }
     }
 
-    public void addAllDeletedFilesInStateDirectory(List<StatusFileDTO> untracked, StateDirectory rootDirectory) {
+    public void addAllDeletedFilesInStateDirectory(List<StatusFileDTO> untracked, StateDirectory rootDirectory , Map<String , FileStatusEnum> directoriesState) {
         List<StateNode> stateNodes = rootDirectory.getInternalNodes();
         for (StateNode stateNode : stateNodes) {
             if (stateNode instanceof StateDirectory) {
-                addAllDeletedFilesInStateDirectory(untracked, (StateDirectory) stateNode);
+                directoriesState.put(stateNode.getPath() , FileStatusEnum.IS_DELETED);
+                addAllDeletedFilesInStateDirectory(untracked, (StateDirectory) stateNode, directoriesState);
             } else {
                 untracked.add(new StatusFileDTO(FileStatusEnum.IS_DELETED, (StateFile) stateNode, stateNode.getPath(), Fetcher.getRelativePath(stateNode.getPath())));
             }
@@ -55,13 +56,14 @@ public class StatusService {
 
     }
 
-    public void getDeleted(List<StatusFileDTO> untracked, StateDirectory rootDirectory, File[] filesList) {
+    public void getDeleted(List<StatusFileDTO> untracked, StateDirectory rootDirectory, File[] filesList, Map<String , FileStatusEnum> directoriesState) {
         if (rootDirectory != null) {
             List<StateNode> stateTree = rootDirectory.getInternalNodes();
             List<File> files = List.of(filesList);
             for (StateNode stateNode : stateTree) {
                 if (stateNode instanceof StateDirectory && !files.contains(new File(stateNode.getPath()))) {
-                    addAllDeletedFilesInStateDirectory(untracked, (StateDirectory) stateNode);
+                    directoriesState.put(stateNode.getPath() , FileStatusEnum.IS_DELETED);
+                    addAllDeletedFilesInStateDirectory(untracked, (StateDirectory) stateNode, directoriesState);
                 } else if (!files.contains(new File(stateNode.getPath()))) {
                     untracked.add(new StatusFileDTO(FileStatusEnum.IS_DELETED, (StateFile) stateNode, stateNode.getPath(), Fetcher.getRelativePath(stateNode.getPath())));
                 }
@@ -69,10 +71,10 @@ public class StatusService {
         }
     }
 
-    public void currentState(StateDirectory stateDirectory, List<StatusFileDTO> untracked, Map<String, CommitFileDTO> tracked, File[] filesList) throws Exception {
+    public void currentState(StateDirectory stateDirectory, List<StatusFileDTO> untracked, Map<String, CommitFileDTO> tracked, File[] filesList, Map<String , FileStatusEnum> directoriesState) throws Exception {
         Map<String, StateNode> stateTreeMap = stateDirectory.getInternalNodes().stream()
                 .collect(Collectors.toMap((stateTree) -> stateTree.getPath(), (stateTree -> stateTree)));
-        getDeleted(untracked, stateDirectory, filesList);
+        getDeleted(untracked, stateDirectory, filesList, directoriesState);
         for (File file : filesList) {
             if (file.isDirectory()) {
                 StateDirectory stateDirectoryChild = (StateDirectory) stateTreeMap.get(file.getPath());
@@ -82,10 +84,10 @@ public class StatusService {
                 BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
                 if (stateDirectoryChild == null) {
                     // the directory is new add everything inside it
-                    addAllFilesInDirectory(file, untracked, tracked);
+                    addAllFilesInDirectory(file, untracked, tracked, directoriesState);
                 } else if (stateDirectoryChild.getLastAccessed() != attrs.lastAccessTime().toMillis()) {
                     File[] filesInDirectory = file.listFiles();
-                    currentState(stateDirectoryChild, untracked, tracked, filesInDirectory);
+                    currentState(stateDirectoryChild, untracked, tracked, filesInDirectory, directoriesState);
                 }
             } else {
                 StateFile stateFile = (StateFile) stateTreeMap.get(file.getPath());
@@ -98,10 +100,11 @@ public class StatusService {
 
     }
 
-    private void addAllFilesInDirectory(File directory, List<StatusFileDTO> untracked, Map<String, CommitFileDTO> tracked) throws Exception {
+    private void addAllFilesInDirectory(File directory, List<StatusFileDTO> untracked, Map<String, CommitFileDTO> tracked , Map<String , FileStatusEnum> directoriesState) throws Exception {
         for (File file : directory.listFiles()) {
             if (file.isDirectory()) {
-                addAllFilesInDirectory(file, untracked, tracked);
+                directoriesState.put(file.getPath(), FileStatusEnum.IS_NEW);
+                addAllFilesInDirectory(file, untracked, tracked,  directoriesState);
             } else if (isModified(null, tracked.get(file.getPath()), file)) {
                 untracked.add(new StatusFileDTO(FileStatusEnum.IS_NEW, null, file.getPath(), Fetcher.getRelativePath(file.getPath())));
             }
@@ -114,6 +117,7 @@ public class StatusService {
         }
         FileTrackingState fileTrackingState = new FileTrackingState();
         List<CommitFileDTO> trackedFiles = fileTrackingState.getTracked();
+        Map<String , FileStatusEnum> directoriesState = fileTrackingState.getDirectoriesState();
 
         //loading the staging area and getting the tracked files
         CommitDirectory stagingArea = getStagingArea(path);
@@ -125,7 +129,7 @@ public class StatusService {
                 .collect(Collectors.toMap((commitFileDTO) -> commitFileDTO.getPath(), (commitFileDTO -> commitFileDTO)));
         File mainFileDirectory = new File(path);
         File[] filesList = mainFileDirectory.listFiles();
-        currentState(stateDirectory, fileTrackingState.getUntracked(), stagingAreaMap, filesList);
+        currentState(stateDirectory, fileTrackingState.getUntracked(), stagingAreaMap, filesList , directoriesState);
         return fileTrackingState;
     }
 

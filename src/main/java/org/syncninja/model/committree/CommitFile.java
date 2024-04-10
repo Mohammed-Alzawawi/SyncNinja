@@ -1,6 +1,7 @@
 package org.syncninja.model.committree;
 
 import org.neo4j.ogm.annotation.NodeEntity;
+import org.syncninja.dto.FileStatusEnum;
 import org.syncninja.util.LinesContainer;
 
 import java.util.List;
@@ -14,11 +15,12 @@ public class CommitFile extends CommitNode {
 
     public CommitFile() {}
 
-    public CommitFile(String path, List<Integer> lineNumberList, List<String> newValuesList, List<String> oldValuesList) {
+    public CommitFile(String path, FileStatusEnum fileStatusEnum, List<Integer> lineNumberList, List<String> newValuesList, List<String> oldValuesList) {
         super(path);
         this.lineNumberList = lineNumberList;
         this.newValuesList = newValuesList;
         this.oldValuesList = oldValuesList;
+        this.setStatusEnum(fileStatusEnum);
     }
 
     public CommitFile(String path) {
