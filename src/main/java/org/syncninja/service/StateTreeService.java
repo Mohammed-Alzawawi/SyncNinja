@@ -74,10 +74,10 @@ public class StateTreeService {
         StateNode currentStateNode;
 
         if (commitNode instanceof CommitDirectory) {
-            currentStateNode = getStateDirectory(commitNode.getPath());
+            currentStateNode = getStateDirectory(commitNode.getFullPath());
             commitNodeList = ((CommitDirectory) commitNode).getCommitNodeList();
         } else {
-            currentStateNode = compareAndAddLines(commitNode, getStateFile(commitNode.getPath()));
+            currentStateNode = compareAndAddLines(commitNode, getStateFile(commitNode.getFullPath()));
         }
 
         if (parentStateNode != null && !((StateDirectory) parentStateNode).getInternalNodes().contains(currentStateNode)) {

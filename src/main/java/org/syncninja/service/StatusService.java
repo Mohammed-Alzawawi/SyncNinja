@@ -37,7 +37,7 @@ public class StatusService {
                 if (commitNode instanceof CommitDirectory) {
                     getTracked(tracked, (CommitDirectory) commitNode);
                 } else {
-                    tracked.add(new CommitFileDTO((CommitFile) commitNode, commitNode.getPath(), Fetcher.getRelativePath(commitNode.getPath())));
+                    tracked.add(new CommitFileDTO((CommitFile) commitNode, commitNode.getFullPath(), commitNode.getPath()));
                 }
             }
         }
@@ -84,7 +84,7 @@ public class StatusService {
                 BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
                 if (stateDirectoryChild == null) {
                     // the directory is new add everything inside it
-                    directoriesState.put(stateDirectoryChild.getPath(), FileStatusEnum.IS_NEW);
+                    directoriesState.put(file.getPath(), FileStatusEnum.IS_NEW);
                     addAllFilesInDirectory(file, untracked, tracked, directoriesState);
                 } else if (stateDirectoryChild.getLastAccessed() != attrs.lastAccessTime().toMillis()) {
                     File[] filesInDirectory = file.listFiles();

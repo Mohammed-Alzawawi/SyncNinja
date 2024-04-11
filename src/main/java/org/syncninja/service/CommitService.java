@@ -3,6 +3,7 @@ package org.syncninja.service;
 import org.syncninja.model.Commit;
 import org.syncninja.model.NinjaNode;
 import org.syncninja.model.committree.CommitDirectory;
+import org.syncninja.model.statetree.StateRoot;
 import org.syncninja.repository.CommitRepository;
 import org.syncninja.util.ResourceBundleEnum;
 
@@ -28,15 +29,15 @@ public class CommitService {
         commitTreeRoot.setCommitted(true);
         commitTreeRoot.setMessage(message);
         commitTreeRoot.setNextCommit(createStagedCommit());
-        stateTreeService.updateStateRoot(stateTreeService.getStateRoot(commitTreeRoot.getCommitTreeRoot().getPath()), commitTreeRoot);
+        stateTreeService.updateStateRoot(stateTreeService.getStateRoot(commitTreeRoot.getCommitTreeRoot().getFullPath()), commitTreeRoot);
         commitRepository.save(commitTreeRoot);
     }
 
     public void addCommitTreeRoot(CommitDirectory commitDirectory) throws Exception {
-        NinjaNode currentNinjaNode = stateTreeService.getStateRoot(commitDirectory.getPath()).getCurrentCommit();
-        if (currentNinjaNode == null) {
-            currentNinjaNode = stateTreeService.getStateRoot(commitDirectory.getPath()).getCurrentBranch();
-        }
+        String mainDirectoryPath = System.getProperty("user.dir");
+        StateRoot stateRoot = stateTreeService.getStateRoot(mainDirectoryPath);
+        NinjaNode currentNinjaNode = stateRoot.getCurrentNinjaNode();
+
         Commit commit = currentNinjaNode.getNextCommit();
         commit.setCommitTree(commitDirectory);
         commitRepository.save(commit);

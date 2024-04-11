@@ -21,6 +21,10 @@ public abstract class CommitNode extends SyncNode {
         return path;
     }
 
+    public String getFullPath() {
+        return System.getProperty("user.dir") + getPath();
+    }
+
     public FileStatusEnum getStatusEnum() {
         return statusEnum;
     }

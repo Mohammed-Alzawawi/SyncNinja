@@ -23,7 +23,8 @@ public enum ResourceBundleEnum {
     COMMIT_SUCCESSFULLY("commit_successfully"),
 
     RESTORED_SUCCESSFULLY("restored_successfully"),
-    YOU_ARE_ALREADY_IN_BRANCH("you_are_already_in_branch");
+    YOU_ARE_ALREADY_IN_BRANCH("you_are_already_in_branch"),
+    NO_CHANGES_TO_BE_ADDED("no_changes_to_be_added");
 
     private final String key;
 
