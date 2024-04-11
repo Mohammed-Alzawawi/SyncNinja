@@ -3,10 +3,10 @@ package org.syncninja.service;
 import org.syncninja.dto.FileStatusEnum;
 import org.syncninja.dto.StatusFileDTO;
 import org.syncninja.model.NinjaNode;
-import org.syncninja.model.statetree.StateRoot;
 import org.syncninja.model.committree.CommitDirectory;
 import org.syncninja.model.committree.CommitFile;
 import org.syncninja.model.committree.CommitNode;
+import org.syncninja.model.statetree.StateRoot;
 import org.syncninja.repository.CommitNodeRepository;
 import org.syncninja.util.*;
 
@@ -35,12 +35,12 @@ public class CommitTreeService {
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_NOT_INITIALIZED, new Object[]{mainDirectoryPath}));
         }
         List<StatusFileDTO> untrackedFiles = fileTrackingState.getUntracked();
-        Map<String,FileStatusEnum> directoriesState = fileTrackingState.getDirectoriesState();
-        addFilesToCommitTree(untrackedFiles, mainDirectoryPath, listOfFilesToBeAdded , directoriesState);
+        Map<String, FileStatusEnum> directoriesState = fileTrackingState.getDirectoriesState();
+        addFilesToCommitTree(untrackedFiles, mainDirectoryPath, listOfFilesToBeAdded, directoriesState);
     }
 
-    private void addFilesToCommitTree(List<StatusFileDTO> statusFileDTOs, String mainDirectoryPath, List<String> listOfFilesToBeAdded, Map<String,FileStatusEnum> directoriesState) throws Exception {
-        CommitDirectory root = createAndGetCommitTreeRoot(mainDirectoryPath , directoriesState);
+    private void addFilesToCommitTree(List<StatusFileDTO> statusFileDTOs, String mainDirectoryPath, List<String> listOfFilesToBeAdded, Map<String, FileStatusEnum> directoriesState) throws Exception {
+        CommitDirectory root = createAndGetCommitTreeRoot(mainDirectoryPath, directoriesState);
 
         // building regex for add command
         Regex regexBuilder = new Regex();
@@ -55,14 +55,14 @@ public class CommitTreeService {
                 String relativePath = statusFileDTO.getPath().substring(mainDirectoryPath.length() + 1);
                 String[] pathComponents = relativePath.split("\\\\");
 
-                addNodesInPath(pathComponents, mainDirectoryPath, root, statusFileDTO , directoriesState);
+                addNodesInPath(pathComponents, mainDirectoryPath, root, statusFileDTO, directoriesState);
             }
 
         }
         commitNodeRepository.save(root);
     }
 
-    private void addNodesInPath(String[] pathComponents, String mainDirectoryPath, CommitDirectory currentDirectory, StatusFileDTO statusFileDTO, Map<String,FileStatusEnum> directoriesState) throws Exception {
+    private void addNodesInPath(String[] pathComponents, String mainDirectoryPath, CommitDirectory currentDirectory, StatusFileDTO statusFileDTO, Map<String, FileStatusEnum> directoriesState) throws Exception {
         String previousPath = mainDirectoryPath;
 
         for (String component : pathComponents) {
@@ -70,17 +70,17 @@ public class CommitTreeService {
             String path = previousPath;
 
             // get node with the current path inside commitNode list
-            CommitNode commitNode =  currentDirectory.getCommitNodeList()
+            CommitNode commitNode = currentDirectory.getCommitNodeList()
                     .stream()
                     .filter(child -> child.getPath().equals(path))
                     .findFirst()
                     .orElse(null);
 
-            if(isFile(path)) {
+            if (isFile(path)) {
                 LinesContainer linesContainer = CompareFileUtil.compareFiles(path, statusFileDTO);
                 // new File
-                if(commitNode == null) {
-                    commitNode = new CommitFile(path, statusFileDTO.getFileStatus(),linesContainer.getLineNumbers(), linesContainer.getNewLines(), linesContainer.getOldLines());
+                if (commitNode == null) {
+                    commitNode = new CommitFile(path, statusFileDTO.getFileStatus(), linesContainer.getLineNumbers(), linesContainer.getNewLines(), linesContainer.getOldLines());
                     currentDirectory.addNode(commitNode);
                 } else {
                     ((CommitFile) commitNode).updateCommitList(linesContainer);
@@ -88,23 +88,25 @@ public class CommitTreeService {
                 break;
             } else {
                 // new Directory
-                if(commitNode == null) {
-                    FileStatusEnum directoryState = directoriesState.getOrDefault(path,FileStatusEnum.IS_MODIFIED);
-                    commitNode = new CommitDirectory(path,directoryState);
+                if (commitNode == null) {
+                    FileStatusEnum directoryState = directoriesState.getOrDefault(path, FileStatusEnum.IS_MODIFIED);
+                    commitNode = new CommitDirectory(path, directoryState);
                 }
                 currentDirectory.addNode(commitNode);
                 currentDirectory = (CommitDirectory) commitNode;
             }
         }
     }
-    private CommitDirectory createAndGetCommitTreeRoot(String path, Map<String,FileStatusEnum> directoriesState) throws Exception {
+
+    private CommitDirectory createAndGetCommitTreeRoot(String path, Map<String, FileStatusEnum> directoriesState) throws Exception {
         CommitDirectory root = (CommitDirectory) stateTreeService.getStagingArea(path);
-        if(root == null) {
-            root = new CommitDirectory(path, directoriesState.getOrDefault(path,FileStatusEnum.IS_MODIFIED));
+        if (root == null) {
+            root = new CommitDirectory(path, directoriesState.getOrDefault(path, FileStatusEnum.IS_MODIFIED));
         }
         commitService.addCommitTreeRoot(root);
         return root;
     }
+
     private boolean isFile(String path) {
         return new File(path).isFile();
     }
