@@ -20,7 +20,9 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class StateTreeService {
     private final StateTreeRepository stateTreeRepository;
@@ -157,6 +159,25 @@ public class StateTreeService {
                 if(index != lines.size() - 1) {
                     writer.newLine();
                 }
+            }
+        }
+    }
+
+    public Map<String, StateNode> getStateTree(String path) throws Exception {
+        StateRoot stateRoot = getStateRoot(path);
+        Map<String, StateNode> stateTree = new HashMap<>();
+        updateStateTreeMap(stateTree, stateRoot);
+        return stateTree;
+    }
+
+    public void updateStateTreeMap(Map<String, StateNode> stateNodeMap , StateDirectory stateDirectory){
+        for(StateNode stateNode : stateDirectory.getInternalNodes()){
+            if(stateNode instanceof StateDirectory){
+                stateNodeMap.put(stateNode.getPath(), stateNode);
+                updateStateTreeMap(stateNodeMap, (StateDirectory) stateNode);
+            }
+            else{
+                stateNodeMap.put(stateNode.getPath(), stateNode);
             }
         }
     }

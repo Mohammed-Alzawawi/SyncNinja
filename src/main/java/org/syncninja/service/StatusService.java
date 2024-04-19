@@ -53,18 +53,23 @@ public class StatusService {
                 untracked.add(new StatusFileDTO(FileStatusEnum.IS_DELETED, (StateFile) stateNode, stateNode.getPath(), Fetcher.getRelativePath(stateNode.getPath())));
             }
         }
-
     }
-
-    public void getDeleted(List<StatusFileDTO> untracked, StateDirectory rootDirectory, File[] filesList, Map<String, FileStatusEnum> directoriesState) {
+    private boolean isDeleted(Map<String, CommitFileDTO> tracked, StateNode stateNode){
+        CommitFileDTO commitFileDTO = tracked.get(stateNode.getPath());
+        if(commitFileDTO == null){
+            return false;
+        }
+        return commitFileDTO.getCommitFile().getStatusEnum() == FileStatusEnum.IS_DELETED;
+    }
+    public void getDeleted(List<StatusFileDTO> untracked, StateDirectory rootDirectory, File[] filesList, Map<String, FileStatusEnum> directoriesState, Map<String, CommitFileDTO> tracked) {
         if (rootDirectory != null) {
             List<StateNode> stateTree = rootDirectory.getInternalNodes();
             List<File> files = List.of(filesList);
             for (StateNode stateNode : stateTree) {
-                if (stateNode instanceof StateDirectory && !files.contains(new File(stateNode.getPath()))) {
+                if (stateNode instanceof StateDirectory && !files.contains(new File(stateNode.getPath())) && !isDeleted(tracked, stateNode)) {
                     directoriesState.put(stateNode.getPath(), FileStatusEnum.IS_DELETED);
                     addAllDeletedFilesInStateDirectory(untracked, (StateDirectory) stateNode, directoriesState);
-                } else if (!files.contains(new File(stateNode.getPath()))) {
+                } else if (!files.contains(new File(stateNode.getPath())) && !isDeleted(tracked, stateNode)) {
                     untracked.add(new StatusFileDTO(FileStatusEnum.IS_DELETED, (StateFile) stateNode, stateNode.getPath(), Fetcher.getRelativePath(stateNode.getPath())));
                 }
             }
@@ -74,7 +79,7 @@ public class StatusService {
     public void currentState(StateDirectory stateDirectory, List<StatusFileDTO> untracked, Map<String, CommitFileDTO> tracked, File[] filesList, Map<String, FileStatusEnum> directoriesState) throws Exception {
         Map<String, StateNode> stateTreeMap = stateDirectory.getInternalNodes().stream()
                 .collect(Collectors.toMap((stateTree) -> stateTree.getPath(), (stateTree -> stateTree)));
-        getDeleted(untracked, stateDirectory, filesList, directoriesState);
+        getDeleted(untracked, stateDirectory, filesList, directoriesState, tracked);
         for (File file : filesList) {
             if (file.isDirectory()) {
                 StateDirectory stateDirectoryChild = (StateDirectory) stateTreeMap.get(file.getPath());
@@ -94,11 +99,14 @@ public class StatusService {
                 StateFile stateFile = (StateFile) stateTreeMap.get(file.getPath());
                 CommitFileDTO commitFileDTO = tracked.get(file.getPath());
                 if (isModified(stateFile, commitFileDTO, file)) {
-                    untracked.add(new StatusFileDTO(stateFile == null ? FileStatusEnum.IS_NEW : FileStatusEnum.IS_MODIFIED, stateFile, file.getPath(), Fetcher.getRelativePath(file.getPath())));
+                    FileStatusEnum fileStatusEnum = FileStatusEnum.IS_MODIFIED;
+                    if (stateFile == null || (commitFileDTO.getCommitFile() != null && commitFileDTO.getCommitFile().getStatusEnum() == FileStatusEnum.IS_DELETED)){
+                        fileStatusEnum = FileStatusEnum.IS_NEW;
+                    }
+                    untracked.add(new StatusFileDTO(fileStatusEnum, stateFile, file.getPath(), Fetcher.getRelativePath(file.getPath())));
                 }
             }
         }
-
     }
 
     private void addAllFilesInDirectory(File directory, List<StatusFileDTO> untracked, Map<String, CommitFileDTO> tracked, Map<String, FileStatusEnum> directoriesState) throws Exception {
@@ -148,6 +156,9 @@ public class StatusService {
 
     //checking the state of the file
     public boolean isModified(StateFile stateFile, CommitFileDTO commitFileDTO, File file) throws Exception {
+        if(commitFileDTO != null && commitFileDTO.getCommitFile().getStatusEnum() == FileStatusEnum.IS_DELETED){
+            return true;
+        }
         if (stateFile != null && stateFile.getLastModified() == file.lastModified()) {
             return false;
         }

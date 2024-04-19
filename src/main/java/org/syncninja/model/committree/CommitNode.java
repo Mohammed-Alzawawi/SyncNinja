@@ -40,4 +40,12 @@ public abstract class CommitNode extends SyncNode {
     public CommitDirectory getParent() {
         return parent;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof CommitNode)){
+           return false;
+        }
+        return this.getId().equals(((CommitNode) obj).getId());
+    }
 }
