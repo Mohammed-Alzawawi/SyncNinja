@@ -1,5 +1,6 @@
 package org.syncninja.util;
 
+import org.syncninja.dto.FileStatusEnum;
 import org.syncninja.dto.StatusFileDTO;
 
 import java.util.ArrayList;
@@ -8,9 +9,11 @@ import java.util.List;
 public class CompareFileUtil {
 
     public static LinesContainer compareFiles(String filePath, StatusFileDTO statusFileDTO) throws Exception {
-        List<String> newFileList = Fetcher.readFile(filePath);
+        List<String> newFileList = new ArrayList<>();
+        if (statusFileDTO.getFileStatus() != FileStatusEnum.IS_DELETED){
+            newFileList = Fetcher.readFile(filePath);
+        }
         List<String> oldFileList;
-
         if (statusFileDTO.getStateFile() != null) {
             oldFileList = statusFileDTO.getStateFile().getLines();
         } else {

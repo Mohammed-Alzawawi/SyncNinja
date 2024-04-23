@@ -30,41 +30,40 @@ public class StatusService {
         this.stateTreeRepository = new StateTreeRepository();
     }
 
-    public void getTracked(List<CommitFileDTO> tracked, CommitDirectory commitDirectory) {
+    public void getTracked(List<CommitFileDTO> tracked, CommitDirectory commitDirectory, List<StatusFileDTO> untracked) {
         if (commitDirectory != null) {
             List<CommitNode> trackedList = commitDirectory.getCommitNodeList();
             for (CommitNode commitNode : trackedList) {
                 if (commitNode instanceof CommitDirectory) {
-                    getTracked(tracked, (CommitDirectory) commitNode);
+                    getTracked(tracked, (CommitDirectory) commitNode, untracked);
                 } else {
+                    if (commitNode.getStatusEnum() == FileStatusEnum.IS_NEW && !(new File(commitNode.getFullPath()).exists())) {
+                        untracked.add(new StatusFileDTO(FileStatusEnum.IS_DELETED, null, commitNode.getFullPath(), commitNode.getPath()));
+                    }
                     tracked.add(new CommitFileDTO((CommitFile) commitNode, commitNode.getFullPath(), commitNode.getPath()));
                 }
             }
         }
     }
 
-    public void addAllDeletedFilesInStateDirectory(List<StatusFileDTO> untracked, StateDirectory rootDirectory, Map<String, FileStatusEnum> directoriesState) {
-        List<StateNode> stateNodes = rootDirectory.getInternalNodes();
-        for (StateNode stateNode : stateNodes) {
-            if (stateNode instanceof StateDirectory) {
-                directoriesState.put(stateNode.getPath(), FileStatusEnum.IS_DELETED);
-                addAllDeletedFilesInStateDirectory(untracked, (StateDirectory) stateNode, directoriesState);
-            } else {
-                untracked.add(new StatusFileDTO(FileStatusEnum.IS_DELETED, (StateFile) stateNode, stateNode.getPath(), Fetcher.getRelativePath(stateNode.getPath())));
-            }
+    private boolean isDeleted(Map<String, CommitFileDTO> tracked, StateNode stateNode) {
+        CommitFileDTO commitFileDTO = tracked.get(stateNode.getPath());
+        if (commitFileDTO == null) {
+            return false;
         }
-
+        return commitFileDTO.getCommitFile().getStatusEnum() == FileStatusEnum.IS_DELETED;
     }
 
-    public void getDeleted(List<StatusFileDTO> untracked, StateDirectory rootDirectory, File[] filesList, Map<String, FileStatusEnum> directoriesState) {
+    public void getDeleted(List<StatusFileDTO> untracked, StateDirectory rootDirectory, File[] filesList, Map<String, FileStatusEnum> directoriesState, Map<String, CommitFileDTO> tracked) {
         if (rootDirectory != null) {
             List<StateNode> stateTree = rootDirectory.getInternalNodes();
             List<File> files = List.of(filesList);
             for (StateNode stateNode : stateTree) {
                 if (stateNode instanceof StateDirectory && !files.contains(new File(stateNode.getPath()))) {
+                    //to be checked later to see if it causes problems
                     directoriesState.put(stateNode.getPath(), FileStatusEnum.IS_DELETED);
-                    addAllDeletedFilesInStateDirectory(untracked, (StateDirectory) stateNode, directoriesState);
-                } else if (!files.contains(new File(stateNode.getPath()))) {
+                    getDeleted(untracked, (StateDirectory) stateNode, filesList, directoriesState, tracked);
+                } else if (!files.contains(new File(stateNode.getPath())) && !isDeleted(tracked, stateNode)) {
                     untracked.add(new StatusFileDTO(FileStatusEnum.IS_DELETED, (StateFile) stateNode, stateNode.getPath(), Fetcher.getRelativePath(stateNode.getPath())));
                 }
             }
@@ -74,7 +73,7 @@ public class StatusService {
     public void currentState(StateDirectory stateDirectory, List<StatusFileDTO> untracked, Map<String, CommitFileDTO> tracked, File[] filesList, Map<String, FileStatusEnum> directoriesState) throws Exception {
         Map<String, StateNode> stateTreeMap = stateDirectory.getInternalNodes().stream()
                 .collect(Collectors.toMap((stateTree) -> stateTree.getPath(), (stateTree -> stateTree)));
-        getDeleted(untracked, stateDirectory, filesList, directoriesState);
+        getDeleted(untracked, stateDirectory, filesList, directoriesState, tracked);
         for (File file : filesList) {
             if (file.isDirectory()) {
                 StateDirectory stateDirectoryChild = (StateDirectory) stateTreeMap.get(file.getPath());
@@ -94,11 +93,14 @@ public class StatusService {
                 StateFile stateFile = (StateFile) stateTreeMap.get(file.getPath());
                 CommitFileDTO commitFileDTO = tracked.get(file.getPath());
                 if (isModified(stateFile, commitFileDTO, file)) {
-                    untracked.add(new StatusFileDTO(stateFile == null ? FileStatusEnum.IS_NEW : FileStatusEnum.IS_MODIFIED, stateFile, file.getPath(), Fetcher.getRelativePath(file.getPath())));
+                    FileStatusEnum fileStatusEnum = FileStatusEnum.IS_MODIFIED;
+                    if (stateFile == null || (commitFileDTO.getCommitFile() != null && commitFileDTO.getCommitFile().getStatusEnum() == FileStatusEnum.IS_DELETED)) {
+                        fileStatusEnum = FileStatusEnum.IS_NEW;
+                    }
+                    untracked.add(new StatusFileDTO(fileStatusEnum, stateFile, file.getPath(), Fetcher.getRelativePath(file.getPath())));
                 }
             }
         }
-
     }
 
     private void addAllFilesInDirectory(File directory, List<StatusFileDTO> untracked, Map<String, CommitFileDTO> tracked, Map<String, FileStatusEnum> directoriesState) throws Exception {
@@ -122,7 +124,7 @@ public class StatusService {
 
         //loading the staging area and getting the tracked files
         CommitDirectory stagingArea = getStagingArea(path);
-        getTracked(trackedFiles, stagingArea);
+        getTracked(trackedFiles, stagingArea, fileTrackingState.getUntracked());
 
         //determining the state of each file (tracked/untracked)
         StateDirectory stateDirectory = (StateDirectory) stateTreeRepository.findById(path).orElse(null);
@@ -148,6 +150,9 @@ public class StatusService {
 
     //checking the state of the file
     public boolean isModified(StateFile stateFile, CommitFileDTO commitFileDTO, File file) throws Exception {
+        if (commitFileDTO != null && commitFileDTO.getCommitFile().getStatusEnum() == FileStatusEnum.IS_DELETED) {
+            return true;
+        }
         if (stateFile != null && stateFile.getLastModified() == file.lastModified()) {
             return false;
         }

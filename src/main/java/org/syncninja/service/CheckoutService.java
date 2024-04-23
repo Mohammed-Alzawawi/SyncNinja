@@ -5,6 +5,10 @@ import org.neo4j.ogm.session.Session;
 import org.syncninja.model.Branch;
 import org.syncninja.model.Commit;
 import org.syncninja.model.NinjaNode;
+import org.syncninja.model.committree.CommitDirectory;
+import org.syncninja.model.committree.CommitFile;
+import org.syncninja.model.committree.CommitNode;
+import org.syncninja.model.statetree.StateNode;
 import org.syncninja.model.statetree.StateRoot;
 import org.syncninja.repository.BranchRepository;
 import org.syncninja.repository.NinjaNodeRepository;
@@ -159,8 +163,34 @@ public class CheckoutService {
             commitsToRemove(removedCommits, ancestorNode, ninjaNodesInPath, relationships);
             //now the arrays have the list of commits to add and remove
             stateTreeRepository.updateStateRoot(stateRoot, branch);
+            //updating stateTree
+            Map<String, StateNode> stateTree = stateTreeService.getStateTree(path);
+            updateStateTreeByRemovingCommits(stateTree, removedCommits);
+
         } else {
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.BRANCH_NOT_FOUND, new Object[]{branchName}));
+        }
+    }
+
+    public void updateStateTreeByRemovingCommits(Map<String, StateNode> stateTree, ArrayList<NinjaNode> removedCommits){
+        for(NinjaNode ninjaNode : removedCommits){
+            Commit commit = (Commit) ninjaNode;
+            CommitDirectory commitDirectory = commit.getCommitTreeRoot();
+            ArrayList<CommitNode> commitFiles = new ArrayList<>();
+            getCommitTree(commitDirectory, commitFiles);
+
+        }
+    }
+
+    public void getCommitTree(CommitDirectory commitDirectory, ArrayList<CommitNode> commitNodes){
+        for(CommitNode commitNode: commitDirectory.getCommitNodeList()){
+            if(commitNode instanceof CommitDirectory){
+                commitNodes.add(commitNode);
+                getCommitTree((CommitDirectory) commitNode, commitNodes);
+            }
+            else{
+                commitNodes.add(commitNode);
+            }
         }
     }
 }

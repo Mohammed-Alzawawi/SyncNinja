@@ -84,17 +84,42 @@ public class CommitTreeService {
                     .filter(child -> child.getPath().equals(path))
                     .findFirst()
                     .orElse(null);
-
-            if (isFile(previousPath)) {
+            File file = new File(previousPath);
+            if (!file.exists()){
+                if(directoriesState.containsKey(previousPath)){
+                    if (commitNode == null) {
+                        FileStatusEnum directoryState = FileStatusEnum.IS_DELETED;
+                        commitNode = new CommitDirectory(path, directoryState);
+                    }
+                    currentDirectory.addNode(commitNode);
+                    currentDirectory = (CommitDirectory) commitNode;
+                }
+                else {
+                    LinesContainer linesContainer = CompareFileUtil.compareFiles(previousPath, statusFileDTO);
+                    if (commitNode == null) {
+                        commitNode = new CommitFile(path, statusFileDTO.getFileStatus(), linesContainer.getLineNumbers(), linesContainer.getNewLines(), linesContainer.getOldLines());
+                        currentDirectory.addNode(commitNode);
+                    } else {
+                        ((CommitFile) commitNode).updateCommitList(linesContainer);
+                    }
+                }
+            }
+            else if (isFile(previousPath)) {
                 LinesContainer linesContainer = CompareFileUtil.compareFiles(previousPath, statusFileDTO);
                 // new File
                 if (commitNode == null) {
                     commitNode = new CommitFile(path, statusFileDTO.getFileStatus(), linesContainer.getLineNumbers(), linesContainer.getNewLines(), linesContainer.getOldLines());
                     currentDirectory.addNode(commitNode);
                 } else {
+                    if (commitNode.getStatusEnum() == FileStatusEnum.IS_DELETED){
+                        if(linesContainer.getLineNumbers().isEmpty()){
+                            currentDirectory.getCommitNodeList().remove(commitNode);
+                            commitNodeRepository.delete(commitNode);
+                        }
+                    }
                     ((CommitFile) commitNode).updateCommitList(linesContainer);
+                    commitNode.setStatusEnum(statusFileDTO.getFileStatus());
                 }
-                break;
             } else {
                 // new Directory
                 if (commitNode == null) {
@@ -116,6 +141,7 @@ public class CommitTreeService {
     }
 
     private boolean isFile(String path) {
+
         return new File(path).isFile();
     }
 
