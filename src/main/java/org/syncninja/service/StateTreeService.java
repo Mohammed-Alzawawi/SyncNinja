@@ -1,5 +1,6 @@
 package org.syncninja.service;
 
+import org.syncninja.dto.FileStatusEnum;
 import org.syncninja.dto.StatusFileDTO;
 import org.syncninja.model.Branch;
 import org.syncninja.model.Commit;
@@ -19,10 +20,10 @@ import org.syncninja.util.ResourceBundleEnum;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class StateTreeService {
     private final StateTreeRepository stateTreeRepository;
@@ -31,11 +32,6 @@ public class StateTreeService {
     public StateTreeService() {
         stateTreeRepository = new StateTreeRepository();
         statusService = new StatusService();
-    }
-
-    public StateNode getStateNode(String path) throws Exception {
-        return stateTreeRepository.findById(path).orElseThrow(() ->
-                new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.FILE_NOT_FOUND, new Object[]{path})));
     }
 
     public StateRoot generateStateRootNode(String path, Branch currentBranch) throws Exception {
@@ -71,32 +67,38 @@ public class StateTreeService {
         stateTreeRepository.updateStateRoot(stateRoot, ninjaNode);
     }
 
-    public void addChangesToStateTree(CommitNode commitNode, StateNode parentStateNode) throws Exception {
-        List<CommitNode> commitNodeList = new ArrayList<>();
-        StateNode currentStateNode;
+    public void addChangesToStateTree(CommitDirectory commitDirectory, StateDirectory stateDirectory) throws IOException {
+        Map<String, StateNode> stateTreeMap = stateDirectory.getInternalNodes().stream()
+                .collect(Collectors.toMap(StateNode::getPath, (stateTree -> stateTree)));
+        List<CommitNode> commitNodeList = commitDirectory.getCommitNodeList();
 
-        if (commitNode instanceof CommitDirectory) {
-            currentStateNode = getStateDirectory(commitNode.getFullPath());
-            commitNodeList = ((CommitDirectory) commitNode).getCommitNodeList();
-        } else {
-            currentStateNode = compareAndAddLines(commitNode, getStateFile(commitNode.getFullPath()));
+        for (CommitNode commitNode : commitNodeList) {
+            StateNode currentStateNode = stateTreeMap.get(commitNode.getFullPath());
+            if (commitNode.getStatusEnum() == FileStatusEnum.IS_DELETED) {
+                stateDirectory.getInternalNodes().remove(currentStateNode);
+                stateTreeRepository.delete(currentStateNode);
+            }
+
+            if (commitNode instanceof CommitDirectory) {
+                if (currentStateNode == null) {
+                    currentStateNode = new StateDirectory(commitNode.getFullPath());
+                    stateDirectory.getInternalNodes().add(currentStateNode);
+                }
+                addChangesToStateTree((CommitDirectory) commitNode, (StateDirectory) currentStateNode);
+            } else {
+                if (currentStateNode == null) {
+                    currentStateNode = new StateFile(commitNode.getFullPath());
+                    stateDirectory.getInternalNodes().add(currentStateNode);
+                }
+                ((StateFile) currentStateNode).setLines(compareAndAddLines(commitNode, currentStateNode));
+            }
         }
-
-        if (parentStateNode != null && !((StateDirectory) parentStateNode).getInternalNodes().contains(currentStateNode)) {
-            ((StateDirectory) parentStateNode).addFile(currentStateNode);
-        }
-
-        for (CommitNode childCommitNode : commitNodeList) {
-            addChangesToStateTree(childCommitNode, currentStateNode);
-        }
-
-        // save the root
-        if (parentStateNode == null) {
-            stateTreeRepository.save(currentStateNode);
+        if (stateDirectory instanceof StateRoot) {
+            stateTreeRepository.save(stateDirectory);
         }
     }
 
-    private StateNode compareAndAddLines(CommitNode commitNode, StateNode currentStateTree) {
+    private List<String> compareAndAddLines(CommitNode commitNode, StateNode currentStateTree) {
         CommitFile commitFile = ((CommitFile) commitNode);
         List<String> stateFileLines = ((StateFile) currentStateTree).getLines();
 
@@ -106,30 +108,21 @@ public class StateTreeService {
             int newLineNumber = commitFile.getLineNumberList().get(commitFileLineIndex) - 1;
 
             if (newLineNumber < stateFileLines.size()) {
-                ((StateFile) currentStateTree).getLines().remove(newLineNumber);
+                stateFileLines.remove(newLineNumber);
             }
 
-            ((StateFile) currentStateTree).getLines().add(newLineNumber, newLine);
+            while (newLineNumber > stateFileLines.size()) {
+                stateFileLines.add("\n");
+            }
+
+            stateFileLines.add(newLineNumber, newLine);
             commitFileLineIndex++;
         }
-        return currentStateTree;
-    }
 
-    private StateFile getStateFile(String path) throws Exception {
-        return (StateFile) stateTreeRepository.findById(path).orElse(
-                new StateFile(path)
-        );
-    }
-
-    private StateDirectory getStateDirectory(String path) throws IOException {
-        return (StateDirectory) stateTreeRepository.findById(path).orElse(
-                new StateDirectory(path)
-        );
+        return stateFileLines;
     }
 
     public void restore(List<String> pathList, String mainDirectoryPath) throws Exception {
-        StateRoot stateRoot = getStateRoot(mainDirectoryPath);
-
         // building regex
         Regex regexBuilder = new Regex();
         for (String path : pathList) {
@@ -144,8 +137,8 @@ public class StateTreeService {
         }
         List<StatusFileDTO> untrackedFiles = fileTrackingState.getUntracked();
 
-        for(StatusFileDTO statusFileDTO : untrackedFiles){
-            if(statusFileDTO.getPath().matches(regex) && statusFileDTO.getStateFile() != null){
+        for (StatusFileDTO statusFileDTO : untrackedFiles) {
+            if (statusFileDTO.getPath().matches(regex) && statusFileDTO.getStateFile() != null) {
                 restoreOldLines(statusFileDTO.getPath(), statusFileDTO.getStateFile());
             }
         }
@@ -154,9 +147,9 @@ public class StateTreeService {
     private void restoreOldLines(String path, StateNode stateNode) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(path))) {
             List<String> lines = ((StateFile) stateNode).getLines();
-            for(int index = 0; index < lines.size(); index++) {
+            for (int index = 0; index < lines.size(); index++) {
                 writer.write(lines.get(index));
-                if(index != lines.size() - 1) {
+                if (index != lines.size() - 1) {
                     writer.newLine();
                 }
             }
@@ -170,13 +163,12 @@ public class StateTreeService {
         return stateTree;
     }
 
-    public void updateStateTreeMap(Map<String, StateNode> stateNodeMap , StateDirectory stateDirectory){
-        for(StateNode stateNode : stateDirectory.getInternalNodes()){
-            if(stateNode instanceof StateDirectory){
+    public void updateStateTreeMap(Map<String, StateNode> stateNodeMap, StateDirectory stateDirectory) {
+        for (StateNode stateNode : stateDirectory.getInternalNodes()) {
+            if (stateNode instanceof StateDirectory) {
                 stateNodeMap.put(stateNode.getPath(), stateNode);
                 updateStateTreeMap(stateNodeMap, (StateDirectory) stateNode);
-            }
-            else{
+            } else {
                 stateNodeMap.put(stateNode.getPath(), stateNode);
             }
         }
