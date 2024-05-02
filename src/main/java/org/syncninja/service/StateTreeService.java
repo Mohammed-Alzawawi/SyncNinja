@@ -74,7 +74,10 @@ public class StateTreeService {
 
         for (CommitNode commitNode : commitNodeList) {
             StateNode currentStateNode = stateTreeMap.get(commitNode.getFullPath());
-            checkAndDeleteStateNodes(commitNode, currentStateNode, stateDirectory);
+            if (commitNode.getStatusEnum() == FileStatusEnum.IS_DELETED) {
+                stateDirectory.getInternalNodes().remove(currentStateNode);
+                stateTreeRepository.delete(currentStateNode);
+            }
 
             if (commitNode instanceof CommitDirectory) {
                 if (currentStateNode == null) {
@@ -117,17 +120,6 @@ public class StateTreeService {
         }
 
         return stateFileLines;
-    }
-
-    private void checkAndDeleteStateNodes(CommitNode commitNode, StateNode stateNode, StateDirectory parentStateNode){
-        if (commitNode.getStatusEnum() == FileStatusEnum.IS_DELETED) {
-            parentStateNode.getInternalNodes().remove(stateNode);
-            if(commitNode instanceof CommitDirectory){
-                stateTreeRepository.deleteDirectory(stateNode);
-            } else {
-                stateTreeRepository.deleteFile(stateNode);
-            }
-        }
     }
 
     public void restore(List<String> pathList, String mainDirectoryPath) throws Exception {

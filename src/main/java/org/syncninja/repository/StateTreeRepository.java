@@ -3,6 +3,8 @@ package org.syncninja.repository;
 import org.neo4j.ogm.session.Session;
 import org.syncninja.model.Branch;
 import org.syncninja.model.Commit;
+import org.syncninja.model.committree.CommitDirectory;
+import org.syncninja.model.statetree.StateDirectory;
 import org.syncninja.model.statetree.StateRoot;
 import org.syncninja.model.statetree.StateNode;
 import org.syncninja.model.NinjaNode;
@@ -38,6 +40,14 @@ public class StateTreeRepository {
             }
         }
         session.save(stateRoot);
+    }
+
+    public void delete(StateNode stateNode) {
+        if(stateNode instanceof StateDirectory){
+            deleteDirectory(stateNode);
+        } else {
+            deleteFile(stateNode);
+        }
     }
 
     public void deleteDirectory(StateNode stateNode) {
