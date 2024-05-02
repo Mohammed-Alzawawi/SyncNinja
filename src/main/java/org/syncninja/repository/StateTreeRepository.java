@@ -3,11 +3,13 @@ package org.syncninja.repository;
 import org.neo4j.ogm.session.Session;
 import org.syncninja.model.Branch;
 import org.syncninja.model.Commit;
+import org.syncninja.model.committree.CommitNode;
 import org.syncninja.model.statetree.StateRoot;
 import org.syncninja.model.statetree.StateNode;
 import org.syncninja.model.NinjaNode;
 import org.syncninja.util.Neo4jSession;
 
+import java.util.Collections;
 import java.util.Optional;
 
 public class StateTreeRepository {
@@ -37,5 +39,11 @@ public class StateTreeRepository {
             }
         }
         session.save(stateRoot);
+    }
+
+    public void delete(StateNode stateNode) {
+        Session session = Neo4jSession.getSession();
+        session.query("MATCH (n:StateNode)-[*]->(child:StateNode) WHERE n.path =$path DETACH DELETE n,child",
+                Collections.singletonMap("path", stateNode.getPath()));
     }
 }

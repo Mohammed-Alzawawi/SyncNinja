@@ -1,6 +1,5 @@
 package org.syncninja.command;
 
-import org.codehaus.jettison.json.JSONObject;
 import org.neo4j.ogm.session.Session;
 import org.syncninja.model.Branch;
 import org.syncninja.model.NinjaNode;
@@ -12,8 +11,6 @@ import org.syncninja.service.StateTreeService;
 import org.syncninja.util.Neo4jSession;
 import org.syncninja.util.ResourceBundleEnum;
 import picocli.CommandLine;
-
-import java.net.HttpURLConnection;
 
 @CommandLine.Command(name = "commit")
 public class CommitCommand extends BaseCommand {
@@ -44,9 +41,7 @@ public class CommitCommand extends BaseCommand {
             branch.setLastCommit(currentNinjaNode.getNextCommit());
             new BranchRepository().save(branch);
 
-            stateTreeService.addChangesToStateTree(
-                    currentNinjaNode.getNextCommit().getCommitTreeRoot(),
-                    null);
+            stateTreeService.addChangesToStateTree(currentNinjaNode.getNextCommit().getCommitTreeRoot(), stateRoot);
 
             System.out.println(ResourceMessagingService.getMessage(ResourceBundleEnum.COMMIT_SUCCESSFULLY));
 
