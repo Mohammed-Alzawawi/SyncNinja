@@ -94,7 +94,7 @@ public class StatusService {
                 CommitFileDTO commitFileDTO = tracked.get(file.getPath());
                 if (isModified(stateFile, commitFileDTO, file)) {
                     FileStatusEnum fileStatusEnum = FileStatusEnum.IS_MODIFIED;
-                    if (stateFile == null || (commitFileDTO.getCommitFile() != null && commitFileDTO.getCommitFile().getStatusEnum() == FileStatusEnum.IS_DELETED)) {
+                    if (stateFile == null || (commitFileDTO != null && commitFileDTO.getCommitFile() != null && commitFileDTO.getCommitFile().getStatusEnum() == FileStatusEnum.IS_DELETED)) {
                         fileStatusEnum = FileStatusEnum.IS_NEW;
                     }
                     untracked.add(new StatusFileDTO(fileStatusEnum, stateFile, file.getPath(), Fetcher.getRelativePath(file.getPath())));
