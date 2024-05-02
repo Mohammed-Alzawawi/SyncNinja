@@ -3,7 +3,6 @@ package org.syncninja.repository;
 import org.neo4j.ogm.model.Result;
 import org.neo4j.ogm.session.Session;
 import org.syncninja.model.Branch;
-import org.syncninja.model.Commit;
 import org.syncninja.model.NinjaNode;
 import org.syncninja.util.Neo4jSession;
 

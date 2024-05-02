@@ -11,9 +11,7 @@ import org.syncninja.repository.CommitNodeRepository;
 import org.syncninja.util.*;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CommitTreeService {
     private final StatusService statusService;
@@ -56,21 +54,46 @@ public class CommitTreeService {
         String regex = regexBuilder.buildRegex();
 
         boolean changedStagingArea = false;
+        Set<CommitNode> deletedCommitNodes = new HashSet<>();
+
         for (StatusFileDTO statusFileDTO : statusFileDTOs) {
             if (statusFileDTO.getPath().matches(regex)) {
                 String relativePath = statusFileDTO.getPath().substring(mainDirectoryPath.length() + 1);
                 String[] pathComponents = relativePath.split("\\\\");
                 changedStagingArea = true;
-                addNodesInPath(pathComponents, mainDirectoryPath, root, statusFileDTO, directoriesState);
+                addNodesInPath(pathComponents, mainDirectoryPath, root, statusFileDTO, directoriesState, deletedCommitNodes);
             }
-
         }
+
         if (changedStagingArea) {
             commitService.addCommitTreeRoot(root);
+            deleteCommitNodeList(root, deletedCommitNodes);
+            commitNodeRepository.deleteNodeList(deletedCommitNodes);
         }
     }
 
-    private void addNodesInPath(String[] pathComponents, String mainDirectoryPath, CommitDirectory currentDirectory, StatusFileDTO statusFileDTO, Map<String, FileStatusEnum> directoriesState) throws Exception {
+    private void deleteCommitNodeList(CommitDirectory commitDirectory, Set<CommitNode> deletedCommitNodes) {
+        List<CommitNode> children = commitDirectory.getCommitNodeList();
+        List<CommitNode> nodesToDelete = new ArrayList<>();
+
+        for (CommitNode commitNode : children) {
+            if (deletedCommitNodes.contains(commitNode)) {
+                nodesToDelete.add(commitNode);
+            } else if (commitNode instanceof CommitDirectory) {
+                deleteCommitNodeList((CommitDirectory) commitNode, deletedCommitNodes);
+                if (deletedCommitNodes.contains(commitNode)) {
+                    nodesToDelete.add(commitNode);
+                }
+            }
+        }
+        commitDirectory.getCommitNodeList().removeAll(nodesToDelete);
+
+        if (commitDirectory.getCommitNodeList().isEmpty()) {
+            deletedCommitNodes.add(commitDirectory);
+        }
+    }
+
+    private void addNodesInPath(String[] pathComponents, String mainDirectoryPath, CommitDirectory currentDirectory, StatusFileDTO statusFileDTO, Map<String, FileStatusEnum> directoriesState, Set<CommitNode> deletedCommitNodes) throws Exception {
         String previousPath = mainDirectoryPath;
         String relativePath = "";
         for (String component : pathComponents) {
@@ -85,36 +108,36 @@ public class CommitTreeService {
                     .findFirst()
                     .orElse(null);
             File file = new File(previousPath);
-            if (!file.exists()){
-                if(directoriesState.containsKey(previousPath)){
+            if (!file.exists()) {
+                if (directoriesState.containsKey(previousPath)) {
                     if (commitNode == null) {
                         FileStatusEnum directoryState = FileStatusEnum.IS_DELETED;
                         commitNode = new CommitDirectory(path, directoryState);
+
                     }
                     currentDirectory.addNode(commitNode);
                     currentDirectory = (CommitDirectory) commitNode;
-                }
-                else {
+                } else {
                     LinesContainer linesContainer = CompareFileUtil.compareFiles(previousPath, statusFileDTO);
                     if (commitNode == null) {
                         commitNode = new CommitFile(path, statusFileDTO.getFileStatus(), linesContainer.getLineNumbers(), linesContainer.getNewLines(), linesContainer.getOldLines());
                         currentDirectory.addNode(commitNode);
                     } else {
+                        if (commitNode.getStatusEnum() == FileStatusEnum.IS_NEW) {
+                            deletedCommitNodes.add(commitNode);
+                        }
                         ((CommitFile) commitNode).updateCommitList(linesContainer);
                     }
                 }
-            }
-            else if (isFile(previousPath)) {
+            } else if (isFile(previousPath)) {
                 LinesContainer linesContainer = CompareFileUtil.compareFiles(previousPath, statusFileDTO);
-                // new File
                 if (commitNode == null) {
                     commitNode = new CommitFile(path, statusFileDTO.getFileStatus(), linesContainer.getLineNumbers(), linesContainer.getNewLines(), linesContainer.getOldLines());
                     currentDirectory.addNode(commitNode);
                 } else {
-                    if (commitNode.getStatusEnum() == FileStatusEnum.IS_DELETED){
-                        if(linesContainer.getLineNumbers().isEmpty()){
-                            currentDirectory.getCommitNodeList().remove(commitNode);
-                            commitNodeRepository.delete(commitNode);
+                    if (commitNode.getStatusEnum() == FileStatusEnum.IS_DELETED) {
+                        if (linesContainer.getLineNumbers().isEmpty()) {
+                            deletedCommitNodes.add(commitNode);
                         }
                     }
                     ((CommitFile) commitNode).updateCommitList(linesContainer);
