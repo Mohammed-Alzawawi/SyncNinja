@@ -78,7 +78,11 @@ public class StateTreeService {
             // delete the deleted files from state tree
             if (commitNode.getStatusEnum() == FileStatusEnum.IS_DELETED) {
                 stateDirectory.getInternalNodes().remove(currentStateNode);
-                stateTreeRepository.delete(currentStateNode);
+                if(commitNode instanceof CommitDirectory){
+                    stateTreeRepository.deleteDirectory(currentStateNode);
+                } else {
+                    stateTreeRepository.deleteFile(currentStateNode);
+                }
                 continue;
             }
             if (commitNode instanceof CommitDirectory) {
