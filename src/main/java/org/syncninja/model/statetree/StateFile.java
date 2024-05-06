@@ -22,6 +22,12 @@ public class StateFile extends StateNode {
         this.lastModified = file.lastModified();
     }
 
+    public StateFile(String path, List<String> lines) throws IOException {
+        super(path);
+        hashValue = SHA256.hashValue(lines);
+        this.lines = lines;
+    }
+
     public StateFile() {
     }
 
