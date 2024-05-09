@@ -1,5 +1,6 @@
 package org.syncninja.service;
 
+import org.syncninja.dto.CommitFileDTO;
 import org.syncninja.dto.FileStatusEnum;
 import org.syncninja.dto.StatusFileDTO;
 import org.syncninja.model.Branch;
@@ -90,7 +91,7 @@ public class StateTreeService {
                     currentStateNode = new StateFile(commitNode.getFullPath());
                     stateDirectory.getInternalNodes().add(currentStateNode);
                 }
-                ((StateFile) currentStateNode).setLines(compareAndAddLines(commitNode, currentStateNode));
+                ((StateFile) currentStateNode).setLines(compareAndAddLines((CommitFile) commitNode, currentStateNode));
             }
         }
         if (stateDirectory instanceof StateRoot) {
@@ -98,8 +99,7 @@ public class StateTreeService {
         }
     }
 
-    private List<String> compareAndAddLines(CommitNode commitNode, StateNode currentStateTree) {
-        CommitFile commitFile = ((CommitFile) commitNode);
+    private List<String> compareAndAddLines(CommitFile commitFile, StateNode currentStateTree) {
         List<String> stateFileLines = ((StateFile) currentStateTree).getLines();
 
         int commitFileLineIndex = 0;
@@ -136,10 +136,21 @@ public class StateTreeService {
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_NOT_INITIALIZED, new Object[]{mainDirectoryPath}));
         }
         List<StatusFileDTO> untrackedFiles = fileTrackingState.getUntracked();
+        List<CommitFileDTO> trackedFiles = fileTrackingState.getTracked();
+        Map<String, CommitFileDTO> trackedFilesMap = trackedFiles.stream()
+                .collect(Collectors.toMap(CommitFileDTO::getPath, (commitFileDTO -> commitFileDTO)));
 
         for (StatusFileDTO statusFileDTO : untrackedFiles) {
             if (statusFileDTO.getPath().matches(regex) && statusFileDTO.getStateFile() != null) {
                 restoreOldLines(statusFileDTO.getPath(), statusFileDTO.getStateFile());
+            }
+            if (statusFileDTO.getPath().matches(regex)
+                    && trackedFilesMap.get(statusFileDTO.getPath()) != null
+                    && trackedFilesMap.get(statusFileDTO.getPath()).getCommitFile().getStatusEnum() != FileStatusEnum.IS_DELETED
+            ) {
+                restoreOldLinesFromStagingArea(statusFileDTO.getPath(),
+                        trackedFilesMap.get(statusFileDTO.getPath()),
+                        statusFileDTO.getStateFile());
             }
         }
     }
@@ -147,6 +158,18 @@ public class StateTreeService {
     private void restoreOldLines(String path, StateNode stateNode) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(path))) {
             List<String> lines = ((StateFile) stateNode).getLines();
+            for (int index = 0; index < lines.size(); index++) {
+                writer.write(lines.get(index));
+                if (index != lines.size() - 1) {
+                    writer.newLine();
+                }
+            }
+        }
+    }
+
+    private void restoreOldLinesFromStagingArea(String path, CommitFileDTO commitFileDTO, StateFile stateFile) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(path))) {
+            List<String> lines = compareAndAddLines(commitFileDTO.getCommitFile(), stateFile);
             for (int index = 0; index < lines.size(); index++) {
                 writer.write(lines.get(index));
                 if (index != lines.size() - 1) {
