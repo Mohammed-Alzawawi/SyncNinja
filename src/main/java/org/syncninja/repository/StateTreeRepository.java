@@ -29,6 +29,8 @@ public class StateTreeRepository {
 
     public void updateStateRoot(StateRoot stateRoot, NinjaNode ninjaNode) {
         Session session = Neo4jSession.getSession();
+        deleteSingleRelation(stateRoot, "CURRENT_BRANCH");
+        deleteSingleRelation(stateRoot, "CURRENT_COMMIT");
         if (ninjaNode instanceof Commit) {
             stateRoot.setCurrentCommit((Commit) ninjaNode);
         } else {
@@ -75,5 +77,12 @@ public class StateTreeRepository {
         queryBuilder.deleteCharAt(queryBuilder.length() - 1); // Remove the trailing comma
         queryBuilder.append("] DETACH DELETE n");
         session.query(queryBuilder.toString(), Collections.emptyMap());
+    }
+
+    public void deleteSingleRelation(StateRoot stateRoot, String relationShip) {
+        Session session = Neo4jSession.getSession();
+        session.query(String.format("MATCH (n:StateRoot) -[r:%s]->(n1:NinjaNode) WHERE n.path = '%s' DELETE r",
+                        relationShip, Fetcher.getPathForQuery(stateRoot.getPath())),
+                Collections.emptyMap());
     }
 }

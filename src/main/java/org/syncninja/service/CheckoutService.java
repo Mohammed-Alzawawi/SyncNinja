@@ -189,6 +189,8 @@ public class CheckoutService {
                     toBeDeleted.add(stateTree.get(commitNode.getFullPath()));
                 } else if (commitNode.getStatusEnum() == FileStatusEnum.IS_NEW) {
                     StateDirectory stateDirectory = new StateDirectory(commitNode.getFullPath());
+                    StateDirectory parentStateDirectory = (StateDirectory) stateTree.get(commitDirectory.getFullPath());
+                    parentStateDirectory.getInternalNodes().add(stateDirectory);
                 }
                 addCommitChanges((CommitDirectory) commitNode, stateTree, toBeDeleted);
             } else {
@@ -222,6 +224,8 @@ public class CheckoutService {
             if (commitNode instanceof CommitDirectory) {
                 if (commitNode.getStatusEnum() == FileStatusEnum.IS_DELETED) {
                     StateDirectory stateDirectory = new StateDirectory(commitNode.getFullPath());
+                    StateDirectory parentStateDirectory = (StateDirectory) stateTree.get(commitDirectory.getFullPath());
+                    parentStateDirectory.getInternalNodes().add(stateDirectory);
                 } else if (commitNode.getStatusEnum() == FileStatusEnum.IS_NEW) {
                     toBeDeleted.add(stateTree.get(commitNode.getFullPath()));
                 }
