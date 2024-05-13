@@ -159,6 +159,7 @@ public class StateTreeService {
     public Map<String, StateNode> getStateTree(String path) throws Exception {
         StateRoot stateRoot = getStateRoot(path);
         Map<String, StateNode> stateTree = new HashMap<>();
+        stateTree.put(path, stateRoot);
         updateStateTreeMap(stateTree, stateRoot);
         return stateTree;
     }

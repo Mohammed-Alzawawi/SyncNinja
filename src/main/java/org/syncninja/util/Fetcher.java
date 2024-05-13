@@ -1,9 +1,7 @@
 package org.syncninja.util;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -37,8 +35,12 @@ public class Fetcher {
         return lines;
     }
 
-    public static String getRelativePath(String path){
+    public static String getRelativePath(String path) {
         String mainDirectoryPath = System.getProperty("user.dir");
         return path.substring(mainDirectoryPath.length() + 1);
+    }
+
+    public static String getPathForQuery(String path) {
+        return path.replace("\\", "\\\\");
     }
 }

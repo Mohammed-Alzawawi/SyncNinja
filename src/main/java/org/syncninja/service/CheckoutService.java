@@ -1,26 +1,25 @@
 package org.syncninja.service;
 
 import org.neo4j.ogm.model.Result;
-import org.neo4j.ogm.session.Session;
+import org.syncninja.dto.FileStatusEnum;
 import org.syncninja.model.Branch;
 import org.syncninja.model.Commit;
 import org.syncninja.model.NinjaNode;
 import org.syncninja.model.committree.CommitDirectory;
 import org.syncninja.model.committree.CommitFile;
 import org.syncninja.model.committree.CommitNode;
+import org.syncninja.model.statetree.StateDirectory;
+import org.syncninja.model.statetree.StateFile;
 import org.syncninja.model.statetree.StateNode;
 import org.syncninja.model.statetree.StateRoot;
 import org.syncninja.repository.BranchRepository;
 import org.syncninja.repository.NinjaNodeRepository;
 import org.syncninja.repository.StateTreeRepository;
 import org.syncninja.util.CommitContainer;
-import org.syncninja.util.Neo4jSession;
 import org.syncninja.util.ResourceBundleEnum;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.io.IOException;
+import java.util.*;
 
 public class CheckoutService {
     private final BranchRepository branchRepository;
@@ -44,8 +43,8 @@ public class CheckoutService {
         String ancestorId = null;
         for (Map<String, String> map : relationships) {
             String startNodeId = map.get("startNodeId");
-            occurenceOfEachNode.put(startNodeId, occurenceOfEachNode.getOrDefault(startNodeId, 0)+1);
-            if(occurenceOfEachNode.getOrDefault(startNodeId, 0)==2){
+            occurenceOfEachNode.put(startNodeId, occurenceOfEachNode.getOrDefault(startNodeId, 0) + 1);
+            if (occurenceOfEachNode.getOrDefault(startNodeId, 0) == 2) {
                 ancestorId = startNodeId;
             }
         }
@@ -68,7 +67,7 @@ public class CheckoutService {
         return ninjaNodes;
     }
 
-    public void commitsToAdd(ArrayList<NinjaNode> listOfCommitsToAdd, NinjaNode ancestorNode, ArrayList<NinjaNode> nodesInpath , Map<String, String>[] relationships) {
+    public void commitsToAdd(ArrayList<NinjaNode> listOfCommitsToAdd, NinjaNode ancestorNode, ArrayList<NinjaNode> nodesInpath, Map<String, String>[] relationships) {
         if (ancestorNode != null) {
             int indexOfAncestor = nodesInpath.indexOf(ancestorNode);
             for (int i = indexOfAncestor + 1; i < nodesInpath.size(); i++) {
@@ -159,37 +158,111 @@ public class CheckoutService {
 
             // start the checkout logic
             NinjaNode ancestorNode = getAncestorNode(relationships, ninjaNodesInPath);
-            commitsToAdd(addedCommits, ancestorNode, ninjaNodesInPath , relationships);
+            commitsToAdd(addedCommits, ancestorNode, ninjaNodesInPath, relationships);
             commitsToRemove(removedCommits, ancestorNode, ninjaNodesInPath, relationships);
             //now the arrays have the list of commits to add and remove
-            stateTreeRepository.updateStateRoot(stateRoot, branch);
+
             //updating stateTree
             Map<String, StateNode> stateTree = stateTreeService.getStateTree(path);
             updateStateTreeByRemovingCommits(stateTree, removedCommits);
-
+            updateStateTreeByAddingCommits(stateTree, addedCommits);
+            stateTreeRepository.updateStateRoot(stateRoot, branch);
         } else {
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.BRANCH_NOT_FOUND, new Object[]{branchName}));
         }
     }
 
-    public void updateStateTreeByRemovingCommits(Map<String, StateNode> stateTree, ArrayList<NinjaNode> removedCommits){
-        for(NinjaNode ninjaNode : removedCommits){
+    private void updateStateTreeByAddingCommits(Map<String, StateNode> stateTree, ArrayList<NinjaNode> addedCommits) throws IOException {
+        for (NinjaNode ninjaNode : addedCommits) {
             Commit commit = (Commit) ninjaNode;
             CommitDirectory commitDirectory = commit.getCommitTreeRoot();
-            ArrayList<CommitNode> commitFiles = new ArrayList<>();
-            getCommitTree(commitDirectory, commitFiles);
-
+            Set<StateNode> toBeDeleted = new HashSet<>();
+            addCommitChanges(commitDirectory, stateTree, toBeDeleted);
+            stateTreeRepository.deleteNodeList(toBeDeleted);
         }
     }
 
-    public void getCommitTree(CommitDirectory commitDirectory, ArrayList<CommitNode> commitNodes){
-        for(CommitNode commitNode: commitDirectory.getCommitNodeList()){
-            if(commitNode instanceof CommitDirectory){
-                commitNodes.add(commitNode);
-                getCommitTree((CommitDirectory) commitNode, commitNodes);
+    public void addCommitChanges(CommitDirectory commitDirectory, Map<String, StateNode> stateTree, Set<StateNode> toBeDeleted) throws IOException {
+        for (CommitNode commitNode : commitDirectory.getCommitNodeList()) {
+            if (commitNode instanceof CommitDirectory) {
+                if (commitNode.getStatusEnum() == FileStatusEnum.IS_DELETED) {
+                    toBeDeleted.add(stateTree.get(commitNode.getFullPath()));
+                } else if (commitNode.getStatusEnum() == FileStatusEnum.IS_NEW) {
+                    StateDirectory stateDirectory = new StateDirectory(commitNode.getFullPath());
+                    StateDirectory parentStateDirectory = (StateDirectory) stateTree.get(commitDirectory.getFullPath());
+                    parentStateDirectory.getInternalNodes().add(stateDirectory);
+                }
+                addCommitChanges((CommitDirectory) commitNode, stateTree, toBeDeleted);
+            } else {
+                CommitFile commitFile = (CommitFile) commitNode;
+                if (commitNode.getStatusEnum() == FileStatusEnum.IS_DELETED) {
+                    toBeDeleted.add(stateTree.get(commitNode.getFullPath()));
+
+                } else if (commitNode.getStatusEnum() == FileStatusEnum.IS_NEW) {
+                    StateFile stateFile = new StateFile(commitNode.getFullPath(), commitFile.getOldValuesList());
+                    StateDirectory stateDirectory = (StateDirectory) stateTree.get(commitDirectory.getFullPath());
+                    stateDirectory.getInternalNodes().add(stateFile);
+                } else {
+                    updateStateFileWithNewLines(commitFile.getNewValuesList(), commitFile.getLineNumberList(), (StateFile) stateTree.get(commitFile.getFullPath()));
+                }
             }
-            else{
-                commitNodes.add(commitNode);
+        }
+    }
+
+    private void updateStateTreeByRemovingCommits(Map<String, StateNode> stateTree, ArrayList<NinjaNode> removedCommits) throws IOException {
+        for (NinjaNode ninjaNode : removedCommits) {
+            Commit commit = (Commit) ninjaNode;
+            CommitDirectory commitDirectory = commit.getCommitTreeRoot();
+            Set<StateNode> toBeDeleted = new HashSet<>();
+            removeCommitChanges(commitDirectory, stateTree, toBeDeleted);
+            stateTreeRepository.deleteNodeList(toBeDeleted);
+        }
+    }
+
+    public void removeCommitChanges(CommitDirectory commitDirectory, Map<String, StateNode> stateTree, Set<StateNode> toBeDeleted) throws IOException {
+        for (CommitNode commitNode : commitDirectory.getCommitNodeList()) {
+            if (commitNode instanceof CommitDirectory) {
+                if (commitNode.getStatusEnum() == FileStatusEnum.IS_DELETED) {
+                    StateDirectory stateDirectory = new StateDirectory(commitNode.getFullPath());
+                    StateDirectory parentStateDirectory = (StateDirectory) stateTree.get(commitDirectory.getFullPath());
+                    parentStateDirectory.getInternalNodes().add(stateDirectory);
+                } else if (commitNode.getStatusEnum() == FileStatusEnum.IS_NEW) {
+                    toBeDeleted.add(stateTree.get(commitNode.getFullPath()));
+                }
+                removeCommitChanges((CommitDirectory) commitNode, stateTree, toBeDeleted);
+            } else {
+                CommitFile commitFile = (CommitFile) commitNode;
+                if (commitNode.getStatusEnum() == FileStatusEnum.IS_DELETED) {
+                    StateFile stateFile = new StateFile(commitNode.getFullPath(), commitFile.getOldValuesList());
+                    StateDirectory stateDirectory = (StateDirectory) stateTree.get(commitDirectory.getFullPath());
+                    stateDirectory.getInternalNodes().add(stateFile);
+                } else if (commitNode.getStatusEnum() == FileStatusEnum.IS_NEW) {
+                    toBeDeleted.add(stateTree.get(commitNode.getFullPath()));
+                } else {
+                    updateStateFileWithOldLines(commitFile.getOldValuesList(), commitFile.getLineNumberList(), (StateFile) stateTree.get(commitFile.getFullPath()));
+                }
+            }
+        }
+    }
+
+    private void updateStateFileWithOldLines(List<String> lines, List<Integer> lineNumberList, StateFile stateFile) {
+        for (int i = 0; i < lineNumberList.size(); i++) {
+            int lineNumber = lineNumberList.get(i) - 1;
+            if (lineNumber > lines.size()) {
+                stateFile.getLines().remove(lineNumber);
+            } else {
+                stateFile.getLines().set(lineNumber, lines.get(lineNumber));
+            }
+        }
+    }
+
+    private void updateStateFileWithNewLines(List<String> newlines, List<Integer> lineNumberList, StateFile stateFile) {
+        for (int i = 0; i < lineNumberList.size(); i++) {
+            int lineNumber = lineNumberList.get(i) - 1;
+            if (lineNumber > stateFile.getLines().size()) {
+                stateFile.getLines().add(newlines.get(lineNumber));
+            } else {
+                stateFile.getLines().set(lineNumber, newlines.get(lineNumber));
             }
         }
     }
