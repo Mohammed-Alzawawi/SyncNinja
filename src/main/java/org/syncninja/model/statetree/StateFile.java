@@ -6,6 +6,7 @@ import org.syncninja.util.SHA256;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @NodeEntity
@@ -23,6 +24,7 @@ public class StateFile extends StateNode {
     }
 
     public StateFile() {
+        lines = new ArrayList<>();
     }
 
     public void setPath(String path) {
