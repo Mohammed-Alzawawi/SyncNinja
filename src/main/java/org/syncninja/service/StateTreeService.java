@@ -1,5 +1,6 @@
 package org.syncninja.service;
 
+import org.syncninja.dto.CommitFileDTO;
 import org.syncninja.dto.FileStatusEnum;
 import org.syncninja.dto.StatusFileDTO;
 import org.syncninja.model.Branch;
@@ -20,6 +21,9 @@ import org.syncninja.util.ResourceBundleEnum;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,8 +50,7 @@ public class StateTreeService {
     }
 
     public StateRoot getStateRoot(String path) throws Exception {
-        return (StateRoot) stateTreeRepository.findById(path).orElseThrow(
-                () -> new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_NOT_INITIALIZED, new Object[]{path})));
+        return (StateRoot) stateTreeRepository.findById(path).orElseThrow(() -> new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_NOT_INITIALIZED, new Object[]{path})));
     }
 
     public CommitNode getStagingArea(String path) throws Exception {
@@ -68,8 +71,7 @@ public class StateTreeService {
     }
 
     public void addChangesToStateTree(CommitDirectory commitDirectory, StateDirectory stateDirectory) throws IOException {
-        Map<String, StateNode> stateTreeMap = stateDirectory.getInternalNodes().stream()
-                .collect(Collectors.toMap(StateNode::getPath, (stateTree -> stateTree)));
+        Map<String, StateNode> stateTreeMap = stateDirectory.getInternalNodes().stream().collect(Collectors.toMap(StateNode::getPath, (stateTree -> stateTree)));
         List<CommitNode> commitNodeList = commitDirectory.getCommitNodeList();
 
         for (CommitNode commitNode : commitNodeList) {
@@ -90,7 +92,7 @@ public class StateTreeService {
                     currentStateNode = new StateFile(commitNode.getFullPath());
                     stateDirectory.getInternalNodes().add(currentStateNode);
                 }
-                ((StateFile) currentStateNode).setLines(compareAndAddLines(commitNode, currentStateNode));
+                ((StateFile) currentStateNode).setLines(compareAndAddLines((CommitFile) commitNode, currentStateNode));
             }
         }
         if (stateDirectory instanceof StateRoot) {
@@ -98,8 +100,7 @@ public class StateTreeService {
         }
     }
 
-    private List<String> compareAndAddLines(CommitNode commitNode, StateNode currentStateTree) {
-        CommitFile commitFile = ((CommitFile) commitNode);
+    private List<String> compareAndAddLines(CommitFile commitFile, StateNode currentStateTree) {
         List<String> stateFileLines = ((StateFile) currentStateTree).getLines();
 
         int commitFileLineIndex = 0;
@@ -130,16 +131,48 @@ public class StateTreeService {
         }
         String regex = regexBuilder.buildRegex();
 
-        // looping through the untracked
         FileTrackingState fileTrackingState = statusService.getState(mainDirectoryPath);
         if (fileTrackingState == null) {
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_NOT_INITIALIZED, new Object[]{mainDirectoryPath}));
         }
         List<StatusFileDTO> untrackedFiles = fileTrackingState.getUntracked();
+        List<CommitFileDTO> trackedFiles = fileTrackingState.getTracked();
+        Map<String, CommitFileDTO> trackedFilesMap = trackedFiles.stream().collect(Collectors.toMap(CommitFileDTO::getPath, (commitFileDTO -> commitFileDTO)));
 
+        // looping through the untracked
+        restoreFiles(untrackedFiles, trackedFilesMap, regex);
+    }
+
+    private void restoreFiles(List<StatusFileDTO> untrackedFiles, Map<String, CommitFileDTO> trackedFilesMap, String regex) throws IOException {
         for (StatusFileDTO statusFileDTO : untrackedFiles) {
-            if (statusFileDTO.getPath().matches(regex) && statusFileDTO.getStateFile() != null) {
-                restoreOldLines(statusFileDTO.getPath(), statusFileDTO.getStateFile());
+            CommitFileDTO commitFileDto = trackedFilesMap.get(statusFileDTO.getPath());
+
+            if (statusFileDTO.getPath().matches(regex)) {
+                // if the file has a state node
+                if (statusFileDTO.getStateFile() != null) {
+                    restoreOldLines(statusFileDTO.getPath(), statusFileDTO.getStateFile());
+
+                    if (commitFileDto != null) {
+                        if (commitFileDto.getCommitFile().getStatusEnum() != FileStatusEnum.IS_DELETED) {
+                            restoreOldLinesFromStagingArea(statusFileDTO.getPath(), commitFileDto, statusFileDTO.getStateFile());
+                        } else {
+                            Path path = Paths.get(statusFileDTO.getPath());
+                            Files.delete(path);
+                        }
+                    }
+                }
+
+                // this checks if the file is new
+                else {
+                    if (commitFileDto != null) {
+                        if (commitFileDto.getCommitFile().getStatusEnum() != FileStatusEnum.IS_DELETED) {
+                            restoreNewFileFromStagingArea(statusFileDTO.getPath(), commitFileDto);
+                        } else {
+                            Path path = Paths.get(statusFileDTO.getPath());
+                            Files.delete(path);
+                        }
+                    }
+                }
             }
         }
     }
@@ -147,6 +180,30 @@ public class StateTreeService {
     private void restoreOldLines(String path, StateNode stateNode) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(path))) {
             List<String> lines = ((StateFile) stateNode).getLines();
+            for (int index = 0; index < lines.size(); index++) {
+                writer.write(lines.get(index));
+                if (index != lines.size() - 1) {
+                    writer.newLine();
+                }
+            }
+        }
+    }
+
+    private void restoreOldLinesFromStagingArea(String path, CommitFileDTO commitFileDTO, StateFile stateFile) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(path))) {
+            List<String> lines = compareAndAddLines(commitFileDTO.getCommitFile(), stateFile);
+            for (int index = 0; index < lines.size(); index++) {
+                writer.write(lines.get(index));
+                if (index != lines.size() - 1) {
+                    writer.newLine();
+                }
+            }
+        }
+    }
+
+    private void restoreNewFileFromStagingArea(String path, CommitFileDTO commitFileDTO) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(path))) {
+            List<String> lines = compareAndAddLines(commitFileDTO.getCommitFile(), new StateFile());
             for (int index = 0; index < lines.size(); index++) {
                 writer.write(lines.get(index));
                 if (index != lines.size() - 1) {
