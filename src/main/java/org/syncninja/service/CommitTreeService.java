@@ -49,15 +49,14 @@ public class CommitTreeService {
         // building regex for add command
         Regex regexBuilder = new Regex();
         for (String path : listOfFilesToBeAdded) {
-            regexBuilder.addFilePath(path);
+            regexBuilder.addFilePath(Fetcher.getPathForQuery(path));
         }
         String regex = regexBuilder.buildRegex();
-
         boolean changedStagingArea = false;
         Set<CommitNode> deletedCommitNodes = new HashSet<>();
 
         for (StatusFileDTO statusFileDTO : statusFileDTOs) {
-            if (statusFileDTO.getPath().matches(regex)) {
+            if (statusFileDTO.getRelativePath().matches(regex)) {
                 String relativePath = statusFileDTO.getPath().substring(mainDirectoryPath.length() + 1);
                 String[] pathComponents = relativePath.split("\\\\");
                 changedStagingArea = true;
@@ -75,7 +74,6 @@ public class CommitTreeService {
     private void deleteCommitNodeList(CommitDirectory commitDirectory, Set<CommitNode> deletedCommitNodes) {
         List<CommitNode> children = commitDirectory.getCommitNodeList();
         List<CommitNode> nodesToDelete = new ArrayList<>();
-
         for (CommitNode commitNode : children) {
             if (deletedCommitNodes.contains(commitNode)) {
                 nodesToDelete.add(commitNode);

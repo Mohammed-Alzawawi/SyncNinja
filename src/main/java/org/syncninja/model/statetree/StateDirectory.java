@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @NodeEntity
@@ -25,8 +26,8 @@ public class StateDirectory extends StateNode {
         super(path);
         this.internalNodes = new ArrayList<>();
         Path file = Paths.get(path);
-        BasicFileAttributes attrs = Files.readAttributes(file, BasicFileAttributes.class);
-        this.lastAccessed = attrs.lastAccessTime().toMillis();
+        //BasicFileAttributes attrs = Files.readAttributes(file, BasicFileAttributes.class);
+        this.lastAccessed = new Date().getTime();
     }
 
     public long getLastAccessed() {
