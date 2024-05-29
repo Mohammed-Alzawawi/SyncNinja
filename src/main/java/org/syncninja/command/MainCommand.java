@@ -9,7 +9,8 @@ import picocli.CommandLine;
         RestoreCommand.class,
         StatusCommand.class,
         UnstageCommand.class,
-        CheckoutCommand.class
+        CheckoutCommand.class,
+        MergeCommand.class
 })
 public class MainCommand implements Runnable {
     @Override

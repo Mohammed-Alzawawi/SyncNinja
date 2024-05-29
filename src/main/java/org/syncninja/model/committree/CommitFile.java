@@ -4,6 +4,7 @@ import org.neo4j.ogm.annotation.NodeEntity;
 import org.syncninja.dto.FileStatusEnum;
 import org.syncninja.util.LinesContainer;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @NodeEntity
@@ -32,7 +33,7 @@ public class CommitFile extends CommitNode {
     }
 
     public void setLineNumberList(List<Integer> lineNumberList) {
-        this.lineNumberList = lineNumberList;
+        this.lineNumberList = new ArrayList<>(lineNumberList);
     }
 
     public List<String> getNewValuesList() {
@@ -40,7 +41,7 @@ public class CommitFile extends CommitNode {
     }
 
     public void setNewValuesList(List<String> newValuesList) {
-        this.newValuesList = newValuesList;
+        this.newValuesList = new ArrayList<>(newValuesList);
     }
 
     public List<String> getOldValuesList() {
@@ -48,7 +49,7 @@ public class CommitFile extends CommitNode {
     }
 
     public void setOldValuesList(List<String> oldValuesList) {
-        this.oldValuesList = oldValuesList;
+        this.oldValuesList = new ArrayList<>(oldValuesList);
     }
 
     public void updateCommitList(LinesContainer linesContainer) {
