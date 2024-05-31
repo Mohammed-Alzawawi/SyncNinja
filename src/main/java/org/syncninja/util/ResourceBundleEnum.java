@@ -24,7 +24,8 @@ public enum ResourceBundleEnum {
 
     RESTORED_SUCCESSFULLY("restored_successfully"),
     YOU_ARE_ALREADY_IN_BRANCH("you_are_already_in_branch"),
-    NO_CHANGES_TO_BE_ADDED("no_changes_to_be_added");
+    NO_CHANGES_TO_BE_ADDED("no_changes_to_be_added"),
+    FAILED_TO_UPDATE_FILE_SYSTEM("Failed_to_update_file_system_for");
 
     private final String key;
 
