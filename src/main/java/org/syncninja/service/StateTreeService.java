@@ -213,10 +213,9 @@ public class StateTreeService {
         }
     }
 
-    public Map<String, StateNode> getStateTree(String path) throws Exception {
-        StateRoot stateRoot = getStateRoot(path);
+    public Map<String, StateNode> getStateTree(StateRoot stateRoot) {
         Map<String, StateNode> stateTree = new HashMap<>();
-        stateTree.put(path, stateRoot);
+        stateTree.put(stateRoot.getPath(), stateRoot);
         updateStateTreeMap(stateTree, stateRoot);
         return stateTree;
     }

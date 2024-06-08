@@ -21,11 +21,11 @@ public enum ResourceBundleEnum {
     BRANCH_NOT_FOUND("branch_not_found"),
     PATH_NOT_FILE("path_not_file"),
     COMMIT_SUCCESSFULLY("commit_successfully"),
-
     RESTORED_SUCCESSFULLY("restored_successfully"),
     YOU_ARE_ALREADY_IN_BRANCH("you_are_already_in_branch"),
     NO_CHANGES_TO_BE_ADDED("no_changes_to_be_added"),
-    FAILED_TO_UPDATE_FILE_SYSTEM("Failed_to_update_file_system_for");
+    FAILED_TO_UPDATE_FILE_SYSTEM("Failed_to_update_file_system_for"),
+    MERGED_SUCCESSFULLY("merged_successfully");
 
     private final String key;
 

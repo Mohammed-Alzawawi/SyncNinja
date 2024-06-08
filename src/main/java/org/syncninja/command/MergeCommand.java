@@ -2,7 +2,9 @@ package org.syncninja.command;
 
 import org.neo4j.ogm.session.Session;
 import org.syncninja.service.MergeService;
+import org.syncninja.service.ResourceMessagingService;
 import org.syncninja.util.Neo4jSession;
+import org.syncninja.util.ResourceBundleEnum;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "merge", description = "merge two branches")
@@ -28,6 +30,8 @@ public class MergeCommand extends BaseCommand {
 
             session.getTransaction().commit();
             Neo4jSession.closeSession();
+
+            System.out.println(ResourceMessagingService.getMessage(ResourceBundleEnum.MERGED_SUCCESSFULLY, new Object[]{branchName}));
         } catch (Exception e){
             System.out.println(e.getMessage());
         }
