@@ -12,7 +12,9 @@ public class Commit extends NinjaNode {
     private CommitDirectory commitTree;
 
     public Commit() {
-
+    }
+    public Commit(boolean isCommitted) {
+        this.isCommitted = isCommitted;
     }
 
     public Commit(String message) {

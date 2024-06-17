@@ -27,6 +27,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class StateTreeService {
@@ -98,6 +99,10 @@ public class StateTreeService {
         if (stateDirectory instanceof StateRoot) {
             stateTreeRepository.save(stateDirectory);
         }
+    }
+
+    public StateNode findStateNodeByPath(String path) {
+         return stateTreeRepository.findById(path).get();
     }
 
     private List<String> compareAndAddLines(CommitFile commitFile, StateNode currentStateTree) {

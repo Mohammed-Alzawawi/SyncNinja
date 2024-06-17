@@ -196,9 +196,9 @@ public class PathFinderService {
     }
 
     private void updateStateFileWithOldLines(List<String> lines, List<Integer> lineNumberList, StateFile stateFile) {
-        for (int i = lineNumberList.size() - 1; i > 0; i--) {
+        for (int i = lineNumberList.size() - 1; i >= 0; i--) {
             int lineNumber = lineNumberList.get(i) - 1;
-            if (lineNumber >= lines.size()) {
+            if (lineNumber >= stateFile.getLines().size()) {
                 stateFile.getLines().remove(lineNumber);
             } else {
                 stateFile.getLines().set(lineNumber, lines.get(i));
@@ -206,7 +206,7 @@ public class PathFinderService {
         }
     }
 
-    protected void updateStateTreeByAddingCommits(Map<String, StateNode> stateTree, ArrayList<NinjaNode> addedCommits, Map<StateNode, FileStatusEnum> fileStateMap) throws Exception {
+    protected void updateStateTreeByAddingCommits(Map<String, StateNode> stateTree, List<NinjaNode> addedCommits, Map<StateNode, FileStatusEnum> fileStateMap) throws Exception {
         for (NinjaNode ninjaNode : addedCommits) {
             Commit commit = (Commit) ninjaNode;
             CommitDirectory commitDirectory = commit.getCommitTreeRoot();

@@ -9,6 +9,9 @@ public class MergeFile extends CommitFile {
     private List<String> conflictLine;
     private List<String> conflictSolution;
 
+    public MergeFile() {
+
+    }
     public MergeFile(CommitFile commitFile) {
         this.setPath(commitFile.getPath());
         this.setStatusEnum(commitFile.getStatusEnum());

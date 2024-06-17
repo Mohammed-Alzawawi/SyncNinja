@@ -26,12 +26,15 @@ public class MergeCommand extends BaseCommand {
             session.beginTransaction();
 
             String path = System.getProperty("user.dir");
-            mergeService.merge(path, branchName);
+            boolean conflict = mergeService.merge(path, branchName);
 
             session.getTransaction().commit();
             Neo4jSession.closeSession();
-
-            System.out.println(ResourceMessagingService.getMessage(ResourceBundleEnum.MERGED_SUCCESSFULLY, new Object[]{branchName}));
+            if(conflict) {
+                System.out.println("Conflict Detected Please fix it");
+            } else {
+                System.out.println(ResourceMessagingService.getMessage(ResourceBundleEnum.MERGED_SUCCESSFULLY, new Object[]{branchName}));
+            }
         } catch (Exception e){
             System.out.println(e.getMessage());
         }
