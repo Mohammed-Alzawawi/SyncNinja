@@ -162,7 +162,6 @@ public class CommitTreeService {
     }
 
     private boolean isFile(String path) {
-
         return new File(path).isFile();
     }
 

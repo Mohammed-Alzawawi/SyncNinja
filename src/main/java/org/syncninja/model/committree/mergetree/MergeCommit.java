@@ -9,9 +9,7 @@ public class MergeCommit extends Commit {
     @Relationship(type = "referenceTo")
     private Commit referenceCommit;
 
-    public MergeCommit() {
-
-    }
+    public MergeCommit(){}
 
     public MergeCommit(Commit commit) {
         this.setCommitted(commit.isCommitted());

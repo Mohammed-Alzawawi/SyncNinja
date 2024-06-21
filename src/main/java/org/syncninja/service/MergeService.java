@@ -1,8 +1,10 @@
 package org.syncninja.service;
 
 import org.neo4j.ogm.model.Result;
+import org.syncninja.dto.CommitFileDTO;
 import org.syncninja.dto.ConflictBundle;
 import org.syncninja.dto.FileStatusEnum;
+import org.syncninja.dto.StatusFileDTO;
 import org.syncninja.model.Branch;
 import org.syncninja.model.Commit;
 import org.syncninja.model.NinjaNode;
@@ -33,6 +35,8 @@ public class MergeService {
     private final CommitNodeRepository commitNodeRepository;
     private final PathFinderService pathFinderService;
     private final CommitRepository commitRepository;
+    private final StateTreeUpdate stateTreeUpdate;
+    private final StatusService statusService;
 
     public MergeService() {
         this.branchRepository = new BranchRepository();
@@ -40,6 +44,8 @@ public class MergeService {
         this.commitNodeRepository = new CommitNodeRepository();
         this.pathFinderService = new PathFinderService();
         this.commitRepository = new CommitRepository();
+        this.stateTreeUpdate = new StateTreeUpdate();
+        this.statusService = new StatusService();
     }
 
     public boolean merge(String path, String branchName) throws Exception {
@@ -48,97 +54,110 @@ public class MergeService {
 
         if (branchOptional.isPresent()) {
             Branch branch = branchOptional.get();
-            if (!branch.getName().equals(stateRoot.getCurrentBranch().getName())) {
-                // get both sides of the path
-                NinjaNode currentNode = stateRoot.getCurrentNinjaNode();
-                NinjaNode targetNode = branch.getLastNinjaNode();
-                Result result = branchRepository.getPathOfNinjaNodes(currentNode, targetNode).get();
+            FileTrackingState state = statusService.getState(path);
+            List<CommitFileDTO> tracked = state.getTracked();
+            List<StatusFileDTO> untracked = state.getUntracked();
 
-                // get the relationships and nodes in the path
-                Map<String, String>[] relationships = pathFinderService.getRelationshipsInPath(result);
-                ArrayList<NinjaNode> ninjaNodesInPath = pathFinderService.getNinjaNodesInPath(result);
+            if(tracked.isEmpty() && untracked.isEmpty()){
+                if (!branch.getName().equals(stateRoot.getCurrentBranch().getName())) {
+                    // get both sides of the path
+                    NinjaNode currentNode = stateRoot.getCurrentNinjaNode();
+                    NinjaNode targetNode = branch.getLastNinjaNode();
+                    Result result = branchRepository.getPathOfNinjaNodes(currentNode, targetNode).get();
 
-                // use these arrays to update the file system and the state tree and they are sorted
-                CommitContainer commitContainer = new CommitContainer();
-                ArrayList<NinjaNode> mergedNinjaNodes = commitContainer.getCommitsToAdd();
-                ArrayList<NinjaNode> ignoredNinjaNodes = commitContainer.getCommitsToRemove();
+                    // get the relationships and nodes in the path
+                    Map<String, String>[] relationships = pathFinderService.getRelationshipsInPath(result);
+                    ArrayList<NinjaNode> ninjaNodesInPath = pathFinderService.getNinjaNodesInPath(result);
 
-                // get the nodes to merge and the ones to ignore
-                NinjaNode ancestorNode = pathFinderService.getAncestorNode(relationships, ninjaNodesInPath);
-                pathFinderService.findOutOfAncestor(mergedNinjaNodes, ancestorNode, ninjaNodesInPath, relationships);
-                pathFinderService.findGoingToAncestor(ignoredNinjaNodes, ancestorNode, ninjaNodesInPath, relationships);
+                    // use these arrays to update the file system and the state tree and they are sorted
+                    CommitContainer commitContainer = new CommitContainer();
+                    ArrayList<NinjaNode> mergedNinjaNodes = commitContainer.getCommitsToAdd();
+                    ArrayList<NinjaNode> ignoredNinjaNodes = commitContainer.getCommitsToRemove();
 
-                Map<String, NinjaNode> ignoredNinjaNodeMap = ignoredNinjaNodes.stream().collect(Collectors.toMap(NinjaNode::getId, (ninjaNode -> ninjaNode)));
+                    // get the nodes to merge and the ones to ignore
+                    NinjaNode ancestorNode = pathFinderService.getAncestorNode(relationships, ninjaNodesInPath);
+                    pathFinderService.findOutOfAncestor(mergedNinjaNodes, ancestorNode, ninjaNodesInPath, relationships);
+                    pathFinderService.findGoingToAncestor(ignoredNinjaNodes, ancestorNode, ninjaNodesInPath, relationships);
 
-                // build a map which combines all ignored commit into one commit
-                List<Commit> ignoredCommitList = ignoredNinjaNodes.stream().filter(ninjaNode -> ninjaNode instanceof Commit)
-                        .sorted(Comparator.comparing(SyncNode::getCreationTime))
-                        .map(ninjaNode -> (Commit) ninjaNode)
-                        .collect(Collectors.toList());
-                Map<String, CommitNode> combinedCommitsMap = CombineCommitsUtil.combineCommits(ignoredCommitList);
+                    Map<String, NinjaNode> ignoredNinjaNodeMap = ignoredNinjaNodes.stream().collect(Collectors.toMap(NinjaNode::getId, (ninjaNode -> ninjaNode)));
 
-                // StateRoot
-                Map<StateNode, FileStatusEnum> fileStateMap = new HashMap<>();
-                Map<String, StateNode> stateTree = stateTreeService.getStateTree(stateRoot);
+                    // build a map which combines all ignored commit into one commit
+                    List<Commit> ignoredCommitList = ignoredNinjaNodes.stream().filter(ninjaNode -> ninjaNode instanceof Commit)
+                            .sorted(Comparator.comparing(SyncNode::getCreationTime))
+                            .map(ninjaNode -> (Commit) ninjaNode)
+                            .collect(Collectors.toList());
+                    Map<String, CommitNode> combinedCommitsMap = CombineCommitsUtil.combineCommits(ignoredCommitList);
 
-                // merge logic
-                MergeCommit mergeCommit = null;
-                for (NinjaNode ninjaNodeToMerge: mergedNinjaNodes) {
-                    if (!ignoredNinjaNodeMap.containsKey(ninjaNodeToMerge.getId()) && ninjaNodeToMerge instanceof Commit) {
-                        mergeCommit = new MergeCommit((Commit) ninjaNodeToMerge);
-                        MergeDirectory mergeTreeRoot = new MergeDirectory(((Commit) ninjaNodeToMerge).getCommitTreeRoot());
-                        mergeCommit.setCommitTree(mergeTreeRoot);
-                        
-                        // delete staging area if exist 
-                        if(currentNode.getNextCommit() != null){
-                            commitRepository.delete(currentNode.getNextCommit());
-                        }
+                    // StateRoot
+                    Map<StateNode, FileStatusEnum> fileStateMap = new HashMap<>();
+                    Map<String, StateNode> stateTree = stateTreeService.getStateTree(stateRoot);
 
-                        // merge commit logic
-                        ConflictBundle conflictBundle = mergeCommitTree(((Commit) ninjaNodeToMerge).getCommitTreeRoot(), mergeTreeRoot, combinedCommitsMap);
-                        
-                        pathFinderService.updateStateTreeByAddingCommits(stateTree, List.of(mergeCommit), fileStateMap);
-
-                        if(conflictBundle.containsConflict()) {
-                            // update file system with state tree
-                            pathFinderService.reflectStateTreeOnFileSystem(fileStateMap);
-                            // create the conflict files
-                            createConflictFiles(conflictBundle);
-
-                            mergeCommit.setCommitted(false);
-                            currentNode.setNextCommit(mergeCommit);
-                            commitRepository.save(mergeCommit);
-                            commitRepository.save((Commit) currentNode);
-
-                            return true;
-                        } else {
-                            Branch currentBranch = stateRoot.getCurrentBranch();
-                            currentBranch.setLastCommit(mergeCommit);
-                            new BranchRepository().save(currentBranch);
-                            stateTreeService.updateStateRoot(stateRoot, mergeCommit);
-                        }
-                        commitRepository.save((Commit) ninjaNodeToMerge);
-                        currentNode = currentNode.getNextCommit();
+                    if (mergeLogic(mergedNinjaNodes, ignoredNinjaNodeMap, currentNode, combinedCommitsMap, stateTree, fileStateMap, stateRoot)) {
+                        return true;
                     }
-                }
-
-                if (mergeCommit != null) {
-                    // adding staging area
-                    mergeCommit.setNextCommit(new Commit(false));
-                    commitRepository.save(mergeCommit);
-                    // update file system with state tree
-                    pathFinderService.reflectStateTreeOnFileSystem(fileStateMap);
+                } else {
+                    throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.ALREADY_IN_BRANCH, new Object[]{branchName}));
                 }
             } else {
-                throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.YOU_ARE_ALREADY_IN_BRANCH, new Object[]{branchName}));
+                throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.MERGE_FAILED_UNCOMMITTED_CHANGES));
             }
-
         } else {
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.BRANCH_NOT_FOUND, new Object[]{branchName}));
         }
         return false;
     }
 
+    private boolean mergeLogic(ArrayList<NinjaNode> mergedNinjaNodes, Map<String, NinjaNode> ignoredNinjaNodeMap, NinjaNode currentNode, Map<String, CommitNode> combinedCommitsMap, Map<String, StateNode> stateTree, Map<StateNode, FileStatusEnum> fileStateMap, StateRoot stateRoot) throws Exception {
+        // merge logic
+        MergeCommit mergeCommit = null;
+        for (NinjaNode ninjaNodeToMerge: mergedNinjaNodes) {
+            if (!ignoredNinjaNodeMap.containsKey(ninjaNodeToMerge.getId()) && ninjaNodeToMerge instanceof Commit) {
+                mergeCommit = new MergeCommit((Commit) ninjaNodeToMerge);
+                MergeDirectory mergeTreeRoot = new MergeDirectory(((Commit) ninjaNodeToMerge).getCommitTreeRoot());
+                mergeCommit.setCommitTree(mergeTreeRoot);
+
+                // delete staging area if exist
+                if(currentNode.getNextCommit() != null){
+                    commitRepository.delete(currentNode.getNextCommit());
+                }
+
+                // merge commit logic
+                ConflictBundle conflictBundle = mergeCommitTree(((Commit) ninjaNodeToMerge).getCommitTreeRoot(), mergeTreeRoot, combinedCommitsMap);
+
+                stateTreeUpdate.updateStateTreeByAddingCommits(stateTree, List.of(mergeCommit), fileStateMap);
+
+                if(conflictBundle.containsConflict()) {
+                    // update file system with state tree
+                    stateTreeUpdate.reflectStateTreeOnFileSystem(fileStateMap);
+                    // create the conflict files
+                    createConflictFiles(conflictBundle);
+
+                    mergeCommit.setCommitted(false);
+                    currentNode.setNextCommit(mergeCommit);
+                    commitRepository.save(mergeCommit);
+                    commitRepository.save((Commit) currentNode);
+
+                    return true;
+                } else {
+                    Branch currentBranch = stateRoot.getCurrentBranch();
+                    currentBranch.setLastCommit(mergeCommit);
+                    new BranchRepository().save(currentBranch);
+                    stateTreeService.updateStateRoot(stateRoot, mergeCommit);
+                }
+                commitRepository.save((Commit) ninjaNodeToMerge);
+                currentNode = currentNode.getNextCommit();
+            }
+        }
+
+        if (mergeCommit != null) {
+            // adding staging area
+            mergeCommit.setNextCommit(new Commit(false));
+            commitRepository.save(mergeCommit);
+            // update file system with state tree
+            stateTreeUpdate.reflectStateTreeOnFileSystem(fileStateMap);
+        }
+        return false;
+    }
 
     private ConflictBundle mergeCommitTree(CommitDirectory commitDirectory, MergeDirectory mergeDirectory, Map<String, CommitNode> combinedCommitsMap) {
         ConflictBundle conflictBundle = new ConflictBundle();
@@ -256,7 +275,7 @@ public class MergeService {
         // added lines at the end of the commit
         if(!reachedEnd) {
             int valueIndex = commitFile.getLineNumberList().indexOf(lines.size() + 1);
-            for(int index = valueIndex; index < commitFile.getLineNumberList().size(); index++){
+            for(int index = valueIndex; index < commitFile.getLineNumberList().size() && valueIndex >= 0; index++){
                 conflictFileLines.add(lines.get(index));
                 index++;
             }

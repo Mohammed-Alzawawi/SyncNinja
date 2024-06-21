@@ -16,6 +16,7 @@ public class BranchRepository {
         Session session = Neo4jSession.getSession();
         session.save(branch);
     }
+
     public Optional<Branch> findByName(String branchName,String path){
         Session session = Neo4jSession.getSession();
         String cypher = "match(n:Directory)-[*]->(b:Branch)where n.path=$path and b.name=$branchName return b";
@@ -23,9 +24,6 @@ public class BranchRepository {
         return Optional.ofNullable(branch);
     }
 
-    public Optional<Result> getPathOfBranches(Branch currentBranch , Branch targetBranch){
-        return getPathOfNinjaNodes(currentBranch.getLastCommit(), targetBranch.getLastCommit());
-    }
     public Optional<Result> getPathOfNinjaNodes(NinjaNode currentNode , NinjaNode targetNode){
         Session session = Neo4jSession.getSession();
         Map<String, String> parameters = new HashMap<>();

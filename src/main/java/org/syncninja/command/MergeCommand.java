@@ -31,10 +31,11 @@ public class MergeCommand extends BaseCommand {
             session.getTransaction().commit();
             Neo4jSession.closeSession();
             if(conflict) {
-                System.out.println("Conflict Detected Please fix it");
+                System.out.println(ResourceMessagingService.getMessage(ResourceBundleEnum.CONFLICT_DETECTED));
             } else {
                 System.out.println(ResourceMessagingService.getMessage(ResourceBundleEnum.MERGED_SUCCESSFULLY, new Object[]{branchName}));
             }
+
         } catch (Exception e){
             System.out.println(e.getMessage());
         }

@@ -12,15 +12,13 @@ public class CommitDirectory extends CommitNode {
     @Relationship(type = "HAS", direction = Relationship.Direction.OUTGOING)
     private List<CommitNode> commitNodeList = new ArrayList<>();
 
-    public CommitDirectory() {
-    }
+    public CommitDirectory() {}
 
     public CommitDirectory(String path, FileStatusEnum fileStatusEnum) {
         super(path);
         this.commitNodeList = new ArrayList<>();
         this.setStatusEnum(fileStatusEnum);
     }
-
 
     public List<CommitNode> getCommitNodeList() {
         return this.commitNodeList;
@@ -32,9 +30,5 @@ public class CommitDirectory extends CommitNode {
 
     public void addNode(CommitNode commitNode) {
         this.commitNodeList.add(commitNode);
-    }
-
-    public void removeNode(CommitNode nodeToRemove) {
-        commitNodeList.remove(nodeToRemove);
     }
 }

@@ -27,7 +27,6 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class StateTreeService {
@@ -39,15 +38,13 @@ public class StateTreeService {
         statusService = new StatusService();
     }
 
-    public StateRoot generateStateRootNode(String path, Branch currentBranch) throws Exception {
-        StateRoot stateRoot = null;
+    public void generateStateRootNode(String path, Branch currentBranch) throws Exception {
         if (stateTreeRepository.findById(path).isPresent()) {
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_ALREADY_INITIALIZED, new Object[]{path}));
         } else {
-            stateRoot = new StateRoot(path, currentBranch);
+            StateRoot stateRoot = new StateRoot(path, currentBranch);
             stateTreeRepository.save(stateRoot);
         }
-        return stateRoot;
     }
 
     public StateRoot getStateRoot(String path) throws Exception {

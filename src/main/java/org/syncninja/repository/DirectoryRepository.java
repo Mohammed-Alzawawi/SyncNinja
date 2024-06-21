@@ -14,12 +14,6 @@ public class DirectoryRepository {
         return directory;
     }
 
-    public Optional<Directory> findById(String id) {
-        Session session = Neo4jSession.getSession();
-        Directory directory = session.load(Directory.class, id);
-        return Optional.ofNullable(directory);
-    }
-
     public Optional<Directory> findByPath(String path) {
         Session session = Neo4jSession.getSession();
         Directory directory = session.queryForObject(Directory.class, "MATCH(d:Directory) WHERE d.path = $path RETURN d", Collections.singletonMap("path", path));

@@ -24,10 +24,6 @@ public class CommitFile extends CommitNode {
         this.setStatusEnum(fileStatusEnum);
     }
 
-    public CommitFile(String path) {
-        super(path);
-    }
-
     public List<Integer> getLineNumberList() {
         return lineNumberList;
     }
