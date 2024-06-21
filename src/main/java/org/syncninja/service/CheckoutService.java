@@ -78,38 +78,30 @@ public class CheckoutService {
             List<CommitFileDTO> tracked = state.getTracked();
             List<StatusFileDTO> untracked = state.getUntracked();
 
-            if(tracked.isEmpty() && untracked.isEmpty()) {
-                Branch branch = branchOptional.get();
-                // get both sides of the path
-                NinjaNode currentNode = stateRoot.getCurrentNinjaNode();
-                NinjaNode targetNode = branch.getLastNinjaNode();
-                Result result = branchRepository.getPathOfNinjaNodes(currentNode, targetNode).get();
-
-                // get the relationships and nodes in the path
-                Map<String, String>[] relationships = pathFinderService.getRelationshipsInPath(result);
-                ArrayList<NinjaNode> ninjaNodesInPath = pathFinderService.getNinjaNodesInPath(result);
-
-                //use these arrays to update the file system and the state tree and they are sorted
-                CommitContainer commitContainer = new CommitContainer();
-                ArrayList<NinjaNode> addedCommits = commitContainer.getCommitsToAdd();
-                ArrayList<NinjaNode> removedCommits = commitContainer.getCommitsToRemove();
-
-                // start the checkout logic
-                NinjaNode ancestorNode = pathFinderService.getAncestorNode(relationships, ninjaNodesInPath);
-                pathFinderService.findOutOfAncestor(addedCommits, ancestorNode, ninjaNodesInPath, relationships);
-                pathFinderService.findGoingToAncestor(removedCommits, ancestorNode, ninjaNodesInPath, relationships);
-                //now the arrays have the list of commits to add and remove
-
-                //updating stateTree
-                Map<String, StateNode> stateTree = stateTreeService.getStateTree(stateRoot);
-                Map<StateNode, FileStatusEnum> fileStateMap = new HashMap<>();
-                stateTreeUpdate.updateStateTreeByRemovingCommits(stateTree, removedCommits, fileStateMap);
-                stateTreeUpdate.updateStateTreeByAddingCommits(stateTree, addedCommits, fileStateMap);
-                stateTreeRepository.updateStateRoot(stateRoot, branch);
-                stateTreeUpdate.reflectStateTreeOnFileSystem(fileStateMap);
-            } else {
-                throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.CHECKOUT_FAILED_UNCOMMITTED_CHANGES));
-            }
+            Branch branch = branchOptional.get();
+            // get both sides of the path
+            NinjaNode currentNode = stateRoot.getCurrentNinjaNode();
+            NinjaNode targetNode = branch.getLastNinjaNode();
+            Result result = branchRepository.getPathOfNinjaNodes(currentNode, targetNode).get();
+            // get the relationships and nodes in the path
+            Map<String, String>[] relationships = pathFinderService.getRelationshipsInPath(result);
+            ArrayList<NinjaNode> ninjaNodesInPath = pathFinderService.getNinjaNodesInPath(result);
+            //use these arrays to update the file system and the state tree and they are sorted
+            CommitContainer commitContainer = new CommitContainer();
+            ArrayList<NinjaNode> addedCommits = commitContainer.getCommitsToAdd();
+            ArrayList<NinjaNode> removedCommits = commitContainer.getCommitsToRemove();
+            // start the checkout logic
+            NinjaNode ancestorNode = pathFinderService.getAncestorNode(relationships, ninjaNodesInPath);
+            pathFinderService.findOutOfAncestor(addedCommits, ancestorNode, ninjaNodesInPath, relationships);
+            pathFinderService.findGoingToAncestor(removedCommits, ancestorNode, ninjaNodesInPath, relationships);
+            //now the arrays have the list of commits to add and remove
+            //updating stateTree
+            Map<String, StateNode> stateTree = stateTreeService.getStateTree(stateRoot);
+            Map<StateNode, FileStatusEnum> fileStateMap = new HashMap<>();
+            stateTreeUpdate.updateStateTreeByRemovingCommits(stateTree, removedCommits, fileStateMap);
+            stateTreeUpdate.updateStateTreeByAddingCommits(stateTree, addedCommits, fileStateMap);
+            stateTreeRepository.updateStateRoot(stateRoot, branch);
+            stateTreeUpdate.reflectStateTreeOnFileSystem(fileStateMap);
         } else {
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.BRANCH_NOT_FOUND, new Object[]{branchName}));
         }
