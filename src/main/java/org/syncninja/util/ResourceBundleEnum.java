@@ -29,7 +29,7 @@ public enum ResourceBundleEnum {
     CURRENT_BRANCH("current_branch"),
     CONFLICT_DETECTED("conflict_detected"),
     MERGE_FAILED_UNCOMMITTED_CHANGES("merged_failed_uncommitted_changes"),
-    CHECKOUT_FAILED_UNCOMMITTED_CHANGES("checkout_failed_uncommitted_changes");
+    CHECKOUT_FAILED_UNSTAGED_CHANGES("checkout_failed_unstaged_changes");
 
     private final String key;
 
