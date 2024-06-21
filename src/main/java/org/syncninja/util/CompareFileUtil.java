@@ -22,7 +22,7 @@ public class CompareFileUtil {
         return compareNewAndOldLists(newFileList, oldFileList);
     }
 
-    private static LinesContainer compareNewAndOldLists(List<String> newFileList, List<String> oldFileList) {
+    public static LinesContainer compareNewAndOldLists(List<String> newFileList, List<String> oldFileList) {
         LinesContainer linesContainer = new LinesContainer(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
         int maximumLength = Math.max(newFileList.size(), oldFileList.size());
 

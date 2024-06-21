@@ -8,7 +8,6 @@ import org.syncninja.model.SyncNode;
 public abstract class CommitNode extends SyncNode {
     private FileStatusEnum statusEnum;
     private String path;
-    private CommitDirectory parent;
 
     public CommitNode(String path) {
         this.path = path;
@@ -35,10 +34,6 @@ public abstract class CommitNode extends SyncNode {
 
     public void setPath(String path) {
         this.path = path;
-    }
-
-    public CommitDirectory getParent() {
-        return parent;
     }
 
     @Override

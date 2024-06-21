@@ -8,11 +8,15 @@ import org.syncninja.model.committree.CommitDirectory;
 public class Commit extends NinjaNode {
     private String message;
     private boolean isCommitted;
+
     @Relationship(type = "CommitTree")
     private CommitDirectory commitTree;
 
     public Commit() {
+    }
 
+    public Commit(boolean isCommitted) {
+        this.isCommitted = isCommitted;
     }
 
     public Commit(String message) {

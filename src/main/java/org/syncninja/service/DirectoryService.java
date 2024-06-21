@@ -25,9 +25,4 @@ public class DirectoryService {
             directoryRepository.save(directory);
         }
     }
-
-    public Directory getDirectory(String path) throws Exception {
-        return directoryRepository.findByPath(path).orElseThrow(() ->
-                new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_NOT_INITIALIZED, new Object[]{path})));
-    }
 }

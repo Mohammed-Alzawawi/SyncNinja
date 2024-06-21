@@ -32,5 +32,4 @@ public class Neo4jSession {
         session = null;
         sessionFactory.close();
     }
-
 }

@@ -38,15 +38,13 @@ public class StateTreeService {
         statusService = new StatusService();
     }
 
-    public StateRoot generateStateRootNode(String path, Branch currentBranch) throws Exception {
-        StateRoot stateRoot = null;
+    public void generateStateRootNode(String path, Branch currentBranch) throws Exception {
         if (stateTreeRepository.findById(path).isPresent()) {
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.DIRECTORY_ALREADY_INITIALIZED, new Object[]{path}));
         } else {
-            stateRoot = new StateRoot(path, currentBranch);
+            StateRoot stateRoot = new StateRoot(path, currentBranch);
             stateTreeRepository.save(stateRoot);
         }
-        return stateRoot;
     }
 
     public StateRoot getStateRoot(String path) throws Exception {
@@ -98,6 +96,10 @@ public class StateTreeService {
         if (stateDirectory instanceof StateRoot) {
             stateTreeRepository.save(stateDirectory);
         }
+    }
+
+    public StateNode findStateNodeByPath(String path) {
+         return stateTreeRepository.findById(path).get();
     }
 
     private List<String> compareAndAddLines(CommitFile commitFile, StateNode currentStateTree) {
@@ -213,10 +215,9 @@ public class StateTreeService {
         }
     }
 
-    public Map<String, StateNode> getStateTree(String path) throws Exception {
-        StateRoot stateRoot = getStateRoot(path);
+    public Map<String, StateNode> getStateTree(StateRoot stateRoot) {
         Map<String, StateNode> stateTree = new HashMap<>();
-        stateTree.put(path, stateRoot);
+        stateTree.put(stateRoot.getPath(), stateRoot);
         updateStateTreeMap(stateTree, stateRoot);
         return stateTree;
     }

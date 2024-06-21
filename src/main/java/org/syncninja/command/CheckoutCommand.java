@@ -36,7 +36,7 @@ public class CheckoutCommand extends BaseCommand {
                 checkoutService.createNewBranch(branchName, path);
                 System.out.println(ResourceMessagingService.getMessage(ResourceBundleEnum.BRANCH_ADDED_SUCCESSFULLY, new Object[]{branchName}));
             } else if(stateTreeService.getStateRoot(path).getCurrentBranch().getName().equals(branchName)){
-                throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.YOU_ARE_ALREADY_IN_BRANCH, new Object[]{branchName}));
+                throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.ALREADY_IN_BRANCH, new Object[]{branchName}));
             } else {
                 checkoutService.checkout(branchName, path);
                 System.out.println(ResourceMessagingService.getMessage(ResourceBundleEnum.BRANCH_CHECKED_OUT_SUCCESSFULLY, new Object[]{branchName}));

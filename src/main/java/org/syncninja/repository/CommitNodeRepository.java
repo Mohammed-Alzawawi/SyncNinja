@@ -33,4 +33,3 @@ public class CommitNodeRepository {
         session.query(queryBuilder.toString(), Collections.emptyMap());
     }
 }
-

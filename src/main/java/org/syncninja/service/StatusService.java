@@ -3,10 +3,12 @@ package org.syncninja.service;
 import org.syncninja.dto.CommitFileDTO;
 import org.syncninja.dto.FileStatusEnum;
 import org.syncninja.dto.StatusFileDTO;
+import org.syncninja.model.Commit;
 import org.syncninja.model.NinjaNode;
 import org.syncninja.model.committree.CommitDirectory;
 import org.syncninja.model.committree.CommitFile;
 import org.syncninja.model.committree.CommitNode;
+import org.syncninja.model.committree.mergetree.MergeCommit;
 import org.syncninja.model.statetree.StateDirectory;
 import org.syncninja.model.statetree.StateFile;
 import org.syncninja.model.statetree.StateNode;
@@ -161,5 +163,10 @@ public class StatusService {
             return !linesContainer.getLineNumbers().isEmpty();
         }
         return !commitFileDTO.getCommitFile().getNewValuesList().equals(linesContainer.getNewLines());
+    }
+
+    public boolean hasConflict(StateRoot stateRoot){
+        Commit nextCommit = stateRoot.getCurrentCommit().getNextCommit();
+        return (nextCommit instanceof MergeCommit && !nextCommit.isCommitted());
     }
 }

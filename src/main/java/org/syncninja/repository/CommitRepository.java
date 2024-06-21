@@ -10,4 +10,8 @@ public class CommitRepository {
         session.save(commit);
         return commit;
     }
+    public void delete(Commit commit){
+        Session session = Neo4jSession.getSession();
+        session.delete(commit);
+    }
 }
