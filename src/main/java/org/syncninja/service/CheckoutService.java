@@ -5,7 +5,11 @@ import org.syncninja.dto.CommitFileDTO;
 import org.syncninja.dto.FileStatusEnum;
 import org.syncninja.dto.StatusFileDTO;
 import org.syncninja.model.Branch;
+import org.syncninja.model.Commit;
 import org.syncninja.model.NinjaNode;
+import org.syncninja.model.committree.CommitDirectory;
+import org.syncninja.model.committree.CommitFile;
+import org.syncninja.model.committree.CommitNode;
 import org.syncninja.model.statetree.StateNode;
 import org.syncninja.model.statetree.StateRoot;
 import org.syncninja.repository.BranchRepository;
@@ -16,6 +20,9 @@ import org.syncninja.util.FileTrackingState;
 import org.syncninja.util.ResourceBundleEnum;
 import org.syncninja.util.StateTreeUpdate;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 public class CheckoutService {
@@ -45,14 +52,14 @@ public class CheckoutService {
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.BRANCH_NAME_EXISTS, new Object[]{branchName}));
         }
         FileTrackingState state = statusService.getState(path);
-        List<CommitFileDTO> tracked = state.getTracked();
         List<StatusFileDTO> untracked = state.getUntracked();
-
-        if(tracked.isEmpty() && untracked.isEmpty()) {Branch newBranch = new Branch(branchName);
+        if(untracked.isEmpty()) {
+            Branch newBranch = new Branch(branchName);
             newBranch.setNextCommit(commitService.createStagedCommit());
             StateRoot stateRoot = stateTreeService.getStateRoot(path);
             linkNewBranchWithNinjaNode(stateRoot, newBranch);
             updateStateRootWithNewBranch(stateRoot, newBranch);
+            updateFileSystemWithTargetStagingArea(newBranch.getNextCommit().getCommitTreeRoot());
         } else {
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.CHECKOUT_FAILED_UNSTAGED_CHANGES));
         }
@@ -80,8 +87,8 @@ public class CheckoutService {
             if(untracked.isEmpty()) {
                 Branch branch = branchOptional.get();
                 // get both sides of the path
-                NinjaNode currentNode = stateRoot.getCurrentNinjaNode();
-                NinjaNode targetNode = branch.getLastNinjaNode();
+                NinjaNode currentNode = stateRoot.getCurrentNinjaNode().getNextCommit();
+                NinjaNode targetNode = branch.getLastNinjaNode().getNextCommit();
                 Result result = branchRepository.getPathOfNinjaNodes(currentNode, targetNode).get();
 
                 // get the relationships and nodes in the path
@@ -105,12 +112,88 @@ public class CheckoutService {
                 stateTreeUpdate.updateStateTreeByRemovingCommits(stateTree, removedCommits, fileStateMap);
                 stateTreeUpdate.updateStateTreeByAddingCommits(stateTree, addedCommits, fileStateMap);
                 stateTreeRepository.updateStateRoot(stateRoot, branch);
+                updateFileSystemWithCurrentStagingArea(((Commit) currentNode).getCommitTreeRoot());
                 stateTreeUpdate.reflectStateTreeOnFileSystem(fileStateMap);
+                updateFileSystemWithTargetStagingArea(((Commit) targetNode).getCommitTreeRoot());
             } else {
                 throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.CHECKOUT_FAILED_UNSTAGED_CHANGES));
             }
         } else {
             throw new Exception(ResourceMessagingService.getMessage(ResourceBundleEnum.BRANCH_NOT_FOUND, new Object[]{branchName}));
+        }
+    }
+
+
+    private void updateFileSystemWithTargetStagingArea(CommitDirectory commitDirectory) throws IOException {
+        if(commitDirectory == null){
+            return;
+        }
+        for(CommitNode commitNode: commitDirectory.getCommitNodeList()) {
+            if(commitNode instanceof CommitDirectory){
+                updateFileSystemWithTargetStagingArea((CommitDirectory) commitNode);
+
+                if(commitNode.getStatusEnum() == FileStatusEnum.IS_NEW) {
+                    Files.createDirectories(Path.of(commitNode.getFullPath()));
+                } else if(commitNode.getStatusEnum() == FileStatusEnum.IS_DELETED) {
+                    Files.delete(Path.of(commitNode.getFullPath()));
+                }
+            } else {
+                CommitFile commitFile = (CommitFile) commitNode;
+
+                if(commitFile.getStatusEnum() == FileStatusEnum.IS_DELETED) {
+                    Files.delete(Path.of(commitNode.getFullPath()));
+                } else if(commitFile.getStatusEnum() == FileStatusEnum.IS_NEW) {
+                    Files.write(Path.of(commitNode.getFullPath()), commitFile.getNewValuesList());
+                } else {
+                    List<String> lines = Files.readAllLines(Path.of(commitNode.getFullPath()));
+                    for(int index = 0; index < commitFile.getLineNumberList().size(); index++) {
+                        int indexValue = commitFile.getLineNumberList().get(index);
+                        String value = commitFile.getNewValuesList().get(index);
+                        if(indexValue - 1 < lines.size()) {
+                            lines.set(indexValue - 1, value);
+                        } else {
+                            lines.add(value);
+                        }
+                    }
+                    Files.write(Path.of(commitNode.getFullPath()), lines);
+                }
+            }
+        }
+    }
+
+    private void updateFileSystemWithCurrentStagingArea(CommitDirectory commitDirectory) throws IOException {
+        if(commitDirectory == null){
+            return;
+        }
+        for(CommitNode commitNode: commitDirectory.getCommitNodeList()) {
+            if(commitNode instanceof CommitDirectory){
+                updateFileSystemWithCurrentStagingArea((CommitDirectory) commitNode);
+                if(commitNode.getStatusEnum() == FileStatusEnum.IS_NEW) {
+                    Files.delete(Path.of(commitNode.getFullPath()));
+                } else if(commitNode.getStatusEnum() == FileStatusEnum.IS_DELETED) {
+                    Files.createDirectories(Path.of(commitNode.getFullPath()));
+                }
+            } else {
+                CommitFile commitFile = (CommitFile) commitNode;
+                if(commitFile.getStatusEnum() == FileStatusEnum.IS_DELETED) {
+                    Files.write(Path.of(commitNode.getFullPath()), commitFile.getOldValuesList());
+                } else if(commitFile.getStatusEnum() == FileStatusEnum.IS_NEW) {
+                    Files.delete(Path.of(commitNode.getFullPath()));
+                } else {
+                    List<String> lines = Files.readAllLines(Path.of(commitNode.getFullPath()));
+                    for(int index = 0; index < commitFile.getLineNumberList().size(); index++) {
+                        int indexValue = commitFile.getLineNumberList().get(index);
+                        if(indexValue - 1 >= commitFile.getOldValuesList().size()){
+                            lines.remove(indexValue - 1);
+                        }
+                        else{
+                            String value = commitFile.getOldValuesList().get(index);
+                            lines.set(indexValue - 1 , value);
+                        }
+                    }
+                    Files.write(Path.of(commitNode.getFullPath()), lines);
+                }
+            }
         }
     }
 }
