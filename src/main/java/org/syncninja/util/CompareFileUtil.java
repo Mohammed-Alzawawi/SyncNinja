@@ -24,6 +24,14 @@ public class CompareFileUtil {
 
     public static LinesContainer compareNewAndOldLists(List<String> newFileList, List<String> oldFileList) {
         LinesContainer linesContainer = new LinesContainer(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        if(!newFileList.isEmpty() && oldFileList.isEmpty()) {
+            for(int index = 0; index < newFileList.size(); index++){
+                linesContainer.getLineNumbers().add(index + 1);
+                linesContainer.getNewLines().add(newFileList.get(index));
+                linesContainer.getOldLines().add("");
+            }
+            return linesContainer;
+        }
         int maximumLength = Math.max(newFileList.size(), oldFileList.size());
 
         int lineNumber = 1;
