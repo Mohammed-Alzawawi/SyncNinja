@@ -14,7 +14,6 @@ public enum ResourceBundleEnum {
     CHANGES_NOT_STAGED_FOR_COMMIT("Changes_not_staged_for_commit"),
     UNTRACKED_FILES("untracked_files"),
     STAGE_AREA_IS_EMPTY("stage_area_is_empty"),
-    SUCCESSFULLY_ADDED("successfully_added"),
     SUCCESSFULLY_REMOVED("successfully_removed"),
     BRANCH_ADDED_SUCCESSFULLY("branch_created_successfully"),
     BRANCH_CHECKED_OUT_SUCCESSFULLY("switched_to_branch"),
