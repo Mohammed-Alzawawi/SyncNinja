@@ -19,7 +19,8 @@ public class CommitService {
     public Commit createStagedCommit() {
         Commit commit = new Commit();
         commit.setCommitted(false);
-        return commitRepository.save(commit);
+        commitRepository.save(commit);
+        return commit;
     }
 
     public void save(String message, Commit commit) throws Exception {
