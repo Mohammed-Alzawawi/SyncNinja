@@ -79,7 +79,11 @@ public class MergeService {
                     pathFinderService.findOutOfAncestor(mergedNinjaNodes, ancestorNode, ninjaNodesInPath, relationships);
                     pathFinderService.findGoingToAncestor(ignoredNinjaNodes, ancestorNode, ninjaNodesInPath, relationships);
 
-                    Map<String, NinjaNode> ignoredNinjaNodeMap = ignoredNinjaNodes.stream().collect(Collectors.toMap(NinjaNode::getId, (ninjaNode -> ninjaNode)));
+                    Map<String, NinjaNode> ignoredNinjaNodeMap = new HashMap<>();
+
+                    for(NinjaNode ninjaNode: ignoredNinjaNodes) {
+                        addReferenceToCommits(ninjaNode, ignoredNinjaNodeMap);
+                    }
 
                     // build a map which combines all ignored commit into one commit
                     List<Commit> ignoredCommitList = ignoredNinjaNodes.stream().filter(ninjaNode -> ninjaNode instanceof Commit)
@@ -140,6 +144,7 @@ public class MergeService {
                     return true;
                 } else {
                     Branch currentBranch = stateRoot.getCurrentBranch();
+                    currentNode.setNextCommit(mergeCommit);
                     currentBranch.setLastCommit(mergeCommit);
                     new BranchRepository().save(currentBranch);
                     stateTreeService.updateStateRoot(stateRoot, mergeCommit);
@@ -287,6 +292,13 @@ public class MergeService {
         for(String path: conflictBundle.getConflictFileMap().keySet()) {
             List<String> lines = conflictBundle.getConflictFileMap().get(path);
             Files.write(Path.of(path), lines);
+        }
+    }
+
+    private void addReferenceToCommits(NinjaNode ninjaNode, Map<String, NinjaNode> map) {
+        map.put(ninjaNode.getId(), ninjaNode);
+        if(ninjaNode instanceof MergeCommit) {
+            addReferenceToCommits(((MergeCommit) ninjaNode).getReferenceCommit(), map);
         }
     }
 }

@@ -166,7 +166,7 @@ public class StatusService {
     }
 
     public boolean hasConflict(StateRoot stateRoot){
-        Commit nextCommit = stateRoot.getCurrentCommit().getNextCommit();
+        Commit nextCommit = stateRoot.getCurrentNinjaNode().getNextCommit();
         return (nextCommit instanceof MergeCommit && !nextCommit.isCommitted());
     }
 }

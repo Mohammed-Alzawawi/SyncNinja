@@ -83,6 +83,9 @@ public class StateTreeUpdate {
         for (NinjaNode ninjaNode : removedCommits) {
             Commit commit = (Commit) ninjaNode;
             CommitDirectory commitDirectory = commit.getCommitTreeRoot();
+            if(commitDirectory == null || !commit.isCommitted()){
+                continue;
+            }
             Set<StateNode> toBeDeleted = new HashSet<>();
             removeCommitChanges(commitDirectory, stateTree, toBeDeleted, fileStateMap);
             stateTreeRepository.deleteNodeList(toBeDeleted);
@@ -137,6 +140,9 @@ public class StateTreeUpdate {
         for (NinjaNode ninjaNode : addedCommits) {
             Commit commit = (Commit) ninjaNode;
             CommitDirectory commitDirectory = commit.getCommitTreeRoot();
+            if(commitDirectory == null || !commit.isCommitted()){
+                continue;
+            }
             Set<StateNode> toBeDeleted = new HashSet<>();
             addCommitChanges(commitDirectory, stateTree, toBeDeleted, fileStateMap); //
             stateTreeRepository.deleteNodeList(toBeDeleted);

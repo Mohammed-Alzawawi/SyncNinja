@@ -124,6 +124,9 @@ public class CommitTreeService {
                         if (commitNode.getStatusEnum() == FileStatusEnum.IS_NEW) {
                             deletedCommitNodes.add(commitNode);
                         }
+                        if (commitNode.getStatusEnum() == FileStatusEnum.IS_MODIFIED) {
+                            commitNode.setStatusEnum(FileStatusEnum.IS_DELETED);
+                        }
                         ((CommitFile) commitNode).updateCommitList(linesContainer);
                     }
                 }
