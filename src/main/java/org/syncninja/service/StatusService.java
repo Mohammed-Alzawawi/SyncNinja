@@ -42,7 +42,7 @@ public class StatusService {
                     if (commitNode.getStatusEnum() == FileStatusEnum.IS_NEW && !(new File(commitNode.getFullPath()).exists())) {
                         untracked.add(new StatusFileDTO(FileStatusEnum.IS_DELETED, null, commitNode.getFullPath(), commitNode.getPath()));
                     }
-                    tracked.add(new CommitFileDTO((CommitFile) commitNode, commitNode.getFullPath(), commitNode.getPath()));
+                    tracked.add(new CommitFileDTO((CommitFile) commitNode, commitNode.getFullPath(), Fetcher.getRelativePath(commitNode.getFullPath())));
                 }
             }
         }

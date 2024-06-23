@@ -179,7 +179,7 @@ public class CommitTreeService {
 
         Regex regexBuilder = new Regex();
         for (String path : filesToUnstage) {
-            regexBuilder.addFilePath(path);
+            regexBuilder.addFilePath(Fetcher.getPathForQuery(path));
         }
         String regex = regexBuilder.buildRegex();
 
@@ -192,12 +192,21 @@ public class CommitTreeService {
             commitNode.setPath(commitNode.getPath() + "\\");
             commitNodeList = ((CommitDirectory) commitNode).getCommitNodeList();
         }
-        if (commitNode.getFullPath().matches(regex)) {
-            commitNodeRepository.delete(commitNode);
-
+        if (Fetcher.getPathForQuery(Fetcher.getRelativePath(commitNode.getFullPath())).matches(regex)) {
+            if(commitNode instanceof CommitDirectory){
+                commitNodeRepository.deleteDirectory(commitNode);
+            } else {
+                commitNodeRepository.deleteFile(commitNode);
+            }
         } else {
             for (CommitNode commitNodeChild : commitNodeList) {
                 unstageFiles(commitNodeChild, regex);
+            }
+            if(commitNode instanceof CommitDirectory){
+                CommitDirectory commitDirectory = commitNodeRepository.findCommitDirectory(commitNode);
+                if(commitDirectory.getCommitNodeList().isEmpty()){
+                    commitNodeRepository.deleteFile(commitDirectory);
+                }
             }
         }
     }

@@ -1,7 +1,9 @@
 package org.syncninja.repository;
 
 import org.neo4j.ogm.session.Session;
+import org.syncninja.model.committree.CommitDirectory;
 import org.syncninja.model.committree.CommitNode;
+import org.syncninja.model.statetree.StateNode;
 import org.syncninja.util.Neo4jSession;
 
 import java.util.Collections;
@@ -13,7 +15,13 @@ public class CommitNodeRepository {
         session.save(commitNode);
     }
 
-    public void delete(CommitNode commitNode) {
+    public void deleteFile(CommitNode commitNode) {
+        Session session = Neo4jSession.getSession();
+        session.query("MATCH (n:CommitNode) WHERE n.id = $nodeId DETACH DELETE n",
+                Collections.singletonMap("nodeId", commitNode.getId()));
+    }
+
+    public void deleteDirectory(CommitNode commitNode) {
         Session session = Neo4jSession.getSession();
         session.query("MATCH (n:CommitNode)-[*]->(child:CommitNode) WHERE n.id =$nodeId DETACH DELETE n,child",
                 Collections.singletonMap("nodeId", commitNode.getId()));
@@ -31,5 +39,10 @@ public class CommitNodeRepository {
         queryBuilder.deleteCharAt(queryBuilder.length() - 1); // Remove the trailing comma
         queryBuilder.append("] DETACH DELETE n");
         session.query(queryBuilder.toString(), Collections.emptyMap());
+    }
+
+    public CommitDirectory findCommitDirectory(CommitNode commitNode){
+        Session session = Neo4jSession.getSession();
+        return session.load(CommitDirectory.class, commitNode.getId(), 1);
     }
 }
