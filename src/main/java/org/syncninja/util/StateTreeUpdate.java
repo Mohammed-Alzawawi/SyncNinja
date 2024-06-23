@@ -118,20 +118,32 @@ public class StateTreeUpdate {
                     toBeDeleted.add(stateTree.get(commitNode.getFullPath()));
                     fileStateMap.put(stateTree.get(commitNode.getFullPath()), FileStatusEnum.IS_DELETED);
                 } else {
-                    updateStateFileWithOldLines(commitFile.getOldValuesList(), commitFile.getLineNumberList(), (StateFile) stateTree.get(commitFile.getFullPath()));
+                    updateStateFileWithOldLines(commitFile.getOldValuesList(), commitFile.getNewValuesList(), commitFile.getLineNumberList(), (StateFile) stateTree.get(commitFile.getFullPath()));
                     fileStateMap.put(stateTree.get(commitNode.getFullPath()), FileStatusEnum.IS_MODIFIED);
                 }
             }
         }
     }
 
-    private void updateStateFileWithOldLines(List<String> lines, List<Integer> lineNumberList, StateFile stateFile) {
+    private void updateStateFileWithOldLines(List<String> oldLines, List<String> newLines, List<Integer> lineNumberList, StateFile stateFile) {
         for (int i = lineNumberList.size() - 1; i >= 0; i--) {
             int lineNumber = lineNumberList.get(i) - 1;
             if (lineNumber >= stateFile.getLines().size()) {
                 stateFile.getLines().remove(lineNumber);
             } else {
-                stateFile.getLines().set(lineNumber, lines.get(i));
+                 stateFile.getLines().set(lineNumber, oldLines.get(i));
+            }
+        }
+        List<String> lines = stateFile.getLines();
+        for(int i = lines.size() - 1; i >= 0; i--) {
+            int index = lineNumberList.indexOf(i + 1);
+            if(index == -1){
+                break;
+            }
+            if(lines.get(i).equals("") && oldLines.get(index).equals("") && !newLines.get(index).equals("")) {
+                lines.remove(i);
+            } else {
+                break;
             }
         }
     }
