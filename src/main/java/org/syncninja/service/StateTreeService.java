@@ -150,7 +150,7 @@ public class StateTreeService {
         for (StatusFileDTO statusFileDTO : untrackedFiles) {
             CommitFileDTO commitFileDto = trackedFilesMap.get(statusFileDTO.getPath());
 
-            if (statusFileDTO.getRelativePath().matches(regex)) {
+            if (Fetcher.getPathForQuery(statusFileDTO.getRelativePath()).matches(regex)) {
                 // if the file has a state node
                 if (statusFileDTO.getStateFile() != null) {
                     restoreOldLines(statusFileDTO.getPath(), statusFileDTO.getStateFile());
