@@ -56,7 +56,7 @@ public class CommitTreeService {
         Set<CommitNode> deletedCommitNodes = new HashSet<>();
 
         for (StatusFileDTO statusFileDTO : statusFileDTOs) {
-            if (statusFileDTO.getRelativePath().matches(regex)) {
+            if (Fetcher.getPathForQuery(statusFileDTO.getRelativePath()).matches(regex)) {
                 String relativePath = statusFileDTO.getPath().substring(mainDirectoryPath.length() + 1);
                 String[] pathComponents = relativePath.split("\\\\");
                 changedStagingArea = true;
