@@ -191,6 +191,19 @@ public class CheckoutService {
                             lines.set(indexValue - 1 , value);
                         }
                     }
+
+                    for(int i = lines.size() - 1; i >= 0; i--) {
+                        int index = commitFile.getLineNumberList().indexOf(i + 1);
+                        if(index == -1){
+                            break;
+                        }
+                        if(lines.get(i).equals("") && commitFile.getOldValuesList().get(index).equals("") && !commitFile.getNewValuesList().get(index).equals("")) {
+                            lines.remove(i);
+                        } else {
+                            break;
+                        }
+                    }
+
                     Files.write(Path.of(commitNode.getFullPath()), lines);
                 }
             }
