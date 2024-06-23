@@ -14,6 +14,7 @@ import org.syncninja.model.statetree.StateFile;
 import org.syncninja.model.statetree.StateNode;
 import org.syncninja.model.statetree.StateRoot;
 import org.syncninja.repository.StateTreeRepository;
+import org.syncninja.util.Fetcher;
 import org.syncninja.util.FileTrackingState;
 import org.syncninja.util.Regex;
 import org.syncninja.util.ResourceBundleEnum;
@@ -129,7 +130,7 @@ public class StateTreeService {
         // building regex
         Regex regexBuilder = new Regex();
         for (String path : pathList) {
-            regexBuilder.addFilePath(path);
+            regexBuilder.addFilePath(Fetcher.getPathForQuery(path));
         }
         String regex = regexBuilder.buildRegex();
 
@@ -149,7 +150,7 @@ public class StateTreeService {
         for (StatusFileDTO statusFileDTO : untrackedFiles) {
             CommitFileDTO commitFileDto = trackedFilesMap.get(statusFileDTO.getPath());
 
-            if (statusFileDTO.getPath().matches(regex)) {
+            if (statusFileDTO.getRelativePath().matches(regex)) {
                 // if the file has a state node
                 if (statusFileDTO.getStateFile() != null) {
                     restoreOldLines(statusFileDTO.getPath(), statusFileDTO.getStateFile());
@@ -173,6 +174,9 @@ public class StateTreeService {
                             Path path = Paths.get(statusFileDTO.getPath());
                             Files.delete(path);
                         }
+                    } else {
+                        Path path = Paths.get(statusFileDTO.getPath());
+                        Files.delete(path);
                     }
                 }
             }
