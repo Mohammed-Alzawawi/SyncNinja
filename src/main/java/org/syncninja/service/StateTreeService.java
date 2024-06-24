@@ -116,7 +116,7 @@ public class StateTreeService {
             }
 
             while (newLineNumber > stateFileLines.size()) {
-                stateFileLines.add("\n");
+                stateFileLines.add("");
             }
 
             stateFileLines.add(newLineNumber, newLine);
