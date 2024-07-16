@@ -10,8 +10,8 @@ public class Neo4jSession {
 
     private Neo4jSession() {
         Configuration configuration = new Configuration.Builder()
-                .uri("bolt://localhost:7687")
-                .credentials("neo4j", "12345678")
+                .uri(ConfigReader.getProperty("spring.neo4j.uri"))
+                .credentials(ConfigReader.getProperty("spring.neo4j.authentication.username"), ConfigReader.getProperty("spring.neo4j.authentication.password"))
                 .connectionPoolSize(10)
                 .build();
         sessionFactory = new SessionFactory(configuration, "org.syncninja");
